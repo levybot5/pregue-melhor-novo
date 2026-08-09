@@ -4,3 +4,6 @@
 
 export { createContent, listContents, getContentById } from "./contents";
 export type { Content, NewContent } from "./contents";
+
+export { getProfile } from "./profiles";
+export type { Profile } from "./profiles";

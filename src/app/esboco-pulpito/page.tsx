@@ -1,5 +1,228 @@
-import { ComingSoon } from "@/components/ComingSoon";
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+import type {
+  MinistryAudience,
+  MinistryStyle,
+  MinistryDuration,
+  PulpitOutlineContent,
+} from "@/services/ai";
+import { PulpitOutlineView } from "@/components/PulpitOutlineView";
+import {
+  generateAndSavePulpitOutline,
+  savePulpitOutline,
+  type PulpitOutlineActionResult,
+} from "./actions";
+import { THEME_MAX_LENGTH, THEME_MIN_LENGTH } from "./constants";
+
+const AUDIENCE_OPTIONS: { value: MinistryAudience; label: string }[] = [
+  { value: "domingo", label: "Domingo" },
+  { value: "doutrina", label: "Doutrina" },
+  { value: "jovens", label: "Jovens" },
+  { value: "mulheres", label: "Mulheres" },
+];
+
+const STYLE_OPTIONS: { value: MinistryStyle; label: string }[] = [
+  { value: "expositivo", label: "Expositivo" },
+  { value: "tematico", label: "Temático" },
+  { value: "evangelistico", label: "Evangelístico" },
+];
+
+const DURATION_OPTIONS: { value: MinistryDuration; label: string; hint: string }[] = [
+  { value: "curta", label: "Curta", hint: "10–15 min" },
+  { value: "media", label: "Média", hint: "20–30 min" },
+  { value: "completa", label: "Completa", hint: "30–40 min" },
+];
 
 export default function EsbocoPulpitoPage() {
-  return <ComingSoon title="Esboço para Púlpito" />;
+  const router = useRouter();
+  const [isGenerating, startGenerating] = useTransition();
+  const [isSaving, startSaving] = useTransition();
+
+  const [themeOrPassage, setThemeOrPassage] = useState("");
+  const [audience, setAudience] = useState<MinistryAudience>("domingo");
+  const [style, setStyle] = useState<MinistryStyle>("expositivo");
+  const [duration, setDuration] = useState<MinistryDuration>("media");
+
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [pendingOutline, setPendingOutline] = useState<PulpitOutlineContent | null>(null);
+  const [saveWarning, setSaveWarning] = useState<string | null>(null);
+
+  function handleResult(result: PulpitOutlineActionResult) {
+    if (result.status === "saved") {
+      setPendingOutline(null);
+      setSaveWarning(null);
+      router.push(`/biblioteca/${result.contentId}`);
+      return;
+    }
+    if (result.status === "generated_not_saved") {
+      setPendingOutline(result.outline);
+      setSaveWarning(result.message);
+      return;
+    }
+    setErrorMessage(result.message);
+  }
+
+  function handleGenerate() {
+    setErrorMessage(null);
+    setSaveWarning(null);
+    startGenerating(async () => {
+      const result = await generateAndSavePulpitOutline({
+        themeOrPassage,
+        audience,
+        style,
+        duration,
+      });
+      handleResult(result);
+    });
+  }
+
+  function handleRetrySave() {
+    if (!pendingOutline) return;
+    startSaving(async () => {
+      const result = await savePulpitOutline(pendingOutline);
+      handleResult(result);
+    });
+  }
+
+  if (pendingOutline) {
+    return (
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
+        {saveWarning && (
+          <div className="rounded-2xl border border-red-300 bg-red-50 p-4 text-sm text-red-700">
+            <p>{saveWarning}</p>
+            <button
+              type="button"
+              onClick={handleRetrySave}
+              disabled={isSaving}
+              className="mt-3 min-h-[44px] rounded-xl bg-red-600 px-4 font-semibold text-white disabled:opacity-60"
+            >
+              {isSaving ? "Salvando..." : "Tentar salvar novamente"}
+            </button>
+          </div>
+        )}
+        <PulpitOutlineView outline={pendingOutline} />
+      </main>
+    );
+  }
+
+  return (
+    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
+      <header className="flex flex-col gap-1">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">
+          Esboço para Púlpito
+        </h1>
+        <p className="text-muted">
+          Tenha os principais pontos da mensagem sempre à mão.
+        </p>
+      </header>
+
+      <div className="flex flex-col gap-5">
+        <label className="flex flex-col gap-2">
+          <span className="text-sm font-semibold text-foreground">
+            Tema ou passagem
+          </span>
+          <input
+            type="text"
+            value={themeOrPassage}
+            onChange={(e) => setThemeOrPassage(e.target.value)}
+            placeholder="Ex: Salmo 23, oração, fé em tempos difíceis..."
+            minLength={THEME_MIN_LENGTH}
+            maxLength={THEME_MAX_LENGTH}
+            className="min-h-[52px] rounded-2xl border border-card-border bg-card px-4 text-base text-foreground outline-none focus:border-primary"
+          />
+          <span className="text-right text-xs text-muted">
+            {themeOrPassage.length}/{THEME_MAX_LENGTH}
+          </span>
+        </label>
+
+        <fieldset className="flex flex-col gap-2">
+          <legend className="text-sm font-semibold text-foreground">
+            Onde vai ministrar
+          </legend>
+          <div className="grid grid-cols-2 gap-2">
+            {AUDIENCE_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setAudience(option.value)}
+                className={`min-h-[48px] rounded-2xl border px-3 text-sm font-medium ${
+                  audience === option.value
+                    ? "border-primary bg-primary-soft text-primary"
+                    : "border-card-border bg-card text-foreground"
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset className="flex flex-col gap-2">
+          <legend className="text-sm font-semibold text-foreground">Estilo</legend>
+          <div className="grid grid-cols-3 gap-2">
+            {STYLE_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setStyle(option.value)}
+                className={`min-h-[48px] rounded-2xl border px-2 text-sm font-medium ${
+                  style === option.value
+                    ? "border-primary bg-primary-soft text-primary"
+                    : "border-card-border bg-card text-foreground"
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset className="flex flex-col gap-2">
+          <legend className="text-sm font-semibold text-foreground">Duração</legend>
+          <div className="grid grid-cols-3 gap-2">
+            {DURATION_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setDuration(option.value)}
+                className={`flex min-h-[52px] flex-col items-center justify-center rounded-2xl border px-2 text-sm font-medium ${
+                  duration === option.value
+                    ? "border-primary bg-primary-soft text-primary"
+                    : "border-card-border bg-card text-foreground"
+                }`}
+              >
+                <span>{option.label}</span>
+                <span className="text-xs text-muted">{option.hint}</span>
+              </button>
+            ))}
+          </div>
+        </fieldset>
+      </div>
+
+      <button
+        type="button"
+        onClick={handleGenerate}
+        disabled={isGenerating || themeOrPassage.trim().length < THEME_MIN_LENGTH}
+        className="flex min-h-[52px] items-center justify-center rounded-2xl bg-primary px-5 font-semibold text-primary-foreground transition-opacity disabled:opacity-60"
+      >
+        {isGenerating ? "Gerando..." : "Gerar Esboço"}
+      </button>
+
+      {errorMessage && (
+        <p role="status" className="text-red-600">
+          {errorMessage}
+        </p>
+      )}
+
+      <Link
+        href="/"
+        className="text-sm font-medium text-muted underline underline-offset-4"
+      >
+        Voltar para o início
+      </Link>
+    </main>
+  );
 }

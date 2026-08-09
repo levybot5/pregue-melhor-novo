@@ -1,9 +1,18 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getContentById } from "@/services/database";
-import { sermonContentSchema } from "@/services/ai";
+import {
+  sermonContentSchema,
+  bibleStudyContentSchema,
+  outlineExpansionContentSchema,
+  pulpitOutlineContentSchema,
+} from "@/services/ai";
 import { SermonView } from "@/components/SermonView";
+import { BibleStudyView } from "@/components/BibleStudyView";
+import { OutlineExpansionView } from "@/components/OutlineExpansionView";
+import { PulpitOutlineView } from "@/components/PulpitOutlineView";
 import { getCurrentUser } from "@/services/auth";
+import { getContentTypeLabel } from "@/lib/content-types";
 
 // Sempre busca no request: o conteúdo precisa refletir o banco atual,
 // não o que existia no momento do build. Nenhuma chamada de IA acontece
@@ -16,6 +25,29 @@ function formatDate(iso: string) {
     month: "2-digit",
     year: "numeric",
   });
+}
+
+function renderByType(type: string, raw: Record<string, unknown>) {
+  switch (type) {
+    case "pregacao": {
+      const parsed = sermonContentSchema.safeParse(raw);
+      return parsed.success ? <SermonView sermon={parsed.data} /> : null;
+    }
+    case "biblia_explicada": {
+      const parsed = bibleStudyContentSchema.safeParse(raw);
+      return parsed.success ? <BibleStudyView study={parsed.data} /> : null;
+    }
+    case "esboco_pregacao": {
+      const parsed = outlineExpansionContentSchema.safeParse(raw);
+      return parsed.success ? <OutlineExpansionView content={parsed.data} /> : null;
+    }
+    case "esboco_pulpito": {
+      const parsed = pulpitOutlineContentSchema.safeParse(raw);
+      return parsed.success ? <PulpitOutlineView outline={parsed.data} /> : null;
+    }
+    default:
+      return null;
+  }
 }
 
 export default async function ContentDetailPage({
@@ -58,17 +90,14 @@ export default async function ContentDetailPage({
     notFound();
   }
 
-  const sermon =
-    content.type === "pregacao"
-      ? sermonContentSchema.safeParse(content.content)
-      : null;
+  const rendered = renderByType(content.type, content.content);
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
-      {sermon?.success ? (
+      {rendered ? (
         <>
           <p className="text-xs text-muted">{formatDate(content.created_at)}</p>
-          <SermonView sermon={sermon.data} />
+          {rendered}
         </>
       ) : (
         <>
@@ -77,21 +106,12 @@ export default async function ContentDetailPage({
               {content.title}
             </h1>
             <p className="text-sm text-muted">
-              {content.type}
+              {getContentTypeLabel(content.type)}
               {content.base_text ? ` · ${content.base_text}` : ""} ·{" "}
               {formatDate(content.created_at)}
             </p>
           </header>
-
-          {sermon && !sermon.success && (
-            <p className="text-red-600">
-              Este conteúdo não pôde ser exibido no formato de pregação.
-            </p>
-          )}
-
-          <pre className="overflow-x-auto rounded-2xl border border-card-border bg-card p-4 text-sm text-foreground">
-            {JSON.stringify(content.content, null, 2)}
-          </pre>
+          <p className="text-red-600">Não foi possível exibir este conteúdo.</p>
         </>
       )}
 

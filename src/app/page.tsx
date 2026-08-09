@@ -8,6 +8,7 @@ import {
   TransformIcon,
 } from "@/components/icons";
 import { getCurrentUser } from "@/services/auth";
+import { getProfile } from "@/services/database";
 import { signOutAction } from "./actions";
 
 const tools = [
@@ -45,6 +46,11 @@ const tools = [
 
 export default async function Home() {
   const user = await getCurrentUser();
+  // Uma única consulta extra, só quando logado — nada de polling nem
+  // de repetir isso em outras páginas.
+  const profile = user ? await getProfile(user.id) : null;
+  const firstName = profile?.name?.trim().split(/\s+/)[0];
+  const greeting = firstName || user?.email;
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
@@ -58,7 +64,7 @@ export default async function Home() {
       <div className="flex items-center justify-between text-sm">
         {user ? (
           <>
-            <span className="text-muted">{user.email}</span>
+            <span className="text-muted">Olá, {greeting}</span>
             <form action={signOutAction}>
               <button
                 type="submit"

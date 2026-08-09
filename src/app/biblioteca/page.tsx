@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { listContents } from "@/services/database";
 import { getCurrentUser } from "@/services/auth";
+import { getContentTypeLabel } from "@/lib/content-types";
 
 // Sempre busca no request: a biblioteca não pode ficar "congelada"
 // com os dados que existiam no momento do build.
@@ -63,7 +64,7 @@ export default async function BibliotecaPage() {
               {item.title}
             </span>
             <span className="text-sm text-muted">
-              {item.type}
+              {getContentTypeLabel(item.type)}
               {item.base_text ? ` · ${item.base_text}` : ""}
             </span>
             <span className="text-xs text-muted">
