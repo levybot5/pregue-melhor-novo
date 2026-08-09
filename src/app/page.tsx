@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ToolCard } from "@/components/ToolCard";
 import {
   ListIcon,
@@ -6,6 +7,8 @@ import {
   OpenBookIcon,
   TransformIcon,
 } from "@/components/icons";
+import { getCurrentUser } from "@/services/auth";
+import { signOutAction } from "./actions";
 
 const tools = [
   {
@@ -40,7 +43,9 @@ const tools = [
   },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const user = await getCurrentUser();
+
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
       <header className="flex flex-col gap-1">
@@ -49,6 +54,29 @@ export default function Home() {
         </h1>
         <p className="text-muted">Prepare sua mensagem com mais clareza.</p>
       </header>
+
+      <div className="flex items-center justify-between text-sm">
+        {user ? (
+          <>
+            <span className="text-muted">{user.email}</span>
+            <form action={signOutAction}>
+              <button
+                type="submit"
+                className="font-medium text-primary underline underline-offset-4"
+              >
+                Sair
+              </button>
+            </form>
+          </>
+        ) : (
+          <Link
+            href="/entrar"
+            className="font-medium text-primary underline underline-offset-4"
+          >
+            Entrar
+          </Link>
+        )}
+      </div>
 
       <div className="flex flex-col gap-3">
         {tools.map((tool) => (

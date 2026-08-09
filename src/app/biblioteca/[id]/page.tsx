@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getContentById } from "@/services/database";
 import { sermonContentSchema } from "@/services/ai";
 import { SermonView } from "@/components/SermonView";
+import { getCurrentUser } from "@/services/auth";
 
 // Sempre busca no request: o conteúdo precisa refletir o banco atual,
 // não o que existia no momento do build. Nenhuma chamada de IA acontece
@@ -23,6 +24,11 @@ export default async function ContentDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+
+  const user = await getCurrentUser();
+  if (!user) {
+    redirect(`/entrar?redirectTo=/biblioteca/${id}`);
+  }
 
   let content: Awaited<ReturnType<typeof getContentById>> = null;
   let loadError = false;

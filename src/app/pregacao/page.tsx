@@ -6,6 +6,7 @@ import { useState, useTransition } from "react";
 import type { SermonContent, SermonInput } from "@/services/ai";
 import { SermonView } from "@/components/SermonView";
 import { generateAndSaveSermon, saveSermon, type SermonActionResult } from "./actions";
+import { THEME_MAX_LENGTH, THEME_MIN_LENGTH } from "./constants";
 
 const AUDIENCE_OPTIONS: { value: SermonInput["audience"]; label: string }[] = [
   { value: "domingo", label: "Domingo" },
@@ -121,8 +122,13 @@ export default function PregacaoPage() {
             value={themeOrPassage}
             onChange={(e) => setThemeOrPassage(e.target.value)}
             placeholder="Ex: Salmo 23, oração, fé em tempos difíceis..."
+            minLength={THEME_MIN_LENGTH}
+            maxLength={THEME_MAX_LENGTH}
             className="min-h-[52px] rounded-2xl border border-card-border bg-card px-4 text-base text-foreground outline-none focus:border-primary"
           />
+          <span className="text-right text-xs text-muted">
+            {themeOrPassage.length}/{THEME_MAX_LENGTH}
+          </span>
         </label>
 
         <fieldset className="flex flex-col gap-2">
@@ -192,7 +198,7 @@ export default function PregacaoPage() {
       <button
         type="button"
         onClick={handleGenerate}
-        disabled={isGenerating || themeOrPassage.trim().length === 0}
+        disabled={isGenerating || themeOrPassage.trim().length < THEME_MIN_LENGTH}
         className="flex min-h-[52px] items-center justify-center rounded-2xl bg-primary px-5 font-semibold text-primary-foreground transition-opacity disabled:opacity-60"
       >
         {isGenerating ? "Gerando..." : "Gerar Pregação"}

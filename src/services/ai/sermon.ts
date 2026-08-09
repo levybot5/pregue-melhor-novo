@@ -150,9 +150,11 @@ ${duration.guidance}
 Gere uma pregação completa e um esboço resumido para o púlpito, seguindo o formato pedido.`;
 }
 
-const { $schema: _omit, ...sermonJsonSchema } = z.toJSONSchema(sermonContentSchema, {
+const rawSermonJsonSchema = z.toJSONSchema(sermonContentSchema, {
   target: "draft-7",
-});
+}) as Record<string, unknown>;
+delete rawSermonJsonSchema.$schema;
+const sermonJsonSchema = rawSermonJsonSchema;
 
 export async function generateSermon(
   input: SermonInput,

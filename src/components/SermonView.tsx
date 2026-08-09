@@ -1,4 +1,5 @@
 import type { SermonContent } from "@/services/ai";
+import { normalizeOutlinePointTitle } from "@/lib/outline";
 
 type SermonViewProps = {
   sermon: SermonContent;
@@ -39,7 +40,10 @@ export function SermonView({ sermon }: SermonViewProps) {
       <Section title="Contexto Bíblico">{sermon.contexto_biblico}</Section>
 
       {sermon.pontos.map((ponto, index) => (
-        <Section key={index} title={`Ponto ${index + 1}: ${ponto.titulo}`}>
+        <Section
+          key={index}
+          title={`Ponto ${index + 1}: ${normalizeOutlinePointTitle(ponto.titulo)}`}
+        >
           <p>{ponto.explicacao}</p>
           <p className="mt-2 text-muted">{ponto.exemplo_aplicacao}</p>
         </Section>
@@ -61,7 +65,7 @@ export function SermonView({ sermon }: SermonViewProps) {
           {sermon.esboco_pulpito.pontos.map((ponto, index) => (
             <div key={index}>
               <p className="font-semibold text-foreground">
-                {index + 1}. {ponto.titulo}
+                {index + 1}. {normalizeOutlinePointTitle(ponto.titulo)}
               </p>
               <ul className="ml-4 list-disc text-sm text-foreground">
                 {ponto.itens.map((item, itemIndex) => (

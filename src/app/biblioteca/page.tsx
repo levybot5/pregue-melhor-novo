@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { listContents } from "@/services/database";
+import { getCurrentUser } from "@/services/auth";
 
 // Sempre busca no request: a biblioteca não pode ficar "congelada"
 // com os dados que existiam no momento do build.
@@ -14,6 +16,13 @@ function formatDate(iso: string) {
 }
 
 export default async function BibliotecaPage() {
+  // O proxy já bloqueia esta rota sem sessão; reverificamos aqui porque
+  // a página é seu próprio ponto de entrada e não deve depender só dele.
+  const user = await getCurrentUser();
+  if (!user) {
+    redirect("/entrar?redirectTo=/biblioteca");
+  }
+
   let contents: Awaited<ReturnType<typeof listContents>> = [];
   let loadError = false;
 
