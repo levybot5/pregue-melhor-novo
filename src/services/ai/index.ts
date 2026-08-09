@@ -1,13 +1,17 @@
-// Camada de geração por IA. Ainda não implementada.
+// Camada de geração por IA. Único ponto do app que fala com o provedor
+// de IA — componentes e actions só conhecem generateSermon(input).
 //
-// Regras para quando for implementada:
-// - Toda chamada acontece no backend (Route Handler / Server Action),
-//   nunca no cliente. Nenhuma chave de API é exposta ao frontend.
-// - 1 ação explícita do usuário = no máximo 1 chamada de geração.
-//   Nunca chamar IA em load, useEffect, navegação, refresh, autosave,
-//   biblioteca, PDF, copiar ou abrir conteúdo salvo.
-// - O provedor concreto (OpenAI, Anthropic, Gemini) implementa a
-//   interface AiClient definida em ./types, permitindo trocar de
-//   provedor sem alterar quem consome este serviço.
+// Troca de provedor: hoje o Gemini é chamado em ./gemini-client.ts, o
+// único arquivo que importa o SDK do Google. Trocar de provedor (ou
+// suportar mais de um) significa mexer em ./gemini-client.ts e na
+// chamada dentro de ./sermon.ts — nunca na UI ou nas Server Actions.
+//
+// Regras:
+// - Toda chamada acontece no backend (Server Action), nunca no cliente.
+// - Nenhuma chave de API é exposta ao frontend (GEMINI_API_KEY é
+//   server-only, nunca NEXT_PUBLIC_).
+// - 1 clique do usuário = no máximo 1 chamada de geração. Sem retry
+//   automático, sem chamadas em useEffect/load/refresh/autosave.
 
-export type { AiClient, AiProvider, GenerationRequest, GenerationResult } from "./types";
+export { generateSermon, sermonContentSchema, sermonAudiences, sermonStyles, sermonDurations } from "./sermon";
+export type { SermonInput, SermonContent, GenerateSermonResult } from "./sermon";
