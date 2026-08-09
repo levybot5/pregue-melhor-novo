@@ -1,9 +1,6 @@
-// Camada de acesso a dados (Supabase): usuários, biblioteca, assinatura,
-// consumo de IA e histórico. Nenhuma tabela ou cliente real ainda.
-//
-// Quando o Supabase for conectado, o client (ex.: createClient do
-// @supabase/supabase-js) deve ser instanciado aqui, lendo as variáveis
-// de ambiente definidas em .env.example. Nenhum outro módulo deve
-// importar @supabase/supabase-js diretamente.
+// Camada de acesso a dados (Supabase). Único ponto do app que deve
+// falar diretamente com o Supabase — componentes e actions consomem
+// as funções abaixo, nunca o client bruto.
 
-export {};
+export { createContent, listContents, getContentById } from "./contents";
+export type { Content, NewContent } from "./contents";
