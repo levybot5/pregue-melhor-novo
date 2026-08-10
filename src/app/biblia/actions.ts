@@ -3,10 +3,17 @@
 import { generateBibleStudy, type BibleStudyContent } from "@/services/ai";
 import { createContent } from "@/services/database";
 import { getCurrentUser } from "@/services/auth";
+import {
+  reserveGeneration,
+  releaseGenerationLock,
+  recordUsage,
+  type GenerationBlockReason,
+} from "@/services/billing";
 import { PASSAGE_MAX_LENGTH, PASSAGE_MIN_LENGTH } from "./constants";
 
 export type BibleStudyActionResult =
   | { status: "error"; message: string }
+  | { status: "blocked"; reason: GenerationBlockReason; message: string }
   | { status: "saved"; contentId: string }
   | { status: "generated_not_saved"; study: BibleStudyContent; message: string };
 
@@ -34,11 +41,6 @@ async function persistStudy(study: BibleStudyContent): Promise<BibleStudyActionR
 export async function generateAndSaveBibleStudy(
   passage: string,
 ): Promise<BibleStudyActionResult> {
-  const user = await getCurrentUser();
-  if (!user) {
-    return { status: "error", message: "Você precisa entrar para gerar um estudo." };
-  }
-
   const trimmed = passage.trim();
   if (trimmed.length < PASSAGE_MIN_LENGTH) {
     return { status: "error", message: "Use uma passagem com pelo menos 3 caracteres." };
@@ -47,11 +49,23 @@ export async function generateAndSaveBibleStudy(
     return { status: "error", message: "Use uma passagem com até 500 caracteres." };
   }
 
-  const result = await generateBibleStudy({ passage: trimmed });
+  const guard = await reserveGeneration("biblia_explicada");
+  if (!guard.allowed) {
+    return { status: "blocked", reason: guard.reason, message: guard.message };
+  }
+
+  let result: Awaited<ReturnType<typeof generateBibleStudy>>;
+  try {
+    result = await generateBibleStudy({ passage: trimmed });
+  } finally {
+    await releaseGenerationLock();
+  }
 
   if (!result.success) {
     return { status: "error", message: result.message };
   }
+
+  await recordUsage(guard.userId, "biblia_explicada");
 
   return persistStudy(result.data);
 }

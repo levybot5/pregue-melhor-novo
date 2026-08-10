@@ -10,10 +10,17 @@ import {
 } from "@/services/ai";
 import { createContent } from "@/services/database";
 import { getCurrentUser } from "@/services/auth";
+import {
+  reserveGeneration,
+  releaseGenerationLock,
+  recordUsage,
+  type GenerationBlockReason,
+} from "@/services/billing";
 import { THEME_MAX_LENGTH, THEME_MIN_LENGTH } from "./constants";
 
 export type SermonActionResult =
   | { status: "error"; message: string }
+  | { status: "blocked"; reason: GenerationBlockReason; message: string }
   | { status: "saved"; contentId: string }
   | { status: "generated_not_saved"; sermon: SermonContent; message: string };
 
@@ -60,35 +67,45 @@ async function persistSermon(sermon: SermonContent): Promise<SermonActionResult>
 // 1 clique do usuário nesta action = no máximo 1 chamada a generateSermon.
 // Sem retry automático: se a geração falhar, retorna erro e o usuário
 // decide se tenta de novo manualmente.
+//
+// Ordem: validar input (grátis) -> reservar (auth + assinatura +
+// limites + lock, só banco) -> chamar IA -> liberar lock -> só se a IA
+// retornou uma resposta válida, registrar consumo -> autosave.
 export async function generateAndSaveSermon(
   input: SermonInput,
 ): Promise<SermonActionResult> {
-  // Reverifica a sessão aqui: o proxy protege a rota, mas uma Server
-  // Action é um endpoint próprio e precisa se defender sozinha.
-  const user = await getCurrentUser();
-  if (!user) {
-    return { status: "error", message: "Você precisa entrar para gerar uma pregação." };
-  }
-
   const validationError = validateInput(input);
   if (validationError) {
     return { status: "error", message: validationError };
   }
 
-  const result = await generateSermon({
-    ...input,
-    themeOrPassage: input.themeOrPassage.trim(),
-  });
+  const guard = await reserveGeneration("pregacao");
+  if (!guard.allowed) {
+    return { status: "blocked", reason: guard.reason, message: guard.message };
+  }
+
+  let result: Awaited<ReturnType<typeof generateSermon>>;
+  try {
+    result = await generateSermon({
+      ...input,
+      themeOrPassage: input.themeOrPassage.trim(),
+    });
+  } finally {
+    await releaseGenerationLock();
+  }
 
   if (!result.success) {
     return { status: "error", message: result.message };
   }
+
+  await recordUsage(guard.userId, "pregacao");
 
   return persistSermon(result.sermon);
 }
 
 // Salva um resultado já gerado, sem chamar a IA novamente — usado quando
 // a geração funcionou mas o salvamento falhou na primeira tentativa.
+// Não passa pelo guard: o consumo já foi registrado, isso não gera IA.
 export async function saveSermon(sermon: SermonContent): Promise<SermonActionResult> {
   const user = await getCurrentUser();
   if (!user) {

@@ -10,10 +10,17 @@ import {
 } from "@/services/ai";
 import { createContent } from "@/services/database";
 import { getCurrentUser } from "@/services/auth";
+import {
+  reserveGeneration,
+  releaseGenerationLock,
+  recordUsage,
+  type GenerationBlockReason,
+} from "@/services/billing";
 import { THEME_MAX_LENGTH, THEME_MIN_LENGTH } from "./constants";
 
 export type PulpitOutlineActionResult =
   | { status: "error"; message: string }
+  | { status: "blocked"; reason: GenerationBlockReason; message: string }
   | { status: "saved"; contentId: string }
   | { status: "generated_not_saved"; outline: PulpitOutlineContent; message: string };
 
@@ -63,24 +70,31 @@ async function persistOutline(
 export async function generateAndSavePulpitOutline(
   input: PulpitOutlineInput,
 ): Promise<PulpitOutlineActionResult> {
-  const user = await getCurrentUser();
-  if (!user) {
-    return { status: "error", message: "Você precisa entrar para gerar." };
-  }
-
   const validationError = validateInput(input);
   if (validationError) {
     return { status: "error", message: validationError };
   }
 
-  const result = await generatePulpitOutline({
-    ...input,
-    themeOrPassage: input.themeOrPassage.trim(),
-  });
+  const guard = await reserveGeneration("esboco_pulpito");
+  if (!guard.allowed) {
+    return { status: "blocked", reason: guard.reason, message: guard.message };
+  }
+
+  let result: Awaited<ReturnType<typeof generatePulpitOutline>>;
+  try {
+    result = await generatePulpitOutline({
+      ...input,
+      themeOrPassage: input.themeOrPassage.trim(),
+    });
+  } finally {
+    await releaseGenerationLock();
+  }
 
   if (!result.success) {
     return { status: "error", message: result.message };
   }
+
+  await recordUsage(guard.userId, "esboco_pulpito");
 
   return persistOutline(result.data);
 }

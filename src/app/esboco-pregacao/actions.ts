@@ -10,10 +10,17 @@ import {
 } from "@/services/ai";
 import { createContent } from "@/services/database";
 import { getCurrentUser } from "@/services/auth";
+import {
+  reserveGeneration,
+  releaseGenerationLock,
+  recordUsage,
+  type GenerationBlockReason,
+} from "@/services/billing";
 import { OUTLINE_MAX_LENGTH, OUTLINE_MIN_LENGTH } from "./constants";
 
 export type OutlineExpansionActionResult =
   | { status: "error"; message: string }
+  | { status: "blocked"; reason: GenerationBlockReason; message: string }
   | { status: "saved"; contentId: string }
   | { status: "generated_not_saved"; content: OutlineExpansionContent; message: string };
 
@@ -63,21 +70,28 @@ async function persistExpansion(
 export async function generateAndSaveExpansion(
   input: OutlineExpansionInput,
 ): Promise<OutlineExpansionActionResult> {
-  const user = await getCurrentUser();
-  if (!user) {
-    return { status: "error", message: "Você precisa entrar para gerar." };
-  }
-
   const validationError = validateInput(input);
   if (validationError) {
     return { status: "error", message: validationError };
   }
 
-  const result = await expandOutline({ ...input, outline: input.outline.trim() });
+  const guard = await reserveGeneration("esboco_pregacao");
+  if (!guard.allowed) {
+    return { status: "blocked", reason: guard.reason, message: guard.message };
+  }
+
+  let result: Awaited<ReturnType<typeof expandOutline>>;
+  try {
+    result = await expandOutline({ ...input, outline: input.outline.trim() });
+  } finally {
+    await releaseGenerationLock();
+  }
 
   if (!result.success) {
     return { status: "error", message: result.message };
   }
+
+  await recordUsage(guard.userId, "esboco_pregacao");
 
   return persistExpansion(result.data);
 }

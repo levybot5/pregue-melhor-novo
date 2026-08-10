@@ -9,6 +9,8 @@ import {
 } from "@/components/icons";
 import { getCurrentUser } from "@/services/auth";
 import { getProfile } from "@/services/database";
+import { getGenerationStatus } from "@/services/billing";
+import { GenerationCounter } from "@/components/GenerationCounter";
 import { signOutAction } from "./actions";
 
 const tools = [
@@ -51,6 +53,7 @@ export default async function Home() {
   const profile = user ? await getProfile(user.id) : null;
   const firstName = profile?.name?.trim().split(/\s+/)[0];
   const greeting = firstName || user?.email;
+  const generationStatus = user ? await getGenerationStatus(user.id) : null;
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
@@ -83,6 +86,13 @@ export default async function Home() {
           </Link>
         )}
       </div>
+
+      {generationStatus?.subscriptionActive && (
+        <div className="flex items-center justify-between rounded-2xl border border-card-border bg-card px-4 py-3">
+          <span className="text-sm font-medium text-foreground">Pregue Melhor Pro</span>
+          <GenerationCounter remaining={generationStatus.dailyRemaining} />
+        </div>
+      )}
 
       <div className="flex flex-col gap-3">
         {tools.map((tool) => (
