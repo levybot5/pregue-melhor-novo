@@ -11,6 +11,7 @@ import { SermonView } from "@/components/SermonView";
 import { BibleStudyView } from "@/components/BibleStudyView";
 import { OutlineExpansionView } from "@/components/OutlineExpansionView";
 import { PulpitOutlineView } from "@/components/PulpitOutlineView";
+import { ContentToolbar } from "@/components/ContentToolbar";
 import { getCurrentUser } from "@/services/auth";
 import { getContentTypeLabel } from "@/lib/content-types";
 
@@ -27,23 +28,47 @@ function formatDate(iso: string) {
   });
 }
 
-function renderByType(type: string, raw: Record<string, unknown>) {
+function renderByType(type: string, raw: Record<string, unknown>, title: string) {
   switch (type) {
     case "pregacao": {
       const parsed = sermonContentSchema.safeParse(raw);
-      return parsed.success ? <SermonView sermon={parsed.data} /> : null;
+      if (!parsed.success) return null;
+      return (
+        <>
+          <ContentToolbar contentType="pregacao" content={parsed.data} title={title} />
+          <SermonView sermon={parsed.data} />
+        </>
+      );
     }
     case "biblia_explicada": {
       const parsed = bibleStudyContentSchema.safeParse(raw);
-      return parsed.success ? <BibleStudyView study={parsed.data} /> : null;
+      if (!parsed.success) return null;
+      return (
+        <>
+          <ContentToolbar contentType="biblia_explicada" content={parsed.data} title={title} />
+          <BibleStudyView study={parsed.data} />
+        </>
+      );
     }
     case "esboco_pregacao": {
       const parsed = outlineExpansionContentSchema.safeParse(raw);
-      return parsed.success ? <OutlineExpansionView content={parsed.data} /> : null;
+      if (!parsed.success) return null;
+      return (
+        <>
+          <ContentToolbar contentType="esboco_pregacao" content={parsed.data} title={title} />
+          <OutlineExpansionView content={parsed.data} />
+        </>
+      );
     }
     case "esboco_pulpito": {
       const parsed = pulpitOutlineContentSchema.safeParse(raw);
-      return parsed.success ? <PulpitOutlineView outline={parsed.data} /> : null;
+      if (!parsed.success) return null;
+      return (
+        <>
+          <ContentToolbar contentType="esboco_pulpito" content={parsed.data} title={title} />
+          <PulpitOutlineView outline={parsed.data} />
+        </>
+      );
     }
     default:
       return null;
@@ -90,7 +115,7 @@ export default async function ContentDetailPage({
     notFound();
   }
 
-  const rendered = renderByType(content.type, content.content);
+  const rendered = renderByType(content.type, content.content, content.title);
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">

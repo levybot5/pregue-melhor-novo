@@ -1,4 +1,5 @@
 import "server-only";
+import { revalidatePath } from "next/cache";
 import { getSupabaseServerClient } from "@/services/database/server-client";
 import type { UsageTool } from "./limits";
 
@@ -49,4 +50,12 @@ export async function recordUsage(userId: string, tool: UsageTool): Promise<void
   const supabase = await getSupabaseServerClient();
   const { error } = await supabase.from("usage_events").insert({ user_id: userId, tool });
   if (error) throw error;
+
+  // O contador "N gerações disponíveis hoje" aparece na Home e nas 4
+  // ferramentas. Sem isso, o Router Cache do Next pode continuar
+  // mostrando o número antigo até um reload manual. Isso só marca o
+  // cache do cliente como desatualizado — não é polling nem chamada
+  // de IA, e não muda a lógica de limite (que já é sempre recalculada
+  // do banco a cada tentativa, independente de cache).
+  revalidatePath("/", "layout");
 }
