@@ -33,6 +33,9 @@ export type { OutlineExpansionInput, OutlineExpansionContent } from "./outline-e
 export { generatePulpitOutline, pulpitOutlineContentSchema } from "./pulpit-outline";
 export type { PulpitOutlineInput, PulpitOutlineContent } from "./pulpit-outline";
 
+export { generateDevotional, devotionalContentSchema, devotionalMoments } from "./devotional";
+export type { DevotionalInput, DevotionalContent, DevotionalMoment } from "./devotional";
+
 export {
   ministryAudiences,
   ministryStyles,

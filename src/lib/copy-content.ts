@@ -3,6 +3,7 @@ import type {
   BibleStudyContent,
   OutlineExpansionContent,
   PulpitOutlineContent,
+  DevotionalContent,
 } from "@/services/ai";
 import type { ReadySermon, ReadyOutline } from "@/services/database";
 import { normalizeOutlinePointTitle } from "./outline";
@@ -117,6 +118,17 @@ export function formatBibleStudyForCopy(study: BibleStudyContent): string {
     `APLICAÇÃO PARA A VIDA CRISTÃ\n${study.aplicacao_vida_crista}`,
     `CUIDADO DE INTERPRETAÇÃO\n${study.cuidado_interpretacao}`,
     `RESUMO\n${study.resumo_final}`,
+  ]);
+}
+
+export function formatDevotionalForCopy(devotional: DevotionalContent): string {
+  return joinBlocks([
+    devotional.titulo,
+    devotional.texto_base,
+    `REFLEXÃO\n${devotional.reflexao}`,
+    `APLICAÇÃO\n${devotional.aplicacao}`,
+    `ORAÇÃO\n${devotional.oracao}`,
+    `VERSÍCULO PARA GUARDAR\n${devotional.versiculo_para_guardar}`,
   ]);
 }
 

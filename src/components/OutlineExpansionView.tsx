@@ -1,59 +1,52 @@
 import type { OutlineExpansionContent } from "@/services/ai";
 import { normalizeOutlinePointTitle } from "@/lib/outline";
+import {
+  BaseTextQuote,
+  ReadingSection,
+  PointBlock,
+  ExpandableSection,
+  ApplicationBlock,
+} from "@/components/reading";
 
 type OutlineExpansionViewProps = {
   content: OutlineExpansionContent;
 };
 
-function Section({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="flex flex-col gap-2 rounded-2xl border border-card-border bg-card p-4 shadow-sm">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-primary">
-        {title}
-      </h2>
-      <div className="text-base leading-relaxed text-foreground">{children}</div>
-    </section>
-  );
-}
-
 export function OutlineExpansionView({ content }: OutlineExpansionViewProps) {
   return (
-    <div className="flex flex-col gap-4">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">
-          {content.titulo}
-        </h1>
-        <p className="text-sm text-muted">
-          {content.texto_base} · {content.ideia_central}
-        </p>
-      </header>
+    <div className="flex flex-col gap-6">
+      <BaseTextQuote text={content.texto_base} />
 
-      <Section title="Introdução">{content.introducao}</Section>
-      {content.contexto && <Section title="Contexto">{content.contexto}</Section>}
+      <ReadingSection title="Introdução">{content.introducao}</ReadingSection>
 
-      {content.pontos.map((ponto, index) => (
-        <Section
-          key={index}
-          title={`Ponto ${index + 1}: ${normalizeOutlinePointTitle(ponto.titulo)}`}
-        >
-          <p>{ponto.explicacao}</p>
-          <p className="mt-2 text-muted">{ponto.exemplo_aplicacao}</p>
-        </Section>
-      ))}
+      {content.contexto && (
+        <ExpandableSection title="Contexto Bíblico">{content.contexto}</ExpandableSection>
+      )}
 
-      <Section title="Aplicações">{content.aplicacoes}</Section>
-      <Section title="Conclusão">{content.conclusao}</Section>
-      <Section title="Apelo">{content.apelo}</Section>
-      <Section title="Oração">{content.oracao}</Section>
+      <div className="flex flex-col gap-5">
+        {content.pontos.map((ponto, index) => (
+          <PointBlock
+            key={index}
+            index={index + 1}
+            title={normalizeOutlinePointTitle(ponto.titulo)}
+            last={index === content.pontos.length - 1}
+          >
+            <p>{ponto.explicacao}</p>
+            <p className="mt-2 text-[15px] text-muted italic">{ponto.exemplo_aplicacao}</p>
+          </PointBlock>
+        ))}
+      </div>
 
-      <section className="flex flex-col gap-3 rounded-2xl border border-primary bg-primary-soft p-4">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-primary">
+      <ApplicationBlock title="Aplicação">{content.aplicacoes}</ApplicationBlock>
+
+      <ReadingSection title="Conclusão">{content.conclusao}</ReadingSection>
+      <ReadingSection title="Apelo" emphasis>
+        {content.apelo}
+      </ReadingSection>
+      <ReadingSection title="Oração">{content.oracao}</ReadingSection>
+
+      <section className="flex flex-col gap-3 rounded-2xl border border-accent/40 bg-accent-soft/40 p-4">
+        <h2 className="text-xs font-semibold tracking-wide text-primary uppercase">
           Esboço para o Púlpito
         </h2>
         <p className="text-sm text-muted">

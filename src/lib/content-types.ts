@@ -3,6 +3,7 @@ const CONTENT_TYPE_LABELS: Record<string, string> = {
   biblia_explicada: "Bíblia Explicada",
   esboco_pregacao: "Esboço em Pregação",
   esboco_pulpito: "Esboço para Púlpito",
+  devocional: "Devocional",
 };
 
 export function getContentTypeLabel(type: string): string {

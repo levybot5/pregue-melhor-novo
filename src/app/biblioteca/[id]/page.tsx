@@ -6,12 +6,15 @@ import {
   bibleStudyContentSchema,
   outlineExpansionContentSchema,
   pulpitOutlineContentSchema,
+  devotionalContentSchema,
 } from "@/services/ai";
 import { SermonView } from "@/components/SermonView";
 import { BibleStudyView } from "@/components/BibleStudyView";
 import { OutlineExpansionView } from "@/components/OutlineExpansionView";
 import { PulpitOutlineView } from "@/components/PulpitOutlineView";
+import { DevotionalView } from "@/components/DevotionalView";
 import { ContentToolbar } from "@/components/ContentToolbar";
+import { BackLink, ReadingHeader } from "@/components/reading";
 import { getCurrentUser } from "@/services/auth";
 import { getContentTypeLabel } from "@/lib/content-types";
 
@@ -35,8 +38,9 @@ function renderByType(type: string, raw: Record<string, unknown>, title: string)
       if (!parsed.success) return null;
       return (
         <>
-          <ContentToolbar contentType="pregacao" content={parsed.data} title={title} />
+          <ReadingHeader title={parsed.data.titulo} baseText={parsed.data.texto_base} />
           <SermonView sermon={parsed.data} />
+          <ContentToolbar contentType="pregacao" content={parsed.data} title={title} />
         </>
       );
     }
@@ -45,8 +49,9 @@ function renderByType(type: string, raw: Record<string, unknown>, title: string)
       if (!parsed.success) return null;
       return (
         <>
-          <ContentToolbar contentType="biblia_explicada" content={parsed.data} title={title} />
+          <ReadingHeader title={parsed.data.titulo} baseText={parsed.data.passagem} />
           <BibleStudyView study={parsed.data} />
+          <ContentToolbar contentType="biblia_explicada" content={parsed.data} title={title} />
         </>
       );
     }
@@ -55,8 +60,9 @@ function renderByType(type: string, raw: Record<string, unknown>, title: string)
       if (!parsed.success) return null;
       return (
         <>
-          <ContentToolbar contentType="esboco_pregacao" content={parsed.data} title={title} />
+          <ReadingHeader title={parsed.data.titulo} baseText={parsed.data.texto_base} />
           <OutlineExpansionView content={parsed.data} />
+          <ContentToolbar contentType="esboco_pregacao" content={parsed.data} title={title} />
         </>
       );
     }
@@ -65,8 +71,20 @@ function renderByType(type: string, raw: Record<string, unknown>, title: string)
       if (!parsed.success) return null;
       return (
         <>
-          <ContentToolbar contentType="esboco_pulpito" content={parsed.data} title={title} />
+          <ReadingHeader title={parsed.data.tema} baseText={parsed.data.texto_base} />
           <PulpitOutlineView outline={parsed.data} />
+          <ContentToolbar contentType="esboco_pulpito" content={parsed.data} title={title} />
+        </>
+      );
+    }
+    case "devocional": {
+      const parsed = devotionalContentSchema.safeParse(raw);
+      if (!parsed.success) return null;
+      return (
+        <>
+          <ReadingHeader title={parsed.data.titulo} baseText={parsed.data.texto_base} />
+          <DevotionalView devotional={parsed.data} />
+          <ContentToolbar contentType="devocional" content={parsed.data} title={title} />
         </>
       );
     }
@@ -118,10 +136,12 @@ export default async function ContentDetailPage({
   const rendered = renderByType(content.type, content.content, content.title);
 
   return (
-    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
+    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
+      <BackLink href="/biblioteca" />
+
       {rendered ? (
         <>
-          <p className="text-xs text-muted">{formatDate(content.created_at)}</p>
+          <p className="-mt-2 text-xs text-muted">{formatDate(content.created_at)}</p>
           {rendered}
         </>
       ) : (
@@ -139,13 +159,6 @@ export default async function ContentDetailPage({
           <p className="text-red-600">Não foi possível exibir este conteúdo.</p>
         </>
       )}
-
-      <Link
-        href="/biblioteca"
-        className="text-sm font-medium text-primary underline underline-offset-4"
-      >
-        Voltar para a Biblioteca
-      </Link>
     </main>
   );
 }

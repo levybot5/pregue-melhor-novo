@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { toggleFavoriteAction } from "@/app/actions";
 import type { FavoriteContentType } from "@/services/database";
+import { StarIcon } from "./icons";
 
 type FavoriteButtonProps = {
   contentType: FavoriteContentType;
@@ -44,7 +45,8 @@ export function FavoriteButton({
       aria-pressed={favorited}
       className={className}
     >
-      {favorited ? "★ Favoritado" : "☆ Favoritar"}
+      <StarIcon className={`h-4 w-4 ${favorited ? "fill-accent text-accent" : ""}`} />
+      Favoritar
     </button>
   );
 }

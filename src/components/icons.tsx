@@ -77,3 +77,67 @@ export function ClipboardListIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function HeartIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M12 20s-7-4.35-9.5-8.5C1 8.5 2.5 5 6 5c2 0 3.5 1.2 4 2.5.5-1.3 2-2.5 4-2.5 3.5 0 5 3.5 3.5 6.5C19 15.65 12 20 12 20Z" />
+    </svg>
+  );
+}
+
+export function LifebuoyIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <circle cx="12" cy="12" r="9" />
+      <circle cx="12" cy="12" r="3.5" />
+      <path d="m6.5 6.5 2.3 2.3M17.5 6.5l-2.3 2.3M6.5 17.5l2.3-2.3M17.5 17.5l-2.3-2.3" />
+    </svg>
+  );
+}
+
+export function ChevronLeftIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M15 6l-6 6 6 6" />
+    </svg>
+  );
+}
+
+export function ChevronDownIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M6 9l6 6 6-6" />
+    </svg>
+  );
+}
+
+export function PodiumIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M6 21h12" />
+      <path d="M8 21V9a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v12" />
+      <path d="M9 8V4h6v4" />
+      <path d="M10 12h4" />
+    </svg>
+  );
+}
+
+export function PdfIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M7 3h7l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" />
+      <path d="M14 3v4h4" />
+      <path d="M9 17v-4h1.5a1.5 1.5 0 0 1 0 3H9M13 17v-4h2M13 15h1.5M17 13v4" />
+    </svg>
+  );
+}
+
+export function CopyIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <rect x="9" y="9" width="11" height="11" rx="1.5" />
+      <path d="M5 15V5a1 1 0 0 1 1-1h10" />
+    </svg>
+  );
+}

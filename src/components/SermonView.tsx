@@ -1,61 +1,53 @@
 import type { SermonContent } from "@/services/ai";
 import { normalizeOutlinePointTitle } from "@/lib/outline";
+import {
+  BaseTextQuote,
+  ReadingSection,
+  PointBlock,
+  ExpandableSection,
+  ApplicationBlock,
+} from "@/components/reading";
 
 type SermonViewProps = {
   sermon: SermonContent;
 };
 
-function Section({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="flex flex-col gap-2 rounded-2xl border border-card-border bg-card p-4 shadow-sm">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-primary">
-        {title}
-      </h2>
-      <div className="text-base leading-relaxed text-foreground">
-        {children}
-      </div>
-    </section>
-  );
-}
-
+// Experiência de leitura, não um dashboard: texto corrido com respiro,
+// pontos numerados, e o Contexto Bíblico como aprofundamento
+// recolhido — não faz parte do fluxo principal de leitura.
 export function SermonView({ sermon }: SermonViewProps) {
   return (
-    <div className="flex flex-col gap-4">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">
-          {sermon.titulo}
-        </h1>
-        <p className="text-sm text-muted">
-          {sermon.texto_base} · {sermon.tema_central}
-        </p>
-      </header>
+    <div className="flex flex-col gap-6">
+      <BaseTextQuote text={sermon.texto_base} />
 
-      <Section title="Introdução">{sermon.introducao}</Section>
-      <Section title="Contexto Bíblico">{sermon.contexto_biblico}</Section>
+      <ReadingSection title="Introdução">{sermon.introducao}</ReadingSection>
 
-      {sermon.pontos.map((ponto, index) => (
-        <Section
-          key={index}
-          title={`Ponto ${index + 1}: ${normalizeOutlinePointTitle(ponto.titulo)}`}
-        >
-          <p>{ponto.explicacao}</p>
-          <p className="mt-2 text-muted">{ponto.exemplo_aplicacao}</p>
-        </Section>
-      ))}
+      <ExpandableSection title="Contexto Bíblico">{sermon.contexto_biblico}</ExpandableSection>
 
-      <Section title="Aplicação Final">{sermon.aplicacao_final}</Section>
-      <Section title="Conclusão">{sermon.conclusao}</Section>
-      <Section title="Apelo">{sermon.apelo}</Section>
-      <Section title="Oração Final">{sermon.oracao_final}</Section>
+      <div className="flex flex-col gap-5">
+        {sermon.pontos.map((ponto, index) => (
+          <PointBlock
+            key={index}
+            index={index + 1}
+            title={normalizeOutlinePointTitle(ponto.titulo)}
+            last={index === sermon.pontos.length - 1}
+          >
+            <p>{ponto.explicacao}</p>
+            <p className="mt-2 text-[15px] text-muted italic">{ponto.exemplo_aplicacao}</p>
+          </PointBlock>
+        ))}
+      </div>
 
-      <section className="flex flex-col gap-3 rounded-2xl border border-primary bg-primary-soft p-4">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-primary">
+      <ApplicationBlock title="Aplicação">{sermon.aplicacao_final}</ApplicationBlock>
+
+      <ReadingSection title="Conclusão">{sermon.conclusao}</ReadingSection>
+      <ReadingSection title="Apelo" emphasis>
+        {sermon.apelo}
+      </ReadingSection>
+      <ReadingSection title="Oração">{sermon.oracao_final}</ReadingSection>
+
+      <section className="flex flex-col gap-3 rounded-2xl border border-accent/40 bg-accent-soft/40 p-4">
+        <h2 className="text-xs font-semibold tracking-wide text-primary uppercase">
           Esboço para o Púlpito
         </h2>
         <p className="text-sm text-muted">
@@ -75,9 +67,7 @@ export function SermonView({ sermon }: SermonViewProps) {
             </div>
           ))}
         </div>
-        <p className="font-semibold text-foreground">
-          Apelo: {sermon.esboco_pulpito.apelo}
-        </p>
+        <p className="font-semibold text-foreground">Apelo: {sermon.esboco_pulpito.apelo}</p>
       </section>
     </div>
   );

@@ -10,6 +10,7 @@ import type {
   OutlineExpansionContent,
 } from "@/services/ai";
 import { OutlineExpansionView } from "@/components/OutlineExpansionView";
+import { ReadingHeader } from "@/components/reading";
 import { GenerationCounter } from "@/components/GenerationCounter";
 import { GenerationBlockedNotice } from "@/components/GenerationBlockedNotice";
 import { isLimitBlockReason } from "@/lib/billing-ui";
@@ -111,7 +112,8 @@ export function EsbocoPregacaoForm({ initialRemaining }: { initialRemaining: num
 
   if (pendingContent) {
     return (
-      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
+        <ReadingHeader title={pendingContent.titulo} baseText={pendingContent.texto_base} />
         {saveWarning && (
           <div className="rounded-2xl border border-red-300 bg-red-50 p-4 text-sm text-red-700">
             <p>{saveWarning}</p>

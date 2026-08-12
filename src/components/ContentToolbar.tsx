@@ -6,11 +6,15 @@ import type {
   BibleStudyContent,
   OutlineExpansionContent,
   PulpitOutlineContent,
+  DevotionalContent,
 } from "@/services/ai";
 import type { ReadySermon, ReadyOutline, FavoriteContentType } from "@/services/database";
 import type { PulpitModeContent } from "@/lib/pulpit-mode";
 import { PulpitMode } from "./PulpitMode";
 import { FavoriteButton } from "./FavoriteButton";
+import { PodiumIcon, PdfIcon, CopyIcon } from "./icons";
+
+const NO_PULPIT_MODE_TYPES = new Set(["biblia_explicada", "devocional"]);
 
 export type ContentToolbarProps = (
   | { contentType: "pregacao"; content: SermonContent; title: string }
@@ -19,6 +23,7 @@ export type ContentToolbarProps = (
   | { contentType: "esboco_pulpito"; content: PulpitOutlineContent; title: string }
   | { contentType: "pregacao_pronta"; content: ReadySermon; title: string }
   | { contentType: "esboco_pronto"; content: ReadyOutline; title: string }
+  | { contentType: "devocional"; content: DevotionalContent; title: string }
 ) & {
   // Só presente no acervo editorial (Pregações/Esboços Prontos) — a
   // Biblioteca pessoal não tem favoritos.
@@ -71,8 +76,12 @@ async function buildPdfBlob(props: ContentToolbarProps): Promise<Blob> {
     const { ReadySermonPdfDocument } = await import("@/lib/pdf/ready-sermon-pdf");
     return pdf(<ReadySermonPdfDocument sermon={props.content} />).toBlob();
   }
-  const { ReadyOutlinePdfDocument } = await import("@/lib/pdf/ready-outline-pdf");
-  return pdf(<ReadyOutlinePdfDocument outline={props.content} />).toBlob();
+  if (props.contentType === "esboco_pronto") {
+    const { ReadyOutlinePdfDocument } = await import("@/lib/pdf/ready-outline-pdf");
+    return pdf(<ReadyOutlinePdfDocument outline={props.content} />).toBlob();
+  }
+  const { DevotionalPdfDocument } = await import("@/lib/pdf/devotional-pdf");
+  return pdf(<DevotionalPdfDocument devotional={props.content} />).toBlob();
 }
 
 async function buildCopyText(props: ContentToolbarProps): Promise<string> {
@@ -83,6 +92,7 @@ async function buildCopyText(props: ContentToolbarProps): Promise<string> {
     formatPulpitOutlineForCopy,
     formatReadySermonForCopy,
     formatReadyOutlineForCopy,
+    formatDevotionalForCopy,
   } = await import("@/lib/copy-content");
 
   if (props.contentType === "pregacao") return formatSermonForCopy(props.content);
@@ -90,7 +100,8 @@ async function buildCopyText(props: ContentToolbarProps): Promise<string> {
   if (props.contentType === "esboco_pregacao") return formatOutlineExpansionForCopy(props.content);
   if (props.contentType === "esboco_pulpito") return formatPulpitOutlineForCopy(props.content);
   if (props.contentType === "pregacao_pronta") return formatReadySermonForCopy(props.content);
-  return formatReadyOutlineForCopy(props.content);
+  if (props.contentType === "esboco_pronto") return formatReadyOutlineForCopy(props.content);
+  return formatDevotionalForCopy(props.content);
 }
 
 const DIACRITIC_MARKS = /[̀-ͯ]/g;
@@ -107,13 +118,13 @@ function sanitizeFileName(title: string): string {
 }
 
 const TOOLBAR_BUTTON_CLASS =
-  "flex min-h-[44px] flex-1 items-center justify-center rounded-xl border border-card-border bg-card px-3 text-sm font-semibold text-foreground disabled:opacity-60";
+  "flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-full border border-card-border bg-card px-3.5 text-sm font-medium text-primary disabled:opacity-60";
 
 export function ContentToolbar(props: ContentToolbarProps) {
   const [pulpitContent, setPulpitContent] = useState<PulpitModeContent | null>(null);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [copyLabel, setCopyLabel] = useState("Copiar");
-  const showPulpitMode = props.contentType !== "biblia_explicada";
+  const showPulpitMode = !NO_PULPIT_MODE_TYPES.has(props.contentType);
 
   async function handlePulpitMode() {
     setPulpitContent(await buildPulpitModeContent(props));
@@ -150,10 +161,11 @@ export function ContentToolbar(props: ContentToolbarProps) {
 
   return (
     <>
-      <div className="flex gap-2">
+      <div className="grid grid-cols-2 gap-2">
         {showPulpitMode && (
           <button type="button" onClick={handlePulpitMode} className={TOOLBAR_BUTTON_CLASS}>
-            Modo Púlpito
+            <PodiumIcon className="h-4 w-4" />
+            Púlpito
           </button>
         )}
         <button
@@ -162,9 +174,11 @@ export function ContentToolbar(props: ContentToolbarProps) {
           disabled={pdfLoading}
           className={TOOLBAR_BUTTON_CLASS}
         >
-          {pdfLoading ? "Gerando..." : "Baixar PDF"}
+          <PdfIcon className="h-4 w-4" />
+          {pdfLoading ? "Gerando..." : "PDF"}
         </button>
         <button type="button" onClick={handleCopy} className={TOOLBAR_BUTTON_CLASS}>
+          <CopyIcon className="h-4 w-4" />
           {copyLabel}
         </button>
         {props.favorite && (
