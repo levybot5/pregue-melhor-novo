@@ -7,6 +7,8 @@ const PROTECTED_PREFIXES = [
   "/esboco-pregacao",
   "/biblia",
   "/biblioteca",
+  "/pregacoes-prontas",
+  "/esbocos-prontos",
 ];
 
 const AUTH_PATHS = ["/entrar", "/cadastrar"];

@@ -7,14 +7,23 @@ import type {
   OutlineExpansionContent,
   PulpitOutlineContent,
 } from "@/services/ai";
+import type { ReadySermon, ReadyOutline, FavoriteContentType } from "@/services/database";
 import type { PulpitModeContent } from "@/lib/pulpit-mode";
 import { PulpitMode } from "./PulpitMode";
+import { FavoriteButton } from "./FavoriteButton";
 
-export type ContentToolbarProps =
+export type ContentToolbarProps = (
   | { contentType: "pregacao"; content: SermonContent; title: string }
   | { contentType: "biblia_explicada"; content: BibleStudyContent; title: string }
   | { contentType: "esboco_pregacao"; content: OutlineExpansionContent; title: string }
-  | { contentType: "esboco_pulpito"; content: PulpitOutlineContent; title: string };
+  | { contentType: "esboco_pulpito"; content: PulpitOutlineContent; title: string }
+  | { contentType: "pregacao_pronta"; content: ReadySermon; title: string }
+  | { contentType: "esboco_pronto"; content: ReadyOutline; title: string }
+) & {
+  // Só presente no acervo editorial (Pregações/Esboços Prontos) — a
+  // Biblioteca pessoal não tem favoritos.
+  favorite?: { contentType: FavoriteContentType; contentId: string; initialFavorited: boolean };
+};
 
 // Todas as bibliotecas pesadas (react-pdf, os templates de PDF e o
 // mapeador do Modo Púlpito) só entram no bundle quando o usuário clica
@@ -23,12 +32,19 @@ export type ContentToolbarProps =
 // de IA em qualquer uma destas ações.
 
 async function buildPulpitModeContent(props: ContentToolbarProps): Promise<PulpitModeContent> {
-  const { sermonToPulpitMode, outlineExpansionToPulpitMode, pulpitOutlineToPulpitMode } =
-    await import("@/lib/pulpit-mode");
+  const {
+    sermonToPulpitMode,
+    outlineExpansionToPulpitMode,
+    pulpitOutlineToPulpitMode,
+    readySermonToPulpitMode,
+    readyOutlineToPulpitMode,
+  } = await import("@/lib/pulpit-mode");
 
   if (props.contentType === "pregacao") return sermonToPulpitMode(props.content);
   if (props.contentType === "esboco_pregacao") return outlineExpansionToPulpitMode(props.content);
   if (props.contentType === "esboco_pulpito") return pulpitOutlineToPulpitMode(props.content);
+  if (props.contentType === "pregacao_pronta") return readySermonToPulpitMode(props.content);
+  if (props.contentType === "esboco_pronto") return readyOutlineToPulpitMode(props.content);
   throw new Error("Modo Púlpito não está disponível para este tipo de conteúdo.");
 }
 
@@ -47,8 +63,16 @@ async function buildPdfBlob(props: ContentToolbarProps): Promise<Blob> {
     const { BibleStudyPdfDocument } = await import("@/lib/pdf/bible-study-pdf");
     return pdf(<BibleStudyPdfDocument study={props.content} />).toBlob();
   }
-  const { PulpitOutlinePdfDocument } = await import("@/lib/pdf/pulpit-outline-pdf");
-  return pdf(<PulpitOutlinePdfDocument outline={props.content} />).toBlob();
+  if (props.contentType === "esboco_pulpito") {
+    const { PulpitOutlinePdfDocument } = await import("@/lib/pdf/pulpit-outline-pdf");
+    return pdf(<PulpitOutlinePdfDocument outline={props.content} />).toBlob();
+  }
+  if (props.contentType === "pregacao_pronta") {
+    const { ReadySermonPdfDocument } = await import("@/lib/pdf/ready-sermon-pdf");
+    return pdf(<ReadySermonPdfDocument sermon={props.content} />).toBlob();
+  }
+  const { ReadyOutlinePdfDocument } = await import("@/lib/pdf/ready-outline-pdf");
+  return pdf(<ReadyOutlinePdfDocument outline={props.content} />).toBlob();
 }
 
 async function buildCopyText(props: ContentToolbarProps): Promise<string> {
@@ -57,12 +81,16 @@ async function buildCopyText(props: ContentToolbarProps): Promise<string> {
     formatBibleStudyForCopy,
     formatOutlineExpansionForCopy,
     formatPulpitOutlineForCopy,
+    formatReadySermonForCopy,
+    formatReadyOutlineForCopy,
   } = await import("@/lib/copy-content");
 
   if (props.contentType === "pregacao") return formatSermonForCopy(props.content);
   if (props.contentType === "biblia_explicada") return formatBibleStudyForCopy(props.content);
   if (props.contentType === "esboco_pregacao") return formatOutlineExpansionForCopy(props.content);
-  return formatPulpitOutlineForCopy(props.content);
+  if (props.contentType === "esboco_pulpito") return formatPulpitOutlineForCopy(props.content);
+  if (props.contentType === "pregacao_pronta") return formatReadySermonForCopy(props.content);
+  return formatReadyOutlineForCopy(props.content);
 }
 
 const DIACRITIC_MARKS = /[̀-ͯ]/g;
@@ -139,6 +167,14 @@ export function ContentToolbar(props: ContentToolbarProps) {
         <button type="button" onClick={handleCopy} className={TOOLBAR_BUTTON_CLASS}>
           {copyLabel}
         </button>
+        {props.favorite && (
+          <FavoriteButton
+            contentType={props.favorite.contentType}
+            contentId={props.favorite.contentId}
+            initialFavorited={props.favorite.initialFavorited}
+            className={TOOLBAR_BUTTON_CLASS}
+          />
+        )}
       </div>
 
       {pulpitContent && (

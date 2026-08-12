@@ -4,6 +4,7 @@ import type {
   OutlineExpansionContent,
   PulpitOutlineContent,
 } from "@/services/ai";
+import type { ReadySermon, ReadyOutline } from "@/services/database";
 import { normalizeOutlinePointTitle } from "./outline";
 
 // Formatadores de texto puro para o botão "Copiar". Trabalham somente
@@ -116,5 +117,37 @@ export function formatBibleStudyForCopy(study: BibleStudyContent): string {
     `APLICAÇÃO PARA A VIDA CRISTÃ\n${study.aplicacao_vida_crista}`,
     `CUIDADO DE INTERPRETAÇÃO\n${study.cuidado_interpretacao}`,
     `RESUMO\n${study.resumo_final}`,
+  ]);
+}
+
+export function formatReadySermonForCopy(sermon: ReadySermon): string {
+  const points = sermon.points
+    .map((ponto, index) => `${index + 1}. ${ponto.title}\n${ponto.text}`)
+    .join("\n\n");
+
+  return joinBlocks([
+    sermon.title,
+    `${sermon.base_text} · ${sermon.short_description}`,
+    `INTRODUÇÃO\n${sermon.introduction}`,
+    points,
+    `APLICAÇÃO\n${sermon.application}`,
+    `CONCLUSÃO\n${sermon.conclusion}`,
+    sermon.appeal ? `APELO\n${sermon.appeal}` : null,
+    sermon.prayer ? `ORAÇÃO\n${sermon.prayer}` : null,
+  ]);
+}
+
+export function formatReadyOutlineForCopy(outline: ReadyOutline): string {
+  const points = outline.points
+    .map((ponto, index) => bulletBlock(`${index + 1}. ${ponto.title}`, ponto.bullets))
+    .join("\n\n");
+
+  return joinBlocks([
+    outline.title,
+    `${outline.base_text} · ${outline.central_idea}`,
+    `INTRODUÇÃO\n${outline.short_introduction}`,
+    points,
+    bulletBlock("APLICAÇÕES", outline.applications),
+    outline.conclusion_appeal ? `CONCLUSÃO / APELO\n${outline.conclusion_appeal}` : null,
   ]);
 }

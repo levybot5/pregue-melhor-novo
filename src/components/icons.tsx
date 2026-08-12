@@ -59,3 +59,21 @@ export function LibraryIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function StarIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.8l-5.2 2.8 1-5.8-4.3-4.1 5.9-.9L12 3.5Z" />
+    </svg>
+  );
+}
+
+export function ClipboardListIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <rect x="6" y="4" width="12" height="16" rx="2" />
+      <path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1" />
+      <path d="M9 10h6M9 14h6M9 18h3" />
+    </svg>
+  );
+}

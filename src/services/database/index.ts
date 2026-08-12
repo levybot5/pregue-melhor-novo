@@ -7,3 +7,24 @@ export type { Content, NewContent } from "./contents";
 
 export { getProfile } from "./profiles";
 export type { Profile } from "./profiles";
+
+export {
+  listCategories,
+  listReadySermons,
+  getReadySermonBySlug,
+  listReadyOutlines,
+  getReadyOutlineBySlug,
+} from "./ready-content";
+export type {
+  ContentCategory,
+  Testament,
+  ReadySermon,
+  ReadySermonSummary,
+  ReadySermonPoint,
+  ReadyOutline,
+  ReadyOutlineSummary,
+  ReadyOutlinePoint,
+} from "./ready-content";
+
+export { listFavoriteContentIds, addFavorite, removeFavorite } from "./favorites";
+export type { FavoriteContentType } from "./favorites";

@@ -6,6 +6,8 @@ import {
   MessageIcon,
   OpenBookIcon,
   TransformIcon,
+  StarIcon,
+  ClipboardListIcon,
 } from "@/components/icons";
 import { getCurrentUser } from "@/services/auth";
 import { getProfile } from "@/services/database";
@@ -43,6 +45,18 @@ const tools = [
     title: "Minha Biblioteca",
     description: "Encontre suas mensagens e estudos salvos.",
     icon: <LibraryIcon className="h-6 w-6" />,
+  },
+  {
+    href: "/pregacoes-prontas",
+    title: "Pregações Prontas",
+    description: "Mensagens completas para estudar, adaptar e ministrar.",
+    icon: <StarIcon className="h-6 w-6" />,
+  },
+  {
+    href: "/esbocos-prontos",
+    title: "Esboços Prontos",
+    description: "Estruturas objetivas para preparar sua mensagem com mais rapidez.",
+    icon: <ClipboardListIcon className="h-6 w-6" />,
   },
 ];
 
