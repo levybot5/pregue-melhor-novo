@@ -8,6 +8,7 @@ import { SermonView } from "@/components/SermonView";
 import { ReadingHeader } from "@/components/reading";
 import { GenerationCounter } from "@/components/GenerationCounter";
 import { GenerationBlockedNotice } from "@/components/GenerationBlockedNotice";
+import { SpinnerIcon } from "@/components/icons";
 import { isLimitBlockReason } from "@/lib/billing-ui";
 import { generateAndSaveSermon, saveSermon, type SermonActionResult } from "./actions";
 import { THEME_MAX_LENGTH, THEME_MIN_LENGTH } from "./constants";
@@ -240,10 +241,16 @@ export function PregacaoForm({ initialRemaining }: { initialRemaining: number })
           disabled={
             isGenerating || remaining <= 0 || themeOrPassage.trim().length < THEME_MIN_LENGTH
           }
-          className="flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-primary px-5 font-semibold text-primary-foreground transition-opacity disabled:opacity-60"
+          className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl bg-primary px-5 font-semibold text-primary-foreground transition-opacity disabled:opacity-60"
         >
+          {isGenerating && <SpinnerIcon className="h-5 w-5 animate-spin" />}
           {isGenerating ? "Gerando..." : "Gerar Pregação"}
         </button>
+        {isGenerating && (
+          <p role="status" className="text-center text-sm text-muted">
+            Preparando sua pregação... isso pode levar até 30 segundos.
+          </p>
+        )}
         <GenerationCounter remaining={remaining} />
       </div>
 

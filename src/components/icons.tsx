@@ -141,3 +141,13 @@ export function CopyIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+// Use com "animate-spin" no elemento pai/próprio className para indicar
+// carregamento — só o traço arqueado gira, sem preencher o círculo todo.
+export function SpinnerIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M21 12a9 9 0 1 1-9-9" />
+    </svg>
+  );
+}
