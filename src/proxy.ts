@@ -60,7 +60,7 @@ export async function proxy(request: NextRequest) {
   }
 
   if (isAuthPath && isAuthenticated) {
-    return NextResponse.redirect(new URL("/biblioteca", request.url));
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return response;

@@ -23,5 +23,5 @@ export async function signInAction(
     return { error: result.message };
   }
 
-  redirect(redirectTo.startsWith("/") ? redirectTo : "/biblioteca");
+  redirect(redirectTo.startsWith("/") ? redirectTo : "/");
 }

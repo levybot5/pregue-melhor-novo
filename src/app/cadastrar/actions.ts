@@ -27,5 +27,5 @@ export async function signUpAction(
     return { error: null, checkEmail: true };
   }
 
-  redirect("/biblioteca");
+  redirect("/");
 }
