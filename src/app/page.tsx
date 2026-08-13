@@ -15,6 +15,7 @@ import { getCurrentUser } from "@/services/auth";
 import { getProfile } from "@/services/database";
 import { getGenerationStatus } from "@/services/billing";
 import { GenerationCounter } from "@/components/GenerationCounter";
+import { InstallPwaBanner } from "@/components/InstallPwaBanner";
 import { signOutAction } from "./actions";
 
 const tools = [
@@ -92,6 +93,8 @@ export default async function Home() {
 
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-6">
         <p className="text-muted">Prepare sua mensagem com mais clareza.</p>
+
+        <InstallPwaBanner />
 
         {generationStatus?.subscriptionActive && (
           <div className="flex items-center justify-between rounded-2xl border border-card-border bg-card px-4 py-3">
