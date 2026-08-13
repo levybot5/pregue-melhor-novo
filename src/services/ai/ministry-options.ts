@@ -1,8 +1,7 @@
-// Opções de contexto de ministração, compartilhadas pelas ferramentas
-// desta etapa (Esboço em Pregação e Esboço para Púlpito). Pregação
-// Completa (sermon.ts) mantém sua própria cópia local — não foi
-// tocada nesta etapa, por instrução explícita de não refatorar o que
-// já está validado.
+// Opções de contexto de ministração, usadas pelo Esboço em Pregação
+// (outline-expansion.ts). Pregação Completa (sermon.ts) mantém sua
+// própria cópia local. A Pregação para Esboço (sermon-outline.ts) não
+// usa este módulo — recebe a pregação já pronta, não tema/estilo/duração.
 
 export const ministryAudiences = ["domingo", "doutrina", "jovens", "mulheres"] as const;
 export const ministryStyles = ["expositivo", "tematico", "evangelistico"] as const;

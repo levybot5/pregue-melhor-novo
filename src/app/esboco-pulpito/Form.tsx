@@ -3,41 +3,23 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import type {
-  MinistryAudience,
-  MinistryStyle,
-  MinistryDuration,
-  PulpitOutlineContent,
-} from "@/services/ai";
-import { PulpitOutlineView } from "@/components/PulpitOutlineView";
+import type { SermonOutlineContent, SermonOutlineSummaryLevel } from "@/services/ai";
+import { SermonOutlineView } from "@/components/SermonOutlineView";
 import { ReadingHeader } from "@/components/reading";
 import { GenerationCounter } from "@/components/GenerationCounter";
 import { GenerationBlockedNotice } from "@/components/GenerationBlockedNotice";
 import { isLimitBlockReason } from "@/lib/billing-ui";
 import {
-  generateAndSavePulpitOutline,
-  savePulpitOutline,
-  type PulpitOutlineActionResult,
+  generateAndSaveSermonOutline,
+  saveSermonOutline,
+  type SermonOutlineActionResult,
 } from "./actions";
-import { THEME_MAX_LENGTH, THEME_MIN_LENGTH } from "./constants";
+import { SERMON_MAX_LENGTH, SERMON_MIN_LENGTH } from "./constants";
 
-const AUDIENCE_OPTIONS: { value: MinistryAudience; label: string }[] = [
-  { value: "domingo", label: "Domingo" },
-  { value: "doutrina", label: "Doutrina" },
-  { value: "jovens", label: "Jovens" },
-  { value: "mulheres", label: "Mulheres" },
-];
-
-const STYLE_OPTIONS: { value: MinistryStyle; label: string }[] = [
-  { value: "expositivo", label: "Expositivo" },
-  { value: "tematico", label: "Temático" },
-  { value: "evangelistico", label: "Evangelístico" },
-];
-
-const DURATION_OPTIONS: { value: MinistryDuration; label: string; hint: string }[] = [
-  { value: "curta", label: "Curta", hint: "10–15 min" },
-  { value: "media", label: "Média", hint: "20–30 min" },
-  { value: "completa", label: "Completa", hint: "30–40 min" },
+const LEVEL_OPTIONS: { value: SermonOutlineSummaryLevel; label: string }[] = [
+  { value: "enxuto", label: "Enxuto" },
+  { value: "equilibrado", label: "Equilibrado" },
+  { value: "detalhado", label: "Detalhado" },
 ];
 
 export function EsbocoPulpitoForm({ initialRemaining }: { initialRemaining: number }) {
@@ -45,18 +27,16 @@ export function EsbocoPulpitoForm({ initialRemaining }: { initialRemaining: numb
   const [isGenerating, startGenerating] = useTransition();
   const [isSaving, startSaving] = useTransition();
 
-  const [themeOrPassage, setThemeOrPassage] = useState("");
-  const [audience, setAudience] = useState<MinistryAudience>("domingo");
-  const [style, setStyle] = useState<MinistryStyle>("expositivo");
-  const [duration, setDuration] = useState<MinistryDuration>("media");
+  const [sermonText, setSermonText] = useState("");
+  const [level, setLevel] = useState<SermonOutlineSummaryLevel>("equilibrado");
 
   const [remaining, setRemaining] = useState(initialRemaining);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [limitNotice, setLimitNotice] = useState<string | null>(null);
-  const [pendingOutline, setPendingOutline] = useState<PulpitOutlineContent | null>(null);
+  const [pendingOutline, setPendingOutline] = useState<SermonOutlineContent | null>(null);
   const [saveWarning, setSaveWarning] = useState<string | null>(null);
 
-  function handleResult(result: PulpitOutlineActionResult) {
+  function handleResult(result: SermonOutlineActionResult) {
     if (result.status === "blocked") {
       if (isLimitBlockReason(result.reason)) {
         setLimitNotice(result.message);
@@ -85,12 +65,7 @@ export function EsbocoPulpitoForm({ initialRemaining }: { initialRemaining: numb
     setErrorMessage(null);
     setSaveWarning(null);
     startGenerating(async () => {
-      const result = await generateAndSavePulpitOutline({
-        themeOrPassage,
-        audience,
-        style,
-        duration,
-      });
+      const result = await generateAndSaveSermonOutline({ sermonText, level });
       handleResult(result);
     });
   }
@@ -98,7 +73,7 @@ export function EsbocoPulpitoForm({ initialRemaining }: { initialRemaining: numb
   function handleRetrySave() {
     if (!pendingOutline) return;
     startSaving(async () => {
-      const result = await savePulpitOutline(pendingOutline);
+      const result = await saveSermonOutline(pendingOutline);
       handleResult(result);
     });
   }
@@ -118,7 +93,7 @@ export function EsbocoPulpitoForm({ initialRemaining }: { initialRemaining: numb
   if (pendingOutline) {
     return (
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
-        <ReadingHeader title={pendingOutline.tema} baseText={pendingOutline.texto_base} />
+        <ReadingHeader title={pendingOutline.titulo} baseText={pendingOutline.texto_base} />
         {saveWarning && (
           <div className="rounded-2xl border border-red-300 bg-red-50 p-4 text-sm text-red-700">
             <p>{saveWarning}</p>
@@ -132,7 +107,7 @@ export function EsbocoPulpitoForm({ initialRemaining }: { initialRemaining: numb
             </button>
           </div>
         )}
-        <PulpitOutlineView outline={pendingOutline} />
+        <SermonOutlineView outline={pendingOutline} />
       </main>
     );
   }
@@ -141,90 +116,44 @@ export function EsbocoPulpitoForm({ initialRemaining }: { initialRemaining: numb
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
       <header className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold tracking-tight text-foreground">
-          Esboço para Púlpito
+          Pregação para Esboço
         </h1>
         <p className="text-muted">
-          Tenha os principais pontos da mensagem sempre à mão.
+          Transforme sua pregação em um esboço organizado para ministrar com mais clareza.
         </p>
       </header>
 
       <div className="flex flex-col gap-5">
         <label className="flex flex-col gap-2">
-          <span className="text-sm font-semibold text-foreground">
-            Tema ou passagem
-          </span>
-          <input
-            type="text"
-            value={themeOrPassage}
-            onChange={(e) => setThemeOrPassage(e.target.value)}
-            placeholder="Ex: Salmo 23, oração, fé em tempos difíceis..."
-            minLength={THEME_MIN_LENGTH}
-            maxLength={THEME_MAX_LENGTH}
-            className="min-h-[52px] rounded-2xl border border-card-border bg-card px-4 text-base text-foreground outline-none focus:border-primary"
+          <span className="text-sm font-semibold text-foreground">Sua Pregação</span>
+          <textarea
+            value={sermonText}
+            onChange={(e) => setSermonText(e.target.value)}
+            placeholder="Cole aqui a pregação que você deseja transformar em esboço..."
+            maxLength={SERMON_MAX_LENGTH}
+            rows={12}
+            className="min-h-[240px] rounded-2xl border border-card-border bg-card px-4 py-3 text-base text-foreground outline-none focus:border-primary"
           />
           <span className="text-right text-xs text-muted">
-            {themeOrPassage.length}/{THEME_MAX_LENGTH}
+            {sermonText.length.toLocaleString("pt-BR")}/{SERMON_MAX_LENGTH.toLocaleString("pt-BR")}
           </span>
         </label>
 
         <fieldset className="flex flex-col gap-2">
-          <legend className="text-sm font-semibold text-foreground">
-            Onde vai ministrar
-          </legend>
-          <div className="grid grid-cols-2 gap-2">
-            {AUDIENCE_OPTIONS.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => setAudience(option.value)}
-                className={`min-h-[48px] rounded-2xl border px-3 text-sm font-medium ${
-                  audience === option.value
-                    ? "border-primary bg-primary-soft text-primary"
-                    : "border-card-border bg-card text-foreground"
-                }`}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </fieldset>
-
-        <fieldset className="flex flex-col gap-2">
-          <legend className="text-sm font-semibold text-foreground">Estilo</legend>
+          <legend className="text-sm font-semibold text-foreground">Nível de Resumo</legend>
           <div className="grid grid-cols-3 gap-2">
-            {STYLE_OPTIONS.map((option) => (
+            {LEVEL_OPTIONS.map((option) => (
               <button
                 key={option.value}
                 type="button"
-                onClick={() => setStyle(option.value)}
+                onClick={() => setLevel(option.value)}
                 className={`min-h-[48px] rounded-2xl border px-2 text-sm font-medium ${
-                  style === option.value
+                  level === option.value
                     ? "border-primary bg-primary-soft text-primary"
                     : "border-card-border bg-card text-foreground"
                 }`}
               >
                 {option.label}
-              </button>
-            ))}
-          </div>
-        </fieldset>
-
-        <fieldset className="flex flex-col gap-2">
-          <legend className="text-sm font-semibold text-foreground">Duração</legend>
-          <div className="grid grid-cols-3 gap-2">
-            {DURATION_OPTIONS.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => setDuration(option.value)}
-                className={`flex min-h-[52px] flex-col items-center justify-center rounded-2xl border px-2 text-sm font-medium ${
-                  duration === option.value
-                    ? "border-primary bg-primary-soft text-primary"
-                    : "border-card-border bg-card text-foreground"
-                }`}
-              >
-                <span>{option.label}</span>
-                <span className="text-xs text-muted">{option.hint}</span>
               </button>
             ))}
           </div>
@@ -236,11 +165,11 @@ export function EsbocoPulpitoForm({ initialRemaining }: { initialRemaining: numb
           type="button"
           onClick={handleGenerate}
           disabled={
-            isGenerating || remaining <= 0 || themeOrPassage.trim().length < THEME_MIN_LENGTH
+            isGenerating || remaining <= 0 || sermonText.trim().length < SERMON_MIN_LENGTH
           }
           className="flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-primary px-5 font-semibold text-primary-foreground transition-opacity disabled:opacity-60"
         >
-          {isGenerating ? "Gerando..." : "Gerar Esboço"}
+          {isGenerating ? "Criando esboço..." : "Criar Esboço"}
         </button>
         <GenerationCounter remaining={remaining} />
       </div>

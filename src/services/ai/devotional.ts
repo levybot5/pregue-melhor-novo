@@ -5,8 +5,9 @@ import { generateStructured, toGeminiJsonSchema, type GenerateStructuredResult }
 export const devotionalMoments = ["manha", "noite", "qualquer"] as const;
 export type DevotionalMoment = (typeof devotionalMoments)[number];
 
+// O usuário não informa tema nem passagem — a IA escolhe sozinha,
+// variando entre gerações. Sem input textual nenhum.
 export type DevotionalInput = {
-  themeOrPassage: string;
   moment: DevotionalMoment;
 };
 
@@ -34,15 +35,28 @@ export const devotionalContentSchema = z.object({
 
 export type DevotionalContent = z.infer<typeof devotionalContentSchema>;
 
-const MOMENT_LABELS: Record<DevotionalMoment, string> = {
-  manha: "manhã",
-  noite: "noite",
-  qualquer: "qualquer momento do dia",
+const MOMENT_CONFIG: Record<DevotionalMoment, { label: string; guidance: string }> = {
+  manha: {
+    label: "manhã",
+    guidance:
+      "Tom para a manhã: direção, confiança, entrega do dia a Deus, propósito. Pode mencionar 'esta manhã' no máximo uma vez, de forma natural — não repita isso o tempo todo.",
+  },
+  noite: {
+    label: "noite",
+    guidance:
+      "Tom para a noite: descanso, gratidão pelo dia, reflexão, entrega das preocupações antes de dormir. Pode mencionar 'esta noite' no máximo uma vez, de forma natural — não repita isso o tempo todo.",
+  },
+  qualquer: {
+    label: "qualquer momento do dia",
+    guidance: "Tom neutro, que funcione a qualquer hora do dia — não mencione um momento específico.",
+  },
 };
 
 const SYSTEM_INSTRUCTION = `Você escreve devocionais cristãos curtos e diários, em português do Brasil — não uma pregação, não um estudo acadêmico.
 
 Regras:
+- O usuário NÃO informa tema nem passagem: escolha você mesmo uma passagem bíblica real e um tema cristão prático, com boa variedade entre gerações diferentes — não se limite sempre aos mesmos livros, capítulos ou temas.
+- Varie entre temas como: fé, esperança, gratidão, ansiedade, oração, paz, perdão, perseverança, sabedoria, obediência, amor, descanso em Deus, coragem — entre outros temas cristãos práticos.
 - Curto: a resposta inteira deve ficar entre 300 e 500 palavras no total. Não ultrapasse isso desnecessariamente.
 - Linguagem pastoral, simples, acolhedora, bíblica, natural e prática.
 - Nunca use termos acadêmicos, grego/hebraico, ou jargão teológico pesado (ex.: nunca escreva algo como "O Ápice da Soteriologia").
@@ -55,8 +69,10 @@ Regras:
 - Responda SOMENTE com JSON seguindo exatamente o schema fornecido, sem texto fora do JSON.`;
 
 function buildPrompt(input: DevotionalInput): string {
-  return `Tema ou passagem bíblica: ${input.themeOrPassage}
-Momento: ${MOMENT_LABELS[input.moment]}
+  const moment = MOMENT_CONFIG[input.moment];
+  return `Momento: ${moment.label}
+
+${moment.guidance}
 
 Escreva um devocional curto para esse momento, seguindo exatamente o formato pedido.`;
 }

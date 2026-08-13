@@ -6,13 +6,13 @@ import {
   bibleStudyContentSchema,
   outlineExpansionContentSchema,
   pulpitOutlineContentSchema,
-  devotionalContentSchema,
+  sermonOutlineContentSchema,
 } from "@/services/ai";
 import { SermonView } from "@/components/SermonView";
 import { BibleStudyView } from "@/components/BibleStudyView";
 import { OutlineExpansionView } from "@/components/OutlineExpansionView";
 import { PulpitOutlineView } from "@/components/PulpitOutlineView";
-import { DevotionalView } from "@/components/DevotionalView";
+import { SermonOutlineView } from "@/components/SermonOutlineView";
 import { ContentToolbar } from "@/components/ContentToolbar";
 import { BackLink, ReadingHeader } from "@/components/reading";
 import { getCurrentUser } from "@/services/auth";
@@ -67,27 +67,33 @@ function renderByType(type: string, raw: Record<string, unknown>, title: string)
       );
     }
     case "esboco_pulpito": {
-      const parsed = pulpitOutlineContentSchema.safeParse(raw);
-      if (!parsed.success) return null;
+      // Formato novo ("Pregação para Esboço") é o único gerado a
+      // partir de agora — tenta primeiro. Se não bater (conteúdo
+      // salvo antes da mudança), cai para o formato antigo, para
+      // continuar abrindo normalmente sem migration.
+      const parsedNew = sermonOutlineContentSchema.safeParse(raw);
+      if (parsedNew.success) {
+        return (
+          <>
+            <ReadingHeader title={parsedNew.data.titulo} baseText={parsedNew.data.texto_base} />
+            <SermonOutlineView outline={parsedNew.data} />
+            <ContentToolbar contentType="esboco_pulpito" content={parsedNew.data} title={title} />
+          </>
+        );
+      }
+      const parsedOld = pulpitOutlineContentSchema.safeParse(raw);
+      if (!parsedOld.success) return null;
       return (
         <>
-          <ReadingHeader title={parsed.data.tema} baseText={parsed.data.texto_base} />
-          <PulpitOutlineView outline={parsed.data} />
-          <ContentToolbar contentType="esboco_pulpito" content={parsed.data} title={title} />
+          <ReadingHeader title={parsedOld.data.tema} baseText={parsedOld.data.texto_base} />
+          <PulpitOutlineView outline={parsedOld.data} />
+          <ContentToolbar contentType="esboco_pulpito_legacy" content={parsedOld.data} title={title} />
         </>
       );
     }
-    case "devocional": {
-      const parsed = devotionalContentSchema.safeParse(raw);
-      if (!parsed.success) return null;
-      return (
-        <>
-          <ReadingHeader title={parsed.data.titulo} baseText={parsed.data.texto_base} />
-          <DevotionalView devotional={parsed.data} />
-          <ContentToolbar contentType="devocional" content={parsed.data} title={title} />
-        </>
-      );
-    }
+    // Devocional não tem rota de detalhe persistente — não é salvo na
+    // Biblioteca. Se existir algum registro antigo com este tipo, cai
+    // no fallback genérico abaixo (título + "não foi possível exibir").
     default:
       return null;
   }

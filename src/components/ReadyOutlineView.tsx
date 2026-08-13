@@ -5,7 +5,7 @@ type ReadyOutlineViewProps = {
   outline: ReadyOutline;
 };
 
-// Mesma filosofia compacta do Esboço para Púlpito (item 20 da etapa).
+// Mesma filosofia compacta da Pregação para Esboço (item 20 da etapa).
 export function ReadyOutlineView({ outline }: ReadyOutlineViewProps) {
   return (
     <div className="flex flex-col gap-5">

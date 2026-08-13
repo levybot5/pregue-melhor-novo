@@ -13,16 +13,25 @@ import { generateAndSaveSermon, saveSermon, type SermonActionResult } from "./ac
 import { THEME_MAX_LENGTH, THEME_MIN_LENGTH } from "./constants";
 
 const AUDIENCE_OPTIONS: { value: SermonInput["audience"]; label: string }[] = [
-  { value: "domingo", label: "Domingo" },
-  { value: "doutrina", label: "Doutrina" },
-  { value: "jovens", label: "Jovens" },
-  { value: "mulheres", label: "Mulheres" },
+  { value: "domingo", label: "Culto de Domingo" },
+  { value: "ensino", label: "Culto de Ensino" },
+  { value: "oracao", label: "Culto de Oração" },
+  { value: "evangelistico", label: "Culto Evangelístico" },
+  { value: "jovens", label: "Culto de Jovens" },
+  { value: "mulheres", label: "Culto de Mulheres" },
+  { value: "homens", label: "Culto de Homens" },
+  { value: "santa_ceia", label: "Santa Ceia" },
+  { value: "congresso", label: "Congresso / Conferência" },
+  { value: "celula", label: "Célula / Pequeno Grupo" },
+  { value: "outro", label: "Outro" },
 ];
 
 const STYLE_OPTIONS: { value: SermonInput["style"]; label: string }[] = [
-  { value: "expositivo", label: "Expositivo" },
-  { value: "tematico", label: "Temático" },
-  { value: "evangelistico", label: "Evangelístico" },
+  { value: "expositivo", label: "Expositiva" },
+  { value: "tematico", label: "Temática" },
+  { value: "evangelistico", label: "Evangelística" },
+  { value: "ensino_biblico", label: "Ensino Bíblico" },
+  { value: "reflexiva", label: "Reflexiva" },
 ];
 
 const DURATION_OPTIONS: {
@@ -32,7 +41,7 @@ const DURATION_OPTIONS: {
 }[] = [
   { value: "curta", label: "Curta", hint: "10–15 min" },
   { value: "media", label: "Média", hint: "20–30 min" },
-  { value: "completa", label: "Completa", hint: "30–40 min" },
+  { value: "completa", label: "Completa", hint: "40–60 min" },
 ];
 
 export function PregacaoForm({ initialRemaining }: { initialRemaining: number }) {

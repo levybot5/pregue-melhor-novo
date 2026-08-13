@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/services/auth";
 import { listReadyOutlines, listCategories, listFavoriteContentIds } from "@/services/database";
 import { ReadyContentList, type ReadyContentCardItem } from "@/components/ReadyContentList";
+import { BackLink } from "@/components/reading";
 
 export const dynamic = "force-dynamic";
 
@@ -24,12 +24,13 @@ export default async function EsbocosProntosPage() {
     title: outline.title,
     baseText: outline.base_text,
     categoryId: outline.category_id,
-    testament: outline.testament,
     shortDescription: outline.short_description,
   }));
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
+      <BackLink href="/" />
+
       <header className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold tracking-tight text-foreground">
           Esboços Prontos
@@ -43,13 +44,6 @@ export default async function EsbocosProntosPage() {
         categories={categories}
         favoritedIds={Array.from(favoritedIds)}
       />
-
-      <Link
-        href="/"
-        className="text-sm font-medium text-muted underline underline-offset-4"
-      >
-        Voltar para o início
-      </Link>
     </main>
   );
 }

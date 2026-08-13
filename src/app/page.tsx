@@ -32,8 +32,8 @@ const tools = [
   },
   {
     href: "/esboco-pulpito",
-    title: "Esboço para Púlpito",
-    description: "Tenha os principais pontos da mensagem sempre à mão.",
+    title: "Pregação para Esboço",
+    description: "Transforme uma pregação completa em um esboço claro e fácil de acompanhar no púlpito.",
     icon: <ListIcon className="h-6 w-6" />,
   },
 ] as const;

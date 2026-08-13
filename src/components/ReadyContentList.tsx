@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import type { Testament } from "@/services/database";
 
 export type ReadyContentCardItem = {
   id: string;
@@ -10,7 +9,6 @@ export type ReadyContentCardItem = {
   title: string;
   baseText: string;
   categoryId: string;
-  testament: Testament;
   shortDescription: string;
 };
 
@@ -19,11 +17,6 @@ type ReadyContentListProps = {
   items: ReadyContentCardItem[];
   categories: { id: string; label: string }[];
   favoritedIds: string[];
-};
-
-const TESTAMENT_LABELS: Record<"AT" | "NT", string> = {
-  AT: "Antigo Testamento",
-  NT: "Novo Testamento",
 };
 
 function ChipRow({ children }: { children: React.ReactNode }) {
@@ -68,7 +61,6 @@ export function ReadyContentList({
 }: ReadyContentListProps) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<string | null>(null);
-  const [testament, setTestament] = useState<"AT" | "NT" | null>(null);
   const [favoritesOnly, setFavoritesOnly] = useState(false);
 
   const favoritedSet = useMemo(() => new Set(favoritedIds), [favoritedIds]);
@@ -83,16 +75,12 @@ export function ReadyContentList({
   );
   const availableCategories = categories.filter((cat) => presentCategoryIds.has(cat.id));
 
-  const hasBothTestaments =
-    items.some((item) => item.testament === "AT") && items.some((item) => item.testament === "NT");
-
   const filtered = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase("pt-BR");
 
     return items.filter((item) => {
       if (favoritesOnly && !favoritedSet.has(item.id)) return false;
       if (category && item.categoryId !== category) return false;
-      if (testament && item.testament !== testament) return false;
 
       if (normalizedQuery) {
         const categoryLabel = categoryLabels.get(item.categoryId) ?? "";
@@ -104,7 +92,7 @@ export function ReadyContentList({
 
       return true;
     });
-  }, [items, query, category, testament, favoritesOnly, favoritedSet, categoryLabels]);
+  }, [items, query, category, favoritesOnly, favoritedSet, categoryLabels]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -129,20 +117,6 @@ export function ReadyContentList({
           </Chip>
         ))}
       </ChipRow>
-
-      {hasBothTestaments && (
-        <ChipRow>
-          <Chip active={testament === null} onClick={() => setTestament(null)}>
-            Todos os testamentos
-          </Chip>
-          <Chip active={testament === "AT"} onClick={() => setTestament("AT")}>
-            {TESTAMENT_LABELS.AT}
-          </Chip>
-          <Chip active={testament === "NT"} onClick={() => setTestament("NT")}>
-            {TESTAMENT_LABELS.NT}
-          </Chip>
-        </ChipRow>
-      )}
 
       {filtered.length === 0 && (
         <p className="text-muted">Nenhum resultado encontrado.</p>

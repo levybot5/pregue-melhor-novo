@@ -12,17 +12,46 @@ type SermonViewProps = {
   sermon: SermonContent;
 };
 
-// Experiência de leitura, não um dashboard: texto corrido com respiro,
-// pontos numerados, e o Contexto Bíblico como aprofundamento
-// recolhido — não faz parte do fluxo principal de leitura.
+// Divide um texto em parágrafos curtos (a IA separa por linha em
+// branco) — sem isso, todo o campo vira um único bloco visual, mesmo
+// que o texto já tenha sido escrito em parágrafos.
+function Paragraphs({ text }: { text: string }) {
+  const paragraphs = text.split(/\n{2,}/).filter((p) => p.trim().length > 0);
+  return (
+    <div className="flex flex-col gap-3">
+      {paragraphs.map((paragraph, index) => (
+        <p key={index}>{paragraph}</p>
+      ))}
+    </div>
+  );
+}
+
+// Experiência de leitura, não um dashboard: texto corrido com respiro
+// e pontos numerados. Palavra no Original e Aplicação de cada ponto
+// ficam recolhidas — apoio para o pregador, não parte do fluxo
+// principal de leitura, que já inclui Contexto Bíblico e Ideia
+// Central diretamente.
 export function SermonView({ sermon }: SermonViewProps) {
   return (
     <div className="flex flex-col gap-6">
       <BaseTextQuote text={sermon.texto_base} />
 
-      <ReadingSection title="Introdução">{sermon.introducao}</ReadingSection>
+      <div className="flex flex-col gap-1">
+        <h2 className="text-xs font-semibold tracking-wide text-primary uppercase">
+          Ideia Central
+        </h2>
+        <p className="text-[17px] leading-[1.75] font-medium text-primary">
+          {sermon.tema_central}
+        </p>
+      </div>
 
-      <ExpandableSection title="Contexto Bíblico">{sermon.contexto_biblico}</ExpandableSection>
+      <ReadingSection title="Introdução">
+        <Paragraphs text={sermon.introducao} />
+      </ReadingSection>
+
+      <ReadingSection title="Contexto Bíblico">
+        <Paragraphs text={sermon.contexto_biblico} />
+      </ReadingSection>
 
       <div className="flex flex-col gap-5">
         {sermon.pontos.map((ponto, index) => (
@@ -32,15 +61,40 @@ export function SermonView({ sermon }: SermonViewProps) {
             title={normalizeOutlinePointTitle(ponto.titulo)}
             last={index === sermon.pontos.length - 1}
           >
-            <p>{ponto.explicacao}</p>
-            <p className="mt-2 text-[15px] text-muted italic">{ponto.exemplo_aplicacao}</p>
+            <Paragraphs text={ponto.explicacao} />
+            <div className="mt-3 flex flex-col gap-2">
+              {ponto.palavra_original && (
+                <ExpandableSection title="Palavra no Original">
+                  <div className="flex flex-col gap-1">
+                    <p className="text-xs font-semibold tracking-wide text-primary uppercase">
+                      {ponto.palavra_original.idioma}
+                    </p>
+                    <p className="text-base font-bold text-primary">
+                      {ponto.palavra_original.palavra}{" "}
+                      <span className="text-sm font-normal text-muted">
+                        ({ponto.palavra_original.transliteracao})
+                      </span>
+                    </p>
+                    <p>{ponto.palavra_original.significado}</p>
+                    <p className="italic">{ponto.palavra_original.aplicacao}</p>
+                  </div>
+                </ExpandableSection>
+              )}
+              <ExpandableSection title="Aplicação Prática">
+                <p>{ponto.exemplo_aplicacao}</p>
+              </ExpandableSection>
+            </div>
           </PointBlock>
         ))}
       </div>
 
-      <ApplicationBlock title="Aplicação">{sermon.aplicacao_final}</ApplicationBlock>
+      <ApplicationBlock title="Aplicação">
+        <Paragraphs text={sermon.aplicacao_final} />
+      </ApplicationBlock>
 
-      <ReadingSection title="Conclusão">{sermon.conclusao}</ReadingSection>
+      <ReadingSection title="Conclusão">
+        <Paragraphs text={sermon.conclusao} />
+      </ReadingSection>
       <ReadingSection title="Apelo" emphasis>
         {sermon.apelo}
       </ReadingSection>

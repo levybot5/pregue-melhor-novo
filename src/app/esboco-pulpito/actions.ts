@@ -1,12 +1,10 @@
 "use server";
 
 import {
-  generatePulpitOutline,
-  ministryAudiences,
-  ministryDurations,
-  ministryStyles,
-  type PulpitOutlineContent,
-  type PulpitOutlineInput,
+  condenseSermonOutline,
+  sermonOutlineSummaryLevels,
+  type SermonOutlineContent,
+  type SermonOutlineInput,
 } from "@/services/ai";
 import { createContent } from "@/services/database";
 import { getCurrentUser } from "@/services/auth";
@@ -16,48 +14,42 @@ import {
   recordUsage,
   type GenerationBlockReason,
 } from "@/services/billing";
-import { THEME_MAX_LENGTH, THEME_MIN_LENGTH } from "./constants";
+import { SERMON_MAX_LENGTH, SERMON_MIN_LENGTH } from "./constants";
 
-export type PulpitOutlineActionResult =
+export type SermonOutlineActionResult =
   | { status: "error"; message: string }
   | { status: "blocked"; reason: GenerationBlockReason; message: string }
   | { status: "saved"; contentId: string }
-  | { status: "generated_not_saved"; outline: PulpitOutlineContent; message: string };
+  | { status: "generated_not_saved"; outline: SermonOutlineContent; message: string };
 
-function validateInput(input: PulpitOutlineInput): string | null {
-  const theme = input.themeOrPassage.trim();
+function validateInput(input: SermonOutlineInput): string | null {
+  const text = input.sermonText.trim();
 
-  if (theme.length < THEME_MIN_LENGTH) {
-    return "Use um tema ou passagem com pelo menos 3 caracteres.";
+  if (text.length < SERMON_MIN_LENGTH) {
+    return `Cole uma pregação com pelo menos ${SERMON_MIN_LENGTH} caracteres.`;
   }
-  if (theme.length > THEME_MAX_LENGTH) {
-    return "Use um tema ou passagem com até 500 caracteres.";
+  if (text.length > SERMON_MAX_LENGTH) {
+    return `Sua pregação tem ${text.length.toLocaleString("pt-BR")} caracteres — o máximo aceito é ${SERMON_MAX_LENGTH.toLocaleString("pt-BR")}. Reduza o texto antes de continuar.`;
   }
-  if (!(ministryAudiences as readonly string[]).includes(input.audience)) {
-    return "Selecione onde vai ministrar.";
-  }
-  if (!(ministryStyles as readonly string[]).includes(input.style)) {
-    return "Selecione um estilo.";
-  }
-  if (!(ministryDurations as readonly string[]).includes(input.duration)) {
-    return "Selecione uma duração.";
+  if (!(sermonOutlineSummaryLevels as readonly string[]).includes(input.level)) {
+    return "Selecione um nível de resumo.";
   }
   return null;
 }
 
 async function persistOutline(
-  outline: PulpitOutlineContent,
-): Promise<PulpitOutlineActionResult> {
+  outline: SermonOutlineContent,
+): Promise<SermonOutlineActionResult> {
   try {
     const content = await createContent({
       type: "esboco_pulpito",
-      title: outline.tema,
+      title: outline.titulo,
       base_text: outline.texto_base,
       content: { ...outline },
     });
     return { status: "saved", contentId: content.id };
   } catch (error) {
-    console.error("Falha ao salvar esboço para o púlpito:", error);
+    console.error("Falha ao salvar Pregação para Esboço:", error);
     return {
       status: "generated_not_saved",
       outline,
@@ -66,10 +58,10 @@ async function persistOutline(
   }
 }
 
-// 1 clique do usuário nesta action = no máximo 1 chamada a generatePulpitOutline.
-export async function generateAndSavePulpitOutline(
-  input: PulpitOutlineInput,
-): Promise<PulpitOutlineActionResult> {
+// 1 clique do usuário nesta action = no máximo 1 chamada a condenseSermonOutline.
+export async function generateAndSaveSermonOutline(
+  input: SermonOutlineInput,
+): Promise<SermonOutlineActionResult> {
   const validationError = validateInput(input);
   if (validationError) {
     return { status: "error", message: validationError };
@@ -80,11 +72,11 @@ export async function generateAndSavePulpitOutline(
     return { status: "blocked", reason: guard.reason, message: guard.message };
   }
 
-  let result: Awaited<ReturnType<typeof generatePulpitOutline>>;
+  let result: Awaited<ReturnType<typeof condenseSermonOutline>>;
   try {
-    result = await generatePulpitOutline({
-      ...input,
-      themeOrPassage: input.themeOrPassage.trim(),
+    result = await condenseSermonOutline({
+      sermonText: input.sermonText.trim(),
+      level: input.level,
     });
   } finally {
     await releaseGenerationLock();
@@ -100,9 +92,9 @@ export async function generateAndSavePulpitOutline(
 }
 
 // Salva um resultado já gerado, sem chamar a IA novamente.
-export async function savePulpitOutline(
-  outline: PulpitOutlineContent,
-): Promise<PulpitOutlineActionResult> {
+export async function saveSermonOutline(
+  outline: SermonOutlineContent,
+): Promise<SermonOutlineActionResult> {
   const user = await getCurrentUser();
   if (!user) {
     return { status: "error", message: "Você precisa entrar para salvar." };

@@ -4,7 +4,7 @@ const BENEFITS = [
   "Pregação Completa",
   "Bíblia Explicada",
   "Esboço em Pregação",
-  "Esboço para Púlpito",
+  "Pregação para Esboço",
   "Biblioteca com salvamento automático",
   "Até 20 gerações por dia",
 ];

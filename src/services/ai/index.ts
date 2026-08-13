@@ -30,8 +30,21 @@ export type { BibleStudyInput, BibleStudyContent } from "./bible-study";
 export { expandOutline, outlineExpansionContentSchema } from "./outline-expansion";
 export type { OutlineExpansionInput, OutlineExpansionContent } from "./outline-expansion";
 
-export { generatePulpitOutline, pulpitOutlineContentSchema } from "./pulpit-outline";
-export type { PulpitOutlineInput, PulpitOutlineContent } from "./pulpit-outline";
+// Formato antigo (pré "Pregação para Esboço") — só para ler conteúdo
+// já salvo na Biblioteca, nunca para gerar conteúdo novo.
+export { pulpitOutlineContentSchema } from "./pulpit-outline";
+export type { PulpitOutlineContent } from "./pulpit-outline";
+
+export {
+  condenseSermonOutline,
+  sermonOutlineContentSchema,
+  sermonOutlineSummaryLevels,
+} from "./sermon-outline";
+export type {
+  SermonOutlineInput,
+  SermonOutlineContent,
+  SermonOutlineSummaryLevel,
+} from "./sermon-outline";
 
 export { generateDevotional, devotionalContentSchema, devotionalMoments } from "./devotional";
 export type { DevotionalInput, DevotionalContent, DevotionalMoment } from "./devotional";

@@ -1,6 +1,7 @@
 import type { SermonContent } from "@/services/ai";
 import type { OutlineExpansionContent } from "@/services/ai";
 import type { PulpitOutlineContent } from "@/services/ai";
+import type { SermonOutlineContent } from "@/services/ai";
 import type { ReadySermon, ReadyOutline } from "@/services/database";
 import { normalizeOutlinePointTitle } from "./outline";
 
@@ -73,6 +74,27 @@ export function pulpitOutlineToPulpitMode(
     })),
     aplicacao: outline.aplicacao_final,
     apelo: outline.apelo,
+  };
+}
+
+// Pregação para Esboço já É o formato condensado — só remapeia nomes.
+// Campos ausentes no original (texto_base/apelo nulos, arrays vazios)
+// caem em fallback razoável, sem inventar conteúdo novo.
+export function sermonOutlineToPulpitMode(outline: SermonOutlineContent): PulpitModeContent {
+  return {
+    tema: outline.titulo,
+    textoBase: outline.texto_base ?? "",
+    ideiaCentral: outline.ideia_central,
+    introducao: outline.introducao.join(" • "),
+    pontos: outline.pontos.map((ponto) => ({
+      titulo: ponto.titulo,
+      itens: ponto.bullets,
+      fraseImpacto: ponto.frase_chave ?? undefined,
+    })),
+    aplicacao: outline.pontos
+      .map((ponto) => ponto.aplicacao)
+      .filter((aplicacao): aplicacao is string => Boolean(aplicacao)),
+    apelo: outline.apelo ?? (outline.conclusao.length > 0 ? outline.conclusao.join(" ") : outline.ideia_central),
   };
 }
 

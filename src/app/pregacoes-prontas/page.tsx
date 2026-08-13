@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/services/auth";
 import { listReadySermons, listCategories, listFavoriteContentIds } from "@/services/database";
 import { ReadyContentList, type ReadyContentCardItem } from "@/components/ReadyContentList";
+import { BackLink } from "@/components/reading";
 
 // Sempre busca no request: acervo editorial e favoritos podem mudar
 // entre visitas. Nenhuma chamada de IA acontece aqui.
@@ -26,12 +26,13 @@ export default async function PregacoesProntasPage() {
     title: sermon.title,
     baseText: sermon.base_text,
     categoryId: sermon.category_id,
-    testament: sermon.testament,
     shortDescription: sermon.short_description,
   }));
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
+      <BackLink href="/" />
+
       <header className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold tracking-tight text-foreground">
           Pregações Prontas
@@ -45,13 +46,6 @@ export default async function PregacoesProntasPage() {
         categories={categories}
         favoritedIds={Array.from(favoritedIds)}
       />
-
-      <Link
-        href="/"
-        className="text-sm font-medium text-muted underline underline-offset-4"
-      >
-        Voltar para o início
-      </Link>
     </main>
   );
 }

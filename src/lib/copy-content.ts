@@ -3,6 +3,7 @@ import type {
   BibleStudyContent,
   OutlineExpansionContent,
   PulpitOutlineContent,
+  SermonOutlineContent,
   DevotionalContent,
 } from "@/services/ai";
 import type { ReadySermon, ReadyOutline } from "@/services/database";
@@ -21,10 +22,12 @@ function bulletBlock(title: string, items: string[]): string {
 
 export function formatSermonForCopy(sermon: SermonContent): string {
   const pontos = sermon.pontos
-    .map(
-      (ponto, index) =>
-        `${index + 1}. ${normalizeOutlinePointTitle(ponto.titulo)}\n${ponto.explicacao}\n${ponto.exemplo_aplicacao}`,
-    )
+    .map((ponto, index) => {
+      const palavraOriginal = ponto.palavra_original
+        ? `\nPalavra no Original (${ponto.palavra_original.idioma}): ${ponto.palavra_original.palavra} (${ponto.palavra_original.transliteracao})\n${ponto.palavra_original.significado}\n${ponto.palavra_original.aplicacao}`
+        : "";
+      return `${index + 1}. ${normalizeOutlinePointTitle(ponto.titulo)}\n${ponto.explicacao}${palavraOriginal}\n${ponto.exemplo_aplicacao}`;
+    })
     .join("\n\n");
 
   const esbocoPulpito = sermon.esboco_pulpito.pontos
@@ -97,6 +100,29 @@ export function formatPulpitOutlineForCopy(outline: PulpitOutlineContent): strin
     bulletBlock("APLICAÇÃO", outline.aplicacao_final),
     `APELO\n${outline.apelo}`,
     `ORAÇÃO\n${outline.oracao}`,
+  ]);
+}
+
+export function formatSermonOutlineForCopy(outline: SermonOutlineContent): string {
+  const pontos = outline.pontos
+    .map((ponto, index) =>
+      joinBlocks([
+        `${index + 1}. ${ponto.titulo}`,
+        ponto.referencias.length > 0 ? ponto.referencias.join(" · ") : null,
+        ponto.bullets.map((bullet) => `- ${bullet}`).join("\n"),
+        ponto.frase_chave ? `"${ponto.frase_chave}"` : null,
+        ponto.aplicacao,
+      ]),
+    )
+    .join("\n\n");
+
+  return joinBlocks([
+    outline.titulo,
+    [outline.texto_base, outline.ideia_central].filter(Boolean).join(" · "),
+    outline.introducao.length > 0 ? bulletBlock("INTRODUÇÃO", outline.introducao) : null,
+    pontos,
+    outline.conclusao.length > 0 ? bulletBlock("CONCLUSÃO", outline.conclusao) : null,
+    outline.apelo ? `APELO\n${outline.apelo}` : null,
   ]);
 }
 

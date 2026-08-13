@@ -1,2 +1,2 @@
-export const THEME_MIN_LENGTH = 3;
-export const THEME_MAX_LENGTH = 500;
+export const SERMON_MIN_LENGTH = 50;
+export const SERMON_MAX_LENGTH = 40000;

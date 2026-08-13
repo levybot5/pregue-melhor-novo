@@ -6,6 +6,7 @@ import type {
   BibleStudyContent,
   OutlineExpansionContent,
   PulpitOutlineContent,
+  SermonOutlineContent,
   DevotionalContent,
 } from "@/services/ai";
 import type { ReadySermon, ReadyOutline, FavoriteContentType } from "@/services/database";
@@ -20,7 +21,10 @@ export type ContentToolbarProps = (
   | { contentType: "pregacao"; content: SermonContent; title: string }
   | { contentType: "biblia_explicada"; content: BibleStudyContent; title: string }
   | { contentType: "esboco_pregacao"; content: OutlineExpansionContent; title: string }
-  | { contentType: "esboco_pulpito"; content: PulpitOutlineContent; title: string }
+  | { contentType: "esboco_pulpito"; content: SermonOutlineContent; title: string }
+  // Conteúdo salvo no formato antigo desta ferramenta (antes de virar
+  // "Pregação para Esboço"), só para continuar abrindo normalmente.
+  | { contentType: "esboco_pulpito_legacy"; content: PulpitOutlineContent; title: string }
   | { contentType: "pregacao_pronta"; content: ReadySermon; title: string }
   | { contentType: "esboco_pronto"; content: ReadyOutline; title: string }
   | { contentType: "devocional"; content: DevotionalContent; title: string }
@@ -40,6 +44,7 @@ async function buildPulpitModeContent(props: ContentToolbarProps): Promise<Pulpi
   const {
     sermonToPulpitMode,
     outlineExpansionToPulpitMode,
+    sermonOutlineToPulpitMode,
     pulpitOutlineToPulpitMode,
     readySermonToPulpitMode,
     readyOutlineToPulpitMode,
@@ -47,7 +52,8 @@ async function buildPulpitModeContent(props: ContentToolbarProps): Promise<Pulpi
 
   if (props.contentType === "pregacao") return sermonToPulpitMode(props.content);
   if (props.contentType === "esboco_pregacao") return outlineExpansionToPulpitMode(props.content);
-  if (props.contentType === "esboco_pulpito") return pulpitOutlineToPulpitMode(props.content);
+  if (props.contentType === "esboco_pulpito") return sermonOutlineToPulpitMode(props.content);
+  if (props.contentType === "esboco_pulpito_legacy") return pulpitOutlineToPulpitMode(props.content);
   if (props.contentType === "pregacao_pronta") return readySermonToPulpitMode(props.content);
   if (props.contentType === "esboco_pronto") return readyOutlineToPulpitMode(props.content);
   throw new Error("Modo Púlpito não está disponível para este tipo de conteúdo.");
@@ -69,6 +75,10 @@ async function buildPdfBlob(props: ContentToolbarProps): Promise<Blob> {
     return pdf(<BibleStudyPdfDocument study={props.content} />).toBlob();
   }
   if (props.contentType === "esboco_pulpito") {
+    const { SermonOutlinePdfDocument } = await import("@/lib/pdf/sermon-outline-pdf");
+    return pdf(<SermonOutlinePdfDocument outline={props.content} />).toBlob();
+  }
+  if (props.contentType === "esboco_pulpito_legacy") {
     const { PulpitOutlinePdfDocument } = await import("@/lib/pdf/pulpit-outline-pdf");
     return pdf(<PulpitOutlinePdfDocument outline={props.content} />).toBlob();
   }
@@ -89,6 +99,7 @@ async function buildCopyText(props: ContentToolbarProps): Promise<string> {
     formatSermonForCopy,
     formatBibleStudyForCopy,
     formatOutlineExpansionForCopy,
+    formatSermonOutlineForCopy,
     formatPulpitOutlineForCopy,
     formatReadySermonForCopy,
     formatReadyOutlineForCopy,
@@ -98,7 +109,8 @@ async function buildCopyText(props: ContentToolbarProps): Promise<string> {
   if (props.contentType === "pregacao") return formatSermonForCopy(props.content);
   if (props.contentType === "biblia_explicada") return formatBibleStudyForCopy(props.content);
   if (props.contentType === "esboco_pregacao") return formatOutlineExpansionForCopy(props.content);
-  if (props.contentType === "esboco_pulpito") return formatPulpitOutlineForCopy(props.content);
+  if (props.contentType === "esboco_pulpito") return formatSermonOutlineForCopy(props.content);
+  if (props.contentType === "esboco_pulpito_legacy") return formatPulpitOutlineForCopy(props.content);
   if (props.contentType === "pregacao_pronta") return formatReadySermonForCopy(props.content);
   if (props.contentType === "esboco_pronto") return formatReadyOutlineForCopy(props.content);
   return formatDevotionalForCopy(props.content);
