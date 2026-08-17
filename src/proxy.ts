@@ -11,6 +11,7 @@ const PROTECTED_PREFIXES = [
   "/esbocos-prontos",
   "/apoio-do-pregador",
   "/devocional",
+  "/dicionario",
 ];
 
 const AUTH_PATHS = ["/entrar", "/cadastrar"];

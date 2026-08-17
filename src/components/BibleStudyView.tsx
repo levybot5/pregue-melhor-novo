@@ -5,29 +5,41 @@ type BibleStudyViewProps = {
   study: BibleStudyContent;
 };
 
-// Bíblia Explicada é estudo, não pregação: sem aprofundamentos
-// recolhidos — Contexto, Explicação, Palavra no Original e Conexões
-// fazem parte direta da sequência de leitura (item 19 da etapa).
+// Bíblia Explicada é estudo, não pregação: "Explicação do Texto" faz o
+// papel de um comentário bíblico acessível — de propósito não existe
+// uma segunda seção de "comentário" separada (ver relatório da etapa).
 export function BibleStudyView({ study }: BibleStudyViewProps) {
   return (
     <div className="flex flex-col gap-6">
       <BaseTextQuote text={study.passagem} />
 
-      <p className="text-[17px] leading-[1.75] font-medium text-primary">
-        {study.verdade_principal}
-      </p>
+      {study.contexto && (
+        <ReadingSection title="Contexto">{study.contexto}</ReadingSection>
+      )}
 
-      <ReadingSection title="Contexto Bíblico">{study.contexto_biblico}</ReadingSection>
-      <ReadingSection title="Explicação do Texto">{study.explicacao_texto}</ReadingSection>
+      <ReadingSection title="Explicação do Texto">{study.explicacao}</ReadingSection>
 
       {study.palavra_original && (
         <section className="flex flex-col gap-1 rounded-2xl border-l-[3px] border-accent bg-accent-soft/40 px-4 py-3">
           <h2 className="text-xs font-semibold tracking-wide text-primary uppercase">
             Palavra no Original
           </h2>
-          <p className="text-lg font-bold text-primary">{study.palavra_original.palavra}</p>
+          <p className="text-lg font-bold text-primary">
+            {study.palavra_original.termo}
+            {study.palavra_original.transliteracao && (
+              <span className="ml-2 text-sm font-medium text-muted">
+                ({study.palavra_original.transliteracao})
+              </span>
+            )}
+          </p>
+          <p className="text-xs font-medium uppercase tracking-wide text-muted">
+            {study.palavra_original.idioma}
+          </p>
           <p className="text-[16px] leading-[1.7] text-foreground">
             {study.palavra_original.significado}
+          </p>
+          <p className="text-[16px] leading-[1.7] text-foreground">
+            {study.palavra_original.explicacao}
           </p>
         </section>
       )}
@@ -46,14 +58,9 @@ export function BibleStudyView({ study }: BibleStudyViewProps) {
         </div>
       </section>
 
-      <ApplicationBlock title="Aplicação para a Vida Cristã">
-        {study.aplicacao_vida_crista}
-      </ApplicationBlock>
+      <ApplicationBlock title="Aplicação Prática">{study.aplicacao}</ApplicationBlock>
 
-      <ReadingSection title="Cuidado de Interpretação" emphasis>
-        {study.cuidado_interpretacao}
-      </ReadingSection>
-      <ReadingSection title="Resumo">{study.resumo_final}</ReadingSection>
+      <ReadingSection title="Resumo">{study.resumo}</ReadingSection>
     </div>
   );
 }

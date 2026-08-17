@@ -22,6 +22,7 @@ export const USAGE_TOOLS = [
   "esboco_pregacao",
   "esboco_pulpito",
   "devocional",
+  "dicionario_biblico",
 ] as const;
 
 export type UsageTool = (typeof USAGE_TOOLS)[number];

@@ -11,15 +11,20 @@ export function BibleStudyPdfDocument({ study }: { study: BibleStudyContent }) {
         <Text style={pdfStyles.title}>{study.titulo}</Text>
         <Text style={pdfStyles.subtitle}>{study.passagem}</Text>
 
-        <PdfSection title="Verdade Principal" text={study.verdade_principal} />
-        <PdfSection title="Contexto" text={study.contexto_biblico} />
-        <PdfSection title="Explicação" text={study.explicacao_texto} />
+        {study.contexto && <PdfSection title="Contexto" text={study.contexto} />}
+        <PdfSection title="Explicação do Texto" text={study.explicacao} />
 
         {study.palavra_original && (
           <View style={pdfStyles.section} wrap={false}>
             <Text style={pdfStyles.sectionTitle}>Palavra no Original</Text>
-            <Text style={pdfStyles.pointTitle}>{study.palavra_original.palavra}</Text>
+            <Text style={pdfStyles.pointTitle}>
+              {study.palavra_original.termo}
+              {study.palavra_original.transliteracao
+                ? ` (${study.palavra_original.transliteracao})`
+                : ""}
+            </Text>
             <Text style={pdfStyles.paragraph}>{study.palavra_original.significado}</Text>
+            <Text style={pdfStyles.paragraph}>{study.palavra_original.explicacao}</Text>
           </View>
         )}
 
@@ -33,12 +38,11 @@ export function BibleStudyPdfDocument({ study }: { study: BibleStudyContent }) {
           ))}
         </View>
 
-        <PdfSection title="Aplicação para a Vida Cristã" text={study.aplicacao_vida_crista} />
-        <PdfSection title="Cuidado de Interpretação" text={study.cuidado_interpretacao} />
+        <PdfSection title="Aplicação Prática" text={study.aplicacao} />
 
         <View style={pdfStyles.divider} />
 
-        <PdfSection title="Resumo" text={study.resumo_final} />
+        <PdfSection title="Resumo" text={study.resumo} />
 
         <PdfFooter label={study.titulo} />
       </Page>

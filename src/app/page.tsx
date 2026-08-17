@@ -10,6 +10,7 @@ import {
   ClipboardListIcon,
   HeartIcon,
   LifebuoyIcon,
+  SearchIcon,
 } from "@/components/icons";
 import { getCurrentUser } from "@/services/auth";
 import { getProfile } from "@/services/database";
@@ -30,6 +31,12 @@ const tools = [
     title: "Bíblia Explicada",
     description: "Entenda uma passagem bíblica com clareza.",
     icon: <OpenBookIcon className="h-6 w-6" />,
+  },
+  {
+    href: "/dicionario",
+    title: "Dicionário Bíblico",
+    description: "Pesquise termos, lugares e personagens da Bíblia.",
+    icon: <SearchIcon className="h-6 w-6" />,
   },
   {
     href: "/esboco-pulpito",

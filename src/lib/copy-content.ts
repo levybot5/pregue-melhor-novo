@@ -5,6 +5,7 @@ import type {
   PulpitOutlineContent,
   SermonOutlineContent,
   DevotionalContent,
+  BibleDictionaryEntry,
 } from "@/services/ai";
 import type { ReadySermon, ReadyOutline } from "@/services/database";
 import { normalizeOutlinePointTitle } from "./outline";
@@ -134,16 +135,44 @@ export function formatBibleStudyForCopy(study: BibleStudyContent): string {
   return joinBlocks([
     study.titulo,
     study.passagem,
-    `VERDADE PRINCIPAL\n${study.verdade_principal}`,
-    `CONTEXTO\n${study.contexto_biblico}`,
-    `EXPLICAÇÃO\n${study.explicacao_texto}`,
+    study.contexto ? `CONTEXTO\n${study.contexto}` : null,
+    `EXPLICAÇÃO DO TEXTO\n${study.explicacao}`,
     study.palavra_original
-      ? `PALAVRA NO ORIGINAL\n${study.palavra_original.palavra} — ${study.palavra_original.significado}`
+      ? `PALAVRA NO ORIGINAL\n${study.palavra_original.termo} (${study.palavra_original.idioma}${study.palavra_original.transliteracao ? `, ${study.palavra_original.transliteracao}` : ""})\n${study.palavra_original.significado}\n${study.palavra_original.explicacao}`
       : null,
     `CONEXÕES BÍBLICAS\n\n${conexoes}`,
-    `APLICAÇÃO PARA A VIDA CRISTÃ\n${study.aplicacao_vida_crista}`,
-    `CUIDADO DE INTERPRETAÇÃO\n${study.cuidado_interpretacao}`,
-    `RESUMO\n${study.resumo_final}`,
+    `APLICAÇÃO PRÁTICA\n${study.aplicacao}`,
+    `RESUMO\n${study.resumo}`,
+  ]);
+}
+
+export function formatBibleDictionaryForCopy(entry: BibleDictionaryEntry): string {
+  if (entry.tipo === "pessoa") {
+    const { secoes_pessoa } = entry;
+    return joinBlocks([
+      entry.termo,
+      entry.identificacao,
+      secoes_pessoa.contexto ? `CONTEXTO\n${secoes_pessoa.contexto}` : null,
+      secoes_pessoa.principais_acontecimentos
+        ? `PRINCIPAIS ACONTECIMENTOS\n${secoes_pessoa.principais_acontecimentos}`
+        : null,
+      secoes_pessoa.caracteristicas ? `CARACTERÍSTICAS\n${secoes_pessoa.caracteristicas}` : null,
+      secoes_pessoa.acertos ? `ACERTOS\n${secoes_pessoa.acertos}` : null,
+      secoes_pessoa.erros ? `ERROS\n${secoes_pessoa.erros}` : null,
+      bulletBlock("REFERÊNCIAS PRINCIPAIS", entry.referencias_biblicas),
+      secoes_pessoa.licoes ? `LIÇÕES\n${secoes_pessoa.licoes}` : null,
+    ]);
+  }
+
+  const secoes = entry.secoes
+    .map((secao) => `${secao.titulo.toUpperCase()}\n${secao.conteudo}`)
+    .join("\n\n");
+
+  return joinBlocks([
+    entry.termo,
+    entry.identificacao,
+    secoes,
+    bulletBlock("REFERÊNCIAS BÍBLICAS", entry.referencias_biblicas),
   ]);
 }
 

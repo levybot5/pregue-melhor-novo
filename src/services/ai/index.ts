@@ -27,6 +27,17 @@ export type { SermonInput, SermonContent, GenerateSermonResult } from "./sermon"
 export { generateBibleStudy, bibleStudyContentSchema } from "./bible-study";
 export type { BibleStudyInput, BibleStudyContent } from "./bible-study";
 
+export {
+  generateBibleDictionaryEntry,
+  bibleDictionaryEntrySchema,
+  bibleDictionaryTypes,
+} from "./bible-dictionary";
+export type {
+  BibleDictionaryInput,
+  BibleDictionaryEntry,
+  BibleDictionaryType,
+} from "./bible-dictionary";
+
 export { expandOutline, outlineExpansionContentSchema } from "./outline-expansion";
 export type { OutlineExpansionInput, OutlineExpansionContent } from "./outline-expansion";
 
