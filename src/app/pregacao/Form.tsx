@@ -17,19 +17,12 @@ import { isLimitBlockReason, isTrialExhaustedReason, isSubscriptionExpiredReason
 import { generateAndSaveSermon, saveSermon, type SermonActionResult } from "./actions";
 import { PASSAGE_MAX_LENGTH, PASSAGE_MIN_LENGTH, THEME_MAX_LENGTH, NOTES_MAX_LENGTH } from "./constants";
 
-const MESSAGE_TYPE_OPTIONS: { value: SermonInput["messageType"] & string; label: string }[] = [
+const FORMAT_OPTIONS: { value: SermonInput["format"] & string; label: string }[] = [
   { value: "expositiva", label: "Expositiva" },
   { value: "tematica", label: "Temática" },
   { value: "textual", label: "Textual" },
   { value: "evangelistica", label: "Evangelística" },
   { value: "doutrinaria", label: "Doutrinária" },
-  { value: "encorajamento", label: "Encorajamento" },
-  { value: "culto_jovens", label: "Culto de Jovens" },
-  { value: "mulheres", label: "Mulheres" },
-  { value: "homens", label: "Homens" },
-  { value: "infantil", label: "Infantil" },
-  { value: "escola_biblica", label: "Escola Bíblica" },
-  { value: "missoes", label: "Missões" },
 ];
 
 const AUDIENCE_OPTIONS: { value: SermonInput["audience"]; label: string }[] = [
@@ -41,7 +34,17 @@ const AUDIENCE_OPTIONS: { value: SermonInput["audience"]; label: string }[] = [
   { value: "homens", label: "Homens" },
   { value: "lideres", label: "Líderes" },
   { value: "obreiros", label: "Obreiros" },
+];
+
+const OCCASION_OPTIONS: { value: SermonInput["occasion"] & string; label: string }[] = [
+  { value: "culto", label: "Culto" },
+  { value: "escola_biblica", label: "Escola Bíblica" },
+  { value: "missoes", label: "Missões" },
   { value: "evangelismo", label: "Evangelismo" },
+  { value: "celebracao", label: "Celebração" },
+  { value: "encorajamento", label: "Encorajamento" },
+  { value: "reuniao_lideres", label: "Reunião de Líderes" },
+  { value: "culto_infantil", label: "Culto Infantil" },
 ];
 
 const STYLE_OPTIONS: { value: SermonInput["style"]; label: string }[] = [
@@ -90,8 +93,9 @@ export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
 
   const [passage, setPassage] = useState("");
   const [theme, setTheme] = useState("");
-  const [messageType, setMessageType] = useState<SermonInput["messageType"]>(null);
+  const [format, setFormat] = useState<SermonInput["format"]>(null);
   const [audience, setAudience] = useState<SermonInput["audience"]>("geral");
+  const [occasion, setOccasion] = useState<SermonInput["occasion"]>(null);
   const [duration, setDuration] = useState<SermonInput["duration"]>("20");
   const [style, setStyle] = useState<SermonInput["style"]>("simples");
   const [depth, setDepth] = useState<SermonInput["depth"]>("intermediaria");
@@ -163,8 +167,9 @@ export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
       const result = await generateAndSaveSermon({
         passage,
         theme,
-        messageType,
+        format,
         audience,
+        occasion,
         duration,
         style,
         depth,
@@ -369,18 +374,18 @@ export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
 
             <fieldset className="flex flex-col gap-2">
               <legend className="text-sm font-semibold text-foreground">
-                Tipo de mensagem <span className="font-normal text-muted">(opcional)</span>
+                Formato da mensagem <span className="font-normal text-muted">(opcional)</span>
               </legend>
               <div className="grid grid-cols-2 gap-2">
-                {MESSAGE_TYPE_OPTIONS.map((option) => (
+                {FORMAT_OPTIONS.map((option) => (
                   <button
                     key={option.value}
                     type="button"
                     onClick={() =>
-                      setMessageType((current) => (current === option.value ? null : option.value))
+                      setFormat((current) => (current === option.value ? null : option.value))
                     }
                     className={`min-h-[48px] rounded-2xl border px-3 text-sm font-medium ${
-                      messageType === option.value
+                      format === option.value
                         ? "border-primary bg-primary-soft text-primary"
                         : "border-card-border bg-card text-foreground"
                     }`}
@@ -401,6 +406,30 @@ export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
                     onClick={() => setAudience(option.value)}
                     className={`min-h-[48px] rounded-2xl border px-3 text-sm font-medium ${
                       audience === option.value
+                        ? "border-primary bg-primary-soft text-primary"
+                        : "border-card-border bg-card text-foreground"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+
+            <fieldset className="flex flex-col gap-2">
+              <legend className="text-sm font-semibold text-foreground">
+                Ocasião <span className="font-normal text-muted">(opcional)</span>
+              </legend>
+              <div className="grid grid-cols-2 gap-2">
+                {OCCASION_OPTIONS.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() =>
+                      setOccasion((current) => (current === option.value ? null : option.value))
+                    }
+                    className={`min-h-[48px] rounded-2xl border px-3 text-sm font-medium ${
+                      occasion === option.value
                         ? "border-primary bg-primary-soft text-primary"
                         : "border-card-border bg-card text-foreground"
                     }`}

@@ -10,20 +10,23 @@ function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-// Mesma validação de /cadastrar/actions.ts (sem campo de nome — ver
-// item 12 do pedido: só e-mail, senha e confirmar senha). A diferença
-// é o passo extra depois do signUp: vincular a compra já paga à conta
-// recém-criada, uma única vez (claimPendingPurchase cuida da
-// segurança — device_id + "só reivindica se ainda não tinha dono").
+// Mesma validação de /cadastrar/actions.ts, agora incluindo nome. A
+// diferença é o passo extra depois do signUp: vincular a compra já
+// paga à conta recém-criada, uma única vez (claimPendingPurchase cuida
+// da segurança — device_id + "só reivindica se ainda não tinha dono").
 export async function signUpAndClaimAction(
   purchaseId: string,
   _prevState: AsaasSignupState,
   formData: FormData,
 ): Promise<AsaasSignupState> {
+  const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const confirmPassword = String(formData.get("confirmPassword") ?? "");
 
+  if (!name) {
+    return { error: "Digite seu nome.", checkEmail: false };
+  }
   if (!email || !isValidEmail(email)) {
     return { error: "Digite um e-mail válido.", checkEmail: false };
   }
@@ -34,7 +37,7 @@ export async function signUpAndClaimAction(
     return { error: "As senhas não coincidem.", checkEmail: false };
   }
 
-  const result = await signUp("", email, password);
+  const result = await signUp(name, email, password);
 
   if (result.status === "error") {
     return { error: result.message, checkEmail: false };

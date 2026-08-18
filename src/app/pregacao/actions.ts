@@ -2,8 +2,9 @@
 
 import {
   generateSermon,
-  sermonMessageTypes,
+  sermonFormats,
   sermonAudiences,
+  sermonOccasions,
   sermonDurations,
   sermonStyles,
   sermonDepths,
@@ -47,11 +48,14 @@ function validateInput(input: SermonInput): string | null {
   if (input.theme.trim().length > THEME_MAX_LENGTH) {
     return `Use um tema com até ${THEME_MAX_LENGTH} caracteres.`;
   }
-  if (input.messageType !== null && !(sermonMessageTypes as readonly string[]).includes(input.messageType)) {
-    return "Selecione um tipo de mensagem válido.";
+  if (input.format !== null && !(sermonFormats as readonly string[]).includes(input.format)) {
+    return "Selecione um formato de mensagem válido.";
   }
   if (!(sermonAudiences as readonly string[]).includes(input.audience)) {
     return "Selecione um público.";
+  }
+  if (input.occasion !== null && !(sermonOccasions as readonly string[]).includes(input.occasion)) {
+    return "Selecione uma ocasião válida.";
   }
   if (!(sermonDurations as readonly string[]).includes(input.duration)) {
     return "Selecione uma duração.";

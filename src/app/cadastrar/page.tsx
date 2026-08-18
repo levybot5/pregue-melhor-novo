@@ -16,6 +16,7 @@ function isValidEmail(email: string): boolean {
 export default function CadastrarPage() {
   const [state, formAction, isPending] = useActionState(signUpAction, initialState);
 
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [emailTouched, setEmailTouched] = useState(false);
   const [password, setPassword] = useState("");
@@ -75,6 +76,19 @@ export default function CadastrarPage() {
         <>
           <form action={formAction} onSubmit={handleSubmit} className="flex flex-col gap-4">
             <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-foreground">Nome</span>
+              <input
+                type="text"
+                name="name"
+                required
+                autoComplete="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="min-h-[52px] rounded-2xl border border-card-border bg-card px-4 text-base text-foreground outline-none focus:border-primary"
+              />
+            </label>
+
+            <label className="flex flex-col gap-2">
               <span className="text-sm font-semibold text-foreground">Digite seu e-mail</span>
               <input
                 type="email"
@@ -97,12 +111,14 @@ export default function CadastrarPage() {
               value={password}
               onChange={setPassword}
               error={passwordError}
+              defaultVisible
             />
 
             <PasswordInput
               name="confirmPassword"
               label="Confirme sua senha"
               autoComplete="new-password"
+              defaultVisible
               value={confirmPassword}
               onChange={setConfirmPassword}
               error={confirmError}

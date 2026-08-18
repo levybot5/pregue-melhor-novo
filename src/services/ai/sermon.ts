@@ -10,27 +10,21 @@ import { getGeminiClient } from "./gemini-client";
 // custo com os demais modelos Flash disponíveis em ai.google.dev/gemini-api/docs/pricing.
 const MODEL = "gemini-3.1-flash-lite";
 
-// "Tipo de Mensagem" — abordagem estrutural/doutrinária da pregação.
-// Separado de "Estilo" de propósito (item 3/6 do pedido de revisão do
-// formulário): tipo decide O QUE a mensagem é estruturalmente,
-// estilo decide COMO ela soa. Substitui o antigo "Onde vai ministrar"
-// (sermonAudiences pré-revisão), que misturava as duas coisas.
-export const sermonMessageTypes = [
+// "Formato da Mensagem" — só a abordagem estrutural/exegética
+// (COMO a mensagem é construída). Antes se chamava "Tipo de Mensagem"
+// e misturava formato com público/ocasião (Culto de Jovens, Mulheres,
+// Homens, Escola Bíblica...), causando opções repetidas com o campo
+// Público. Cada eixo agora cobre uma coisa só: Formato (como),
+// Público (pra quem), Ocasião (em qual contexto), Estilo (com que tom).
+export const sermonFormats = [
   "expositiva",
   "tematica",
   "textual",
   "evangelistica",
   "doutrinaria",
-  "encorajamento",
-  "culto_jovens",
-  "mulheres",
-  "homens",
-  "infantil",
-  "escola_biblica",
-  "missoes",
 ] as const;
 
-// "Público" — pra quem é a mensagem. Padrão: igreja em geral (item 4).
+// "Público" — pra quem é a mensagem. Padrão: igreja em geral.
 export const sermonAudiences = [
   "geral",
   "jovens",
@@ -40,7 +34,19 @@ export const sermonAudiences = [
   "homens",
   "lideres",
   "obreiros",
+] as const;
+
+// "Ocasião" — em qual contexto/reunião a mensagem será usada. Opcional
+// (null = não informado, a IA não assume nenhum contexto especial).
+export const sermonOccasions = [
+  "culto",
+  "escola_biblica",
+  "missoes",
   "evangelismo",
+  "celebracao",
+  "encorajamento",
+  "reuniao_lideres",
+  "culto_infantil",
 ] as const;
 
 // Minutos falados, não mais "curta/média/completa" — mais preciso pro
@@ -76,8 +82,9 @@ export const bibleVersions = ["padrao", "ara", "arc", "naa", "nvi", "ntlh", "acf
 export type SermonInput = {
   passage: string;
   theme: string;
-  messageType: (typeof sermonMessageTypes)[number] | null;
+  format: (typeof sermonFormats)[number] | null;
   audience: (typeof sermonAudiences)[number];
+  occasion: (typeof sermonOccasions)[number] | null;
   duration: (typeof sermonDurations)[number];
   style: (typeof sermonStyles)[number];
   depth: (typeof sermonDepths)[number];
@@ -239,19 +246,12 @@ Não empobreça a teologia para reduzir o tamanho — corte redundância, não p
   },
 };
 
-const MESSAGE_TYPE_LABELS: Record<(typeof sermonMessageTypes)[number], string> = {
+const FORMAT_LABELS: Record<(typeof sermonFormats)[number], string> = {
   expositiva: "expositiva (desenvolve o texto bíblico verso a verso ou por unidades naturais)",
   tematica: "temática (organizada em torno de um tema, com apoio de várias passagens)",
   textual: "textual (estrutura extraída diretamente dos pontos de um único texto curto)",
   evangelistica: "evangelística (com convite claro à fé em Cristo)",
   doutrinaria: "doutrinária (explica e fundamenta uma doutrina bíblica específica)",
-  encorajamento: "de encorajamento (foco em consolar e fortalecer)",
-  culto_jovens: "para culto de jovens",
-  mulheres: "para reunião de mulheres",
-  homens: "para reunião de homens",
-  infantil: "infantil (linguagem simples para crianças)",
-  escola_biblica: "para Escola Bíblica Dominical (formato de ensino em classe)",
-  missoes: "sobre missões",
 };
 
 const AUDIENCE_LABELS: Record<SermonInput["audience"], string> = {
@@ -263,7 +263,17 @@ const AUDIENCE_LABELS: Record<SermonInput["audience"], string> = {
   homens: "homens",
   lideres: "líderes da igreja",
   obreiros: "obreiros",
-  evangelismo: "público de evangelismo (pessoas ainda não convertidas)",
+};
+
+const OCCASION_LABELS: Record<(typeof sermonOccasions)[number], string> = {
+  culto: "culto",
+  escola_biblica: "Escola Bíblica Dominical (formato de ensino em classe)",
+  missoes: "reunião sobre missões",
+  evangelismo: "evangelismo (pessoas ainda não convertidas)",
+  celebracao: "celebração",
+  encorajamento: "reunião de encorajamento (foco em consolar e fortalecer)",
+  reuniao_lideres: "reunião de líderes",
+  culto_infantil: "culto infantil (linguagem simples para crianças)",
 };
 
 const STYLE_LABELS: Record<SermonInput["style"], string> = {
@@ -298,8 +308,12 @@ Regras de estilo:
 - Nunca use títulos teológicos artificiais. Prefira títulos simples e diretos.
 - Seja bíblico, claro e aplicável à vida real do ouvinte.
 - Use como base o texto/passagem e o tema informados pelo usuário (quando os dois forem dados, o tema direciona o ângulo da mensagem sobre aquele texto).
-- "Tipo de mensagem" define a ABORDAGEM ESTRUTURAL da pregação (ex.: expositiva desenvolve o texto verso a verso, evangelística tem apelo claro à conversão, doutrinária fundamenta uma doutrina). "Estilo" define só LINGUAGEM, TOM E FORMA DE APLICAÇÃO (ex.: simples, impactante, reflexivo) — nunca muda a fidelidade bíblica do conteúdo. São coisas diferentes: uma mensagem expositiva pode ter estilo simples ou estilo impactante, por exemplo.
-- "Público" ajusta vocabulário e exemplos para quem vai ouvir (crianças pedem linguagem bem simples; líderes/obreiros toleram mais profundidade prática).
+- Quatro eixos independentes e complementares, cada um com um papel diferente — nunca misture o que cada um decide:
+  - "Formato da mensagem": COMO a mensagem é construída estruturalmente (ex.: expositiva desenvolve o texto verso a verso, evangelística tem apelo claro à conversão, doutrinária fundamenta uma doutrina).
+  - "Público": PRA QUEM é a mensagem (ajusta vocabulário e exemplos — crianças pedem linguagem bem simples; líderes/obreiros toleram mais profundidade prática).
+  - "Ocasião": EM QUAL CONTEXTO/REUNIÃO a mensagem será usada (ex.: culto infantil, Escola Bíblica, reunião de líderes) — quando informada, adapte a ambientação e o tom de abertura/fechamento a esse contexto.
+  - "Estilo": COM QUE TOM a mensagem soa (ex.: simples, impactante, reflexivo) — nunca muda a fidelidade bíblica do conteúdo.
+  Exemplo: Formato "expositiva" + Público "jovens" + Ocasião "culto" + Estilo "impactante" = uma pregação expositiva, voltada para jovens, para um culto, com linguagem mais forte e marcante — os quatro se combinam, nenhum substitui o outro.
 - "Profundidade" controla o NÍVEL DE ANÁLISE (contexto, precisão conceitual, relações do texto) — nunca o tamanho do texto, que é controlado pela Duração. Uma mensagem de 10 minutos com profundidade "profunda" deve ser curta E analiticamente cuidadosa, não uma mensagem longa.
 - Toda pregação precisa de aplicação prática real em cada ponto — nunca entregue só explicação bíblica.
 - "palavra_original": inclua uma palavra em hebraico (Antigo Testamento) ou grego (Novo Testamento) apenas quando ela realmente ajudar a entender o ponto; use null quando não houver uma palavra relevante. Nunca invente etimologias, transliterações ou significados — se não tiver certeza, use null.
@@ -318,10 +332,13 @@ function buildPrompt(input: SermonInput): string {
   if (input.theme.trim()) {
     lines.push(`Tema: ${input.theme.trim()}`);
   }
-  if (input.messageType) {
-    lines.push(`Tipo de mensagem: ${MESSAGE_TYPE_LABELS[input.messageType]}`);
+  if (input.format) {
+    lines.push(`Formato da mensagem: ${FORMAT_LABELS[input.format]}`);
   }
   lines.push(`Público: ${AUDIENCE_LABELS[input.audience]}`);
+  if (input.occasion) {
+    lines.push(`Ocasião: ${OCCASION_LABELS[input.occasion]}`);
+  }
   lines.push(`Duração alvo: ${duration.label}`);
   lines.push(`Estilo: ${STYLE_LABELS[input.style]}`);
   lines.push(`Profundidade: ${input.depth}`);

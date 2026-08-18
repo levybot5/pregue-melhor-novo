@@ -18,8 +18,9 @@
 export {
   generateSermon,
   sermonContentSchema,
-  sermonMessageTypes,
+  sermonFormats,
   sermonAudiences,
+  sermonOccasions,
   sermonStyles,
   sermonDurations,
   sermonDepths,

@@ -11,6 +11,10 @@ type PasswordInputProps = {
   value: string;
   onChange: (value: string) => void;
   error?: string | null;
+  // Só as telas de cadastro pedem pra começar visível (mais fácil de
+  // conferir o que digitou ao criar a senha) — login e redefinição
+  // continuam mascarados por padrão, como sempre foram.
+  defaultVisible?: boolean;
 };
 
 // Campo de senha com alternância mostrar/ocultar por ícone de olho —
@@ -29,8 +33,9 @@ export function PasswordInput({
   value,
   onChange,
   error,
+  defaultVisible = false,
 }: PasswordInputProps) {
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(defaultVisible);
   const inputId = useId();
 
   return (

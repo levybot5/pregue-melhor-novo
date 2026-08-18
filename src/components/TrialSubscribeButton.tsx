@@ -17,7 +17,7 @@ export function TrialSubscribeButton({ className }: TrialSubscribeButtonProps) {
         "shrink-0 whitespace-nowrap rounded-full border border-accent/40 bg-accent-soft px-3 py-1.5 text-xs font-semibold text-accent"
       }
     >
-      Assinar Pro
+      Assinar Pregue Melhor
     </Link>
   );
 }
