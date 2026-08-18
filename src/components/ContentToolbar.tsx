@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import type {
   SermonContent,
   BibleStudyContent,
@@ -13,7 +14,8 @@ import type { ReadySermon, ReadyOutline, FavoriteContentType } from "@/services/
 import type { PulpitModeContent } from "@/lib/pulpit-mode";
 import { PulpitMode } from "./PulpitMode";
 import { FavoriteButton } from "./FavoriteButton";
-import { PodiumIcon, PdfIcon, CopyIcon } from "./icons";
+import { PodiumIcon, PdfIcon, CopyIcon, TrashIcon } from "./icons";
+import { deleteContentAction } from "@/app/biblioteca/actions";
 
 const NO_PULPIT_MODE_TYPES = new Set(["biblia_explicada", "devocional"]);
 
@@ -32,6 +34,10 @@ export type ContentToolbarProps = (
   // Só presente no acervo editorial (Pregações/Esboços Prontos) — a
   // Biblioteca pessoal não tem favoritos.
   favorite?: { contentType: FavoriteContentType; contentId: string; initialFavorited: boolean };
+  // Só presente na Biblioteca pessoal (conteúdo salvo em `contents`,
+  // que o usuário realmente pode apagar) — nunca no acervo editorial
+  // (Pregações/Esboços Prontos), que não pertence a ele.
+  deletable?: { contentId: string };
 };
 
 // Todas as bibliotecas pesadas (react-pdf, os templates de PDF e o
@@ -133,9 +139,13 @@ const TOOLBAR_BUTTON_CLASS =
   "flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-full border border-card-border bg-card px-3.5 text-sm font-medium text-primary disabled:opacity-60";
 
 export function ContentToolbar(props: ContentToolbarProps) {
+  const router = useRouter();
   const [pulpitContent, setPulpitContent] = useState<PulpitModeContent | null>(null);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [copyLabel, setCopyLabel] = useState("Copiar");
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [isDeleting, startDelete] = useTransition();
   const showPulpitMode = !NO_PULPIT_MODE_TYPES.has(props.contentType);
 
   async function handlePulpitMode() {
@@ -171,6 +181,25 @@ export function ContentToolbar(props: ContentToolbarProps) {
     }
   }
 
+  function handleDelete() {
+    if (!props.deletable) return;
+    setDeleteError(null);
+    setConfirmingDelete(true);
+  }
+
+  function confirmDelete() {
+    if (!props.deletable) return;
+    setConfirmingDelete(false);
+    startDelete(async () => {
+      const result = await deleteContentAction(props.deletable!.contentId);
+      if (result.success) {
+        router.push("/biblioteca");
+        return;
+      }
+      setDeleteError(result.message);
+    });
+  }
+
   return (
     <>
       <div className="grid grid-cols-2 gap-2">
@@ -203,8 +232,50 @@ export function ContentToolbar(props: ContentToolbarProps) {
         )}
       </div>
 
+      {props.deletable && (
+        <div className="flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className="flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-full border border-red-200 bg-red-50 px-3.5 text-sm font-medium text-red-700 disabled:opacity-60"
+          >
+            <TrashIcon className="h-4 w-4" />
+            {isDeleting ? "Excluindo..." : "Excluir"}
+          </button>
+          {deleteError && <p className="text-sm text-red-600">{deleteError}</p>}
+        </div>
+      )}
+
       {pulpitContent && (
         <PulpitMode content={pulpitContent} onClose={() => setPulpitContent(null)} />
+      )}
+
+      {confirmingDelete && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 px-4 pb-6 sm:items-center">
+          <div className="w-full max-w-sm rounded-2xl border border-card-border bg-card p-5">
+            <h2 className="text-base font-semibold text-foreground">Excluir conteúdo</h2>
+            <p className="mt-2 text-sm text-muted">
+              Excluir &ldquo;{props.title}&rdquo;? Essa ação não pode ser desfeita.
+            </p>
+            <div className="mt-5 grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setConfirmingDelete(false)}
+                className="flex min-h-[44px] items-center justify-center rounded-full border border-card-border bg-card px-3.5 text-sm font-medium text-foreground"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={confirmDelete}
+                className="flex min-h-[44px] items-center justify-center rounded-full bg-red-600 px-3.5 text-sm font-medium text-white"
+              >
+                Excluir
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

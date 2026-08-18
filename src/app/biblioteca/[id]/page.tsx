@@ -31,7 +31,9 @@ function formatDate(iso: string) {
   });
 }
 
-function renderByType(type: string, raw: Record<string, unknown>, title: string) {
+function renderByType(type: string, raw: Record<string, unknown>, title: string, id: string) {
+  const deletable = { contentId: id };
+
   switch (type) {
     case "pregacao": {
       const parsed = sermonContentSchema.safeParse(raw);
@@ -40,7 +42,12 @@ function renderByType(type: string, raw: Record<string, unknown>, title: string)
         <>
           <ReadingHeader title={parsed.data.titulo} baseText={parsed.data.texto_base} />
           <SermonView sermon={parsed.data} />
-          <ContentToolbar contentType="pregacao" content={parsed.data} title={title} />
+          <ContentToolbar
+            contentType="pregacao"
+            content={parsed.data}
+            title={title}
+            deletable={deletable}
+          />
         </>
       );
     }
@@ -51,7 +58,12 @@ function renderByType(type: string, raw: Record<string, unknown>, title: string)
         <>
           <ReadingHeader title={parsed.data.titulo} baseText={parsed.data.passagem} />
           <BibleStudyView study={parsed.data} />
-          <ContentToolbar contentType="biblia_explicada" content={parsed.data} title={title} />
+          <ContentToolbar
+            contentType="biblia_explicada"
+            content={parsed.data}
+            title={title}
+            deletable={deletable}
+          />
         </>
       );
     }
@@ -62,7 +74,12 @@ function renderByType(type: string, raw: Record<string, unknown>, title: string)
         <>
           <ReadingHeader title={parsed.data.titulo} baseText={parsed.data.texto_base} />
           <OutlineExpansionView content={parsed.data} />
-          <ContentToolbar contentType="esboco_pregacao" content={parsed.data} title={title} />
+          <ContentToolbar
+            contentType="esboco_pregacao"
+            content={parsed.data}
+            title={title}
+            deletable={deletable}
+          />
         </>
       );
     }
@@ -77,7 +94,12 @@ function renderByType(type: string, raw: Record<string, unknown>, title: string)
           <>
             <ReadingHeader title={parsedNew.data.titulo} baseText={parsedNew.data.texto_base} />
             <SermonOutlineView outline={parsedNew.data} />
-            <ContentToolbar contentType="esboco_pulpito" content={parsedNew.data} title={title} />
+            <ContentToolbar
+              contentType="esboco_pulpito"
+              content={parsedNew.data}
+              title={title}
+              deletable={deletable}
+            />
           </>
         );
       }
@@ -87,7 +109,12 @@ function renderByType(type: string, raw: Record<string, unknown>, title: string)
         <>
           <ReadingHeader title={parsedOld.data.tema} baseText={parsedOld.data.texto_base} />
           <PulpitOutlineView outline={parsedOld.data} />
-          <ContentToolbar contentType="esboco_pulpito_legacy" content={parsedOld.data} title={title} />
+          <ContentToolbar
+            contentType="esboco_pulpito_legacy"
+            content={parsedOld.data}
+            title={title}
+            deletable={deletable}
+          />
         </>
       );
     }
@@ -139,7 +166,7 @@ export default async function ContentDetailPage({
     notFound();
   }
 
-  const rendered = renderByType(content.type, content.content, content.title);
+  const rendered = renderByType(content.type, content.content, content.title, content.id);
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+1.5rem)]">

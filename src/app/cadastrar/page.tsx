@@ -1,84 +1,130 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState, type FormEvent } from "react";
+import { AuthLogo } from "@/components/AuthLogo";
+import { PasswordInput } from "@/components/PasswordInput";
 import { signUpAction, type CadastrarState } from "./actions";
 
 const initialState: CadastrarState = { error: null, checkEmail: false };
 
+function isValidEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
 export default function CadastrarPage() {
   const [state, formAction, isPending] = useActionState(signUpAction, initialState);
 
+  const [email, setEmail] = useState("");
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [formError, setFormError] = useState<string | null>(null);
+
+  const emailError =
+    emailTouched && email.length > 0 && !isValidEmail(email)
+      ? "Digite um e-mail válido."
+      : null;
+  const passwordError =
+    password.length > 0 && password.length < 6
+      ? "A senha precisa ter pelo menos 6 caracteres."
+      : null;
+  const confirmError =
+    confirmPassword.length > 0 && confirmPassword !== password
+      ? "As senhas não coincidem."
+      : null;
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    setFormError(null);
+
+    if (!isValidEmail(email)) {
+      event.preventDefault();
+      setEmailTouched(true);
+      setFormError("Digite um e-mail válido.");
+      return;
+    }
+    if (password.length < 6) {
+      event.preventDefault();
+      setFormError("A senha precisa ter pelo menos 6 caracteres.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      event.preventDefault();
+      setFormError("As senhas não coincidem.");
+    }
+  }
+
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
-      <header className="flex flex-col gap-1">
+      <AuthLogo />
+
+      <header className="flex flex-col items-center gap-1 text-center">
         <h1 className="text-2xl font-bold tracking-tight text-foreground">
-          Criar conta
+          Crie seu acesso
         </h1>
-        <p className="text-muted">Leva menos de um minuto.</p>
+        <p className="text-muted">Cadastre-se para acessar o Pregue Melhor.</p>
       </header>
 
       {state.checkEmail ? (
-        <div className="rounded-2xl border border-card-border bg-card p-4 text-foreground">
+        <div className="rounded-2xl border border-card-border bg-card p-4 text-center text-foreground">
           Verifique seu e-mail para confirmar o cadastro antes de entrar.
         </div>
       ) : (
         <>
-          <form action={formAction} className="flex flex-col gap-4">
+          <form action={formAction} onSubmit={handleSubmit} className="flex flex-col gap-4">
             <label className="flex flex-col gap-2">
-              <span className="text-sm font-semibold text-foreground">Nome</span>
-              <input
-                type="text"
-                name="name"
-                required
-                autoComplete="name"
-                className="min-h-[52px] rounded-2xl border border-card-border bg-card px-4 text-base text-foreground outline-none focus:border-primary"
-              />
-            </label>
-
-            <label className="flex flex-col gap-2">
-              <span className="text-sm font-semibold text-foreground">E-mail</span>
+              <span className="text-sm font-semibold text-foreground">Digite seu e-mail</span>
               <input
                 type="email"
                 name="email"
                 required
                 autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onBlur={() => setEmailTouched(true)}
                 className="min-h-[52px] rounded-2xl border border-card-border bg-card px-4 text-base text-foreground outline-none focus:border-primary"
               />
+              {emailError && <span className="text-sm text-red-600">{emailError}</span>}
             </label>
 
-            <label className="flex flex-col gap-2">
-              <span className="text-sm font-semibold text-foreground">Senha</span>
-              <input
-                type="password"
-                name="password"
-                required
-                minLength={6}
-                autoComplete="new-password"
-                className="min-h-[52px] rounded-2xl border border-card-border bg-card px-4 text-base text-foreground outline-none focus:border-primary"
-              />
-            </label>
+            <PasswordInput
+              name="password"
+              label="Crie sua senha"
+              autoComplete="new-password"
+              minLength={6}
+              value={password}
+              onChange={setPassword}
+              error={passwordError}
+            />
 
-            {state.error && <p className="text-red-600">{state.error}</p>}
+            <PasswordInput
+              name="confirmPassword"
+              label="Confirme sua senha"
+              autoComplete="new-password"
+              value={confirmPassword}
+              onChange={setConfirmPassword}
+              error={confirmError}
+            />
+
+            {(formError || state.error) && (
+              <p className="text-sm text-red-600">{formError ?? state.error}</p>
+            )}
 
             <button
               type="submit"
               disabled={isPending}
-              className="flex min-h-[52px] items-center justify-center rounded-2xl bg-primary px-5 font-semibold text-primary-foreground disabled:opacity-60"
+              className="flex min-h-[52px] items-center justify-center rounded-2xl bg-primary px-5 font-semibold uppercase tracking-wide text-primary-foreground disabled:opacity-60"
             >
-              {isPending ? "Criando conta..." : "Criar conta"}
+              {isPending ? "Cadastrando..." : "Cadastrar"}
             </button>
           </form>
 
-          <p className="text-sm text-muted">
-            Já tem conta?{" "}
-            <Link
-              href="/entrar"
-              className="font-medium text-primary underline underline-offset-4"
-            >
-              Entrar
-            </Link>
-          </p>
+          <Link
+            href="/entrar"
+            className="text-center text-sm font-medium text-primary underline underline-offset-4"
+          >
+            Já sou assinante
+          </Link>
         </>
       )}
     </main>

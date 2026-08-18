@@ -9,13 +9,20 @@ import {
   StarIcon,
   ClipboardListIcon,
   HeartIcon,
-  LifebuoyIcon,
+  GraduationCapIcon,
   SearchIcon,
 } from "@/components/icons";
 import { getCurrentUser } from "@/services/auth";
 import { getProfile } from "@/services/database";
-import { getGenerationStatus } from "@/services/billing";
+import {
+  getGenerationStatus,
+  getTrialRemaining,
+  getCurrentSubscription,
+  getDaysUntilExpiry,
+} from "@/services/billing";
 import { GenerationCounter } from "@/components/GenerationCounter";
+import { TrialCounter } from "@/components/TrialCounter";
+import { TrialSubscribeButton } from "@/components/TrialSubscribeButton";
 import { InstallPwaBanner } from "@/components/InstallPwaBanner";
 import { signOutAction } from "./actions";
 
@@ -69,6 +76,21 @@ export default async function Home() {
   const firstName = profile?.name?.trim().split(/\s+/)[0];
   const greeting = firstName || user?.email;
   const generationStatus = user ? await getGenerationStatus(user.id) : null;
+  // Anônimo OU logado sem Pro: mesmo trial por device_id (nunca reinicia
+  // por login/logout — ver services/billing/trial.ts).
+  const trialRemaining = generationStatus?.subscriptionActive
+    ? null
+    : await getTrialRemaining();
+
+  // Só faz sentido lembrar de renovar quem é PIX — cartão renova
+  // sozinho (item 8 do pedido de checkout Asaas). Discreto: só aparece
+  // nos últimos 5 dias, nunca cobra automaticamente por conta própria.
+  const subscription = generationStatus?.subscriptionActive && user
+    ? await getCurrentSubscription(user.id)
+    : null;
+  const daysUntilExpiry = getDaysUntilExpiry(subscription);
+  const showRenewalReminder =
+    daysUntilExpiry !== null && daysUntilExpiry >= 0 && daysUntilExpiry <= 5;
 
   return (
     <>
@@ -91,8 +113,8 @@ export default async function Home() {
               </form>
             </span>
           ) : (
-            <Link href="/entrar" className="text-sm font-medium underline underline-offset-4">
-              Entrar
+            <Link href="/cadastrar" className="text-sm font-medium underline underline-offset-4">
+              Cadastrar
             </Link>
           )}
         </div>
@@ -103,11 +125,33 @@ export default async function Home() {
 
         <InstallPwaBanner />
 
-        {generationStatus?.subscriptionActive && (
-          <div className="flex items-center justify-between rounded-2xl border border-card-border bg-card px-4 py-3">
-            <span className="text-sm font-medium text-foreground">Pregue Melhor Pro</span>
-            <GenerationCounter remaining={generationStatus.dailyRemaining} />
-          </div>
+        {generationStatus?.subscriptionActive ? (
+          <>
+            <div className="flex items-center justify-between rounded-2xl border border-card-border bg-card px-4 py-3">
+              <span className="text-sm font-medium text-foreground">Pregue Melhor Pro</span>
+              <GenerationCounter remaining={generationStatus.dailyRemaining} />
+            </div>
+            {showRenewalReminder && (
+              <div className="flex items-center justify-between rounded-2xl border border-accent/40 bg-accent-soft px-4 py-3">
+                <span className="text-sm text-foreground">
+                  Seu acesso vence em {daysUntilExpiry} {daysUntilExpiry === 1 ? "dia" : "dias"}.
+                </span>
+                <Link
+                  href="/planos/pagar"
+                  className="text-sm font-semibold text-accent underline underline-offset-4"
+                >
+                  Renovar
+                </Link>
+              </div>
+            )}
+          </>
+        ) : (
+          trialRemaining !== null && (
+            <div className="flex items-center justify-between rounded-2xl border border-card-border bg-card px-4 py-3">
+              <TrialCounter remaining={trialRemaining} className="text-sm font-medium text-foreground" />
+              <TrialSubscribeButton />
+            </div>
+          )
         )}
 
         <HeroToolCard
@@ -135,10 +179,10 @@ export default async function Home() {
           ))}
 
           <ToolCard
-            href="/apoio-do-pregador"
-            title="Apoio do Pregador"
-            description="Curso, guias e materiais de apoio."
-            icon={<LifebuoyIcon className="h-6 w-6" />}
+            href="/academia"
+            title="Academia do Pregador"
+            description="Cursos e formação para desenvolver sua pregação e conhecimento bíblico."
+            icon={<GraduationCapIcon className="h-6 w-6" />}
           />
 
           <ToolCard

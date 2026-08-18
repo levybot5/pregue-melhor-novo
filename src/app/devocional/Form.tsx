@@ -8,7 +8,11 @@ import { ContentToolbar } from "@/components/ContentToolbar";
 import { ReadingHeader } from "@/components/reading";
 import { GenerationCounter } from "@/components/GenerationCounter";
 import { GenerationBlockedNotice } from "@/components/GenerationBlockedNotice";
-import { isLimitBlockReason } from "@/lib/billing-ui";
+import { TrialCounter } from "@/components/TrialCounter";
+import { TrialSubscribeButton } from "@/components/TrialSubscribeButton";
+import { TrialPaywallNotice } from "@/components/TrialPaywallNotice";
+import { RenewalNotice } from "@/components/RenewalNotice";
+import { isLimitBlockReason, isTrialExhaustedReason, isSubscriptionExpiredReason } from "@/lib/billing-ui";
 import { generateDevotionalAction } from "./actions";
 
 const MOMENT_OPTIONS: { value: DevotionalMoment; label: string }[] = [
@@ -17,13 +21,21 @@ const MOMENT_OPTIONS: { value: DevotionalMoment; label: string }[] = [
   { value: "qualquer", label: "Qualquer momento" },
 ];
 
-export function DevocionalForm({ initialRemaining }: { initialRemaining: number }) {
+type DevocionalFormProps = {
+  mode: "subscriber" | "trial" | "expired";
+  initialRemaining: number;
+};
+
+export function DevocionalForm({ mode, initialRemaining }: DevocionalFormProps) {
+  const isTrial = mode === "trial";
   const [isGenerating, startGenerating] = useTransition();
 
   const [moment, setMoment] = useState<DevotionalMoment>("qualquer");
   const [remaining, setRemaining] = useState(initialRemaining);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [limitNotice, setLimitNotice] = useState<string | null>(null);
+  const [trialExhausted, setTrialExhausted] = useState(false);
+  const [subscriptionExpired, setSubscriptionExpired] = useState(false);
   const [devotional, setDevotional] = useState<DevotionalContent | null>(null);
 
   function handleGenerate() {
@@ -32,7 +44,11 @@ export function DevocionalForm({ initialRemaining }: { initialRemaining: number 
       const result = await generateDevotionalAction({ moment });
 
       if (result.status === "blocked") {
-        if (isLimitBlockReason(result.reason)) {
+        if (isSubscriptionExpiredReason(result.reason)) {
+          setSubscriptionExpired(true);
+        } else if (isTrialExhaustedReason(result.reason)) {
+          setTrialExhausted(true);
+        } else if (isLimitBlockReason(result.reason)) {
           setLimitNotice(result.message);
         } else {
           setErrorMessage(result.message);
@@ -46,6 +62,22 @@ export function DevocionalForm({ initialRemaining }: { initialRemaining: number 
       }
       setErrorMessage(result.message);
     });
+  }
+
+  if (mode === "expired" || subscriptionExpired) {
+    return (
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
+        <RenewalNotice />
+      </main>
+    );
+  }
+
+  if (trialExhausted) {
+    return (
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
+        <TrialPaywallNotice />
+      </main>
+    );
   }
 
   if (limitNotice) {
@@ -89,9 +121,12 @@ export function DevocionalForm({ initialRemaining }: { initialRemaining: number 
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Devocional</h1>
-        <p className="text-muted">Uma reflexão bíblica para o seu dia.</p>
+      <header className="flex items-start justify-between gap-2">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Devocional</h1>
+          <p className="text-muted">Uma reflexão bíblica para o seu dia.</p>
+        </div>
+        {isTrial && <TrialSubscribeButton />}
       </header>
 
       <fieldset className="flex flex-col gap-2">
@@ -123,7 +158,7 @@ export function DevocionalForm({ initialRemaining }: { initialRemaining: number 
         >
           {isGenerating ? "Gerando..." : "Gerar Devocional"}
         </button>
-        <GenerationCounter remaining={remaining} />
+        {isTrial ? <TrialCounter remaining={remaining} /> : <GenerationCounter remaining={remaining} />}
       </div>
 
       {errorMessage && (

@@ -5,9 +5,9 @@ import {
   type BibleDictionaryEntry,
 } from "@/services/ai";
 import {
-  reserveGeneration,
-  releaseGenerationLock,
-  recordUsage,
+  reserveGenerationOrTrial,
+  releaseReservation,
+  recordReservationUsage,
   type GenerationBlockReason,
 } from "@/services/billing";
 import { QUERY_MAX_LENGTH, QUERY_MIN_LENGTH } from "./constants";
@@ -33,7 +33,7 @@ export async function searchBibleDictionaryAction(
     return { status: "error", message: "Use até 100 caracteres." };
   }
 
-  const guard = await reserveGeneration("dicionario_biblico");
+  const guard = await reserveGenerationOrTrial("dicionario_biblico");
   if (!guard.allowed) {
     return { status: "blocked", reason: guard.reason, message: guard.message };
   }
@@ -42,14 +42,14 @@ export async function searchBibleDictionaryAction(
   try {
     result = await generateBibleDictionaryEntry({ query: trimmed });
   } finally {
-    await releaseGenerationLock();
+    await releaseReservation(guard);
   }
 
   if (!result.success) {
     return { status: "error", message: result.message };
   }
 
-  await recordUsage(guard.userId, "dicionario_biblico");
+  await recordReservationUsage(guard, "dicionario_biblico");
 
   return { status: "generated", entry: result.data };
 }

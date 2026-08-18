@@ -10,15 +10,29 @@
 //   3. Só depois que a IA retornar uma resposta VÁLIDA: recordUsage().
 //   4. autosave.
 
-export { DAILY_LIMIT, MONTHLY_LIMIT, USAGE_TOOLS } from "./limits";
+export { DAILY_LIMIT, MONTHLY_LIMIT, TRIAL_LIMIT, USAGE_TOOLS } from "./limits";
 export type { UsageTool } from "./limits";
 
-export { reserveGeneration } from "./guard";
-export type { GenerationGuardResult, GenerationBlockReason } from "./guard";
+export { reserveGenerationOrTrial, releaseReservation, recordReservationUsage } from "./guard";
+export type { GenerationReservation, GenerationBlockReason } from "./guard";
 
-export { releaseGenerationLock } from "./lock";
-export { recordUsage } from "./usage";
 export { getGenerationStatus } from "./status";
 export type { GenerationStatus } from "./status";
-export { getCurrentSubscription } from "./subscription";
+export { getCurrentSubscription, getDaysUntilExpiry } from "./subscription";
 export type { Subscription, SubscriptionStatus } from "./subscription";
+export { getTrialRemaining } from "./trial";
+
+export {
+  createPixPurchase,
+  createCardCheckout,
+  getPurchaseStatus,
+  claimPendingPurchase,
+} from "./purchase";
+export type {
+  PaymentMethod,
+  PixPurchaseInput,
+  PixPurchaseResult,
+  CardCheckoutResult,
+  PurchaseStatusResult,
+  ClaimPurchaseResult,
+} from "./purchase";

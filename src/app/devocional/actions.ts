@@ -7,9 +7,9 @@ import {
   type DevotionalInput,
 } from "@/services/ai";
 import {
-  reserveGeneration,
-  releaseGenerationLock,
-  recordUsage,
+  reserveGenerationOrTrial,
+  releaseReservation,
+  recordReservationUsage,
   type GenerationBlockReason,
 } from "@/services/billing";
 
@@ -37,7 +37,7 @@ export async function generateDevotionalAction(
     return { status: "error", message: validationError };
   }
 
-  const guard = await reserveGeneration("devocional");
+  const guard = await reserveGenerationOrTrial("devocional");
   if (!guard.allowed) {
     return { status: "blocked", reason: guard.reason, message: guard.message };
   }
@@ -46,14 +46,14 @@ export async function generateDevotionalAction(
   try {
     result = await generateDevotional(input);
   } finally {
-    await releaseGenerationLock();
+    await releaseReservation(guard);
   }
 
   if (!result.success) {
     return { status: "error", message: result.message };
   }
 
-  await recordUsage(guard.userId, "devocional");
+  await recordReservationUsage(guard, "devocional");
 
   return { status: "generated", devotional: result.data };
 }

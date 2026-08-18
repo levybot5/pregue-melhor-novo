@@ -1,27 +1,26 @@
-import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/services/auth";
-import { getGenerationStatus } from "@/services/billing";
-import { GenerationBlockedNotice } from "@/components/GenerationBlockedNotice";
+import { getCurrentSubscription, getGenerationStatus, getTrialRemaining } from "@/services/billing";
 import { DevocionalForm } from "./Form";
+
+// 60s (teto do plano Hobby da Vercel) — sem isso, a Server Action de
+// gerar o devocional usa o padrão de 10s e pode ser derrubada antes da
+// Gemini terminar.
+export const maxDuration = 60;
 
 export default async function DevocionalPage() {
   const user = await getCurrentUser();
-  if (!user) {
-    redirect("/entrar?redirectTo=/devocional");
+
+  if (user) {
+    const status = await getGenerationStatus(user.id);
+    if (status.subscriptionActive) {
+      return <DevocionalForm mode="subscriber" initialRemaining={status.dailyRemaining} />;
+    }
+    const subscription = await getCurrentSubscription(user.id);
+    if (subscription) {
+      return <DevocionalForm mode="expired" initialRemaining={0} />;
+    }
   }
 
-  const status = await getGenerationStatus(user.id);
-
-  if (!status.subscriptionActive) {
-    return (
-      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
-        <GenerationBlockedNotice
-          message="Seu acesso ao Pregue Melhor Pro não está ativo."
-          variant="inactive"
-        />
-      </main>
-    );
-  }
-
-  return <DevocionalForm initialRemaining={status.dailyRemaining} />;
+  const trialRemaining = await getTrialRemaining();
+  return <DevocionalForm mode="trial" initialRemaining={trialRemaining} />;
 }

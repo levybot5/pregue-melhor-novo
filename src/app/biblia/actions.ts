@@ -4,9 +4,9 @@ import { generateBibleStudy, type BibleStudyContent } from "@/services/ai";
 import { createContent } from "@/services/database";
 import { getCurrentUser } from "@/services/auth";
 import {
-  reserveGeneration,
-  releaseGenerationLock,
-  recordUsage,
+  reserveGenerationOrTrial,
+  releaseReservation,
+  recordReservationUsage,
   type GenerationBlockReason,
 } from "@/services/billing";
 import { PASSAGE_MAX_LENGTH, PASSAGE_MIN_LENGTH } from "./constants";
@@ -14,8 +14,9 @@ import { PASSAGE_MAX_LENGTH, PASSAGE_MIN_LENGTH } from "./constants";
 export type BibleStudyActionResult =
   | { status: "error"; message: string }
   | { status: "blocked"; reason: GenerationBlockReason; message: string }
-  | { status: "saved"; contentId: string }
-  | { status: "generated_not_saved"; study: BibleStudyContent; message: string };
+  | { status: "saved"; contentId: string; study: BibleStudyContent }
+  | { status: "generated_not_saved"; study: BibleStudyContent; message: string }
+  | { status: "generated"; study: BibleStudyContent };
 
 async function persistStudy(study: BibleStudyContent): Promise<BibleStudyActionResult> {
   try {
@@ -25,7 +26,7 @@ async function persistStudy(study: BibleStudyContent): Promise<BibleStudyActionR
       base_text: study.passagem,
       content: { ...study },
     });
-    return { status: "saved", contentId: content.id };
+    return { status: "saved", contentId: content.id, study };
   } catch (error) {
     console.error("Falha ao salvar estudo bíblico:", error);
     return {
@@ -49,7 +50,7 @@ export async function generateAndSaveBibleStudy(
     return { status: "error", message: "Use uma passagem com até 500 caracteres." };
   }
 
-  const guard = await reserveGeneration("biblia_explicada");
+  const guard = await reserveGenerationOrTrial("biblia_explicada");
   if (!guard.allowed) {
     return { status: "blocked", reason: guard.reason, message: guard.message };
   }
@@ -58,14 +59,18 @@ export async function generateAndSaveBibleStudy(
   try {
     result = await generateBibleStudy({ passage: trimmed });
   } finally {
-    await releaseGenerationLock();
+    await releaseReservation(guard);
   }
 
   if (!result.success) {
     return { status: "error", message: result.message };
   }
 
-  await recordUsage(guard.userId, "biblia_explicada");
+  await recordReservationUsage(guard, "biblia_explicada");
+
+  if (guard.mode === "trial") {
+    return { status: "generated", study: result.data };
+  }
 
   return persistStudy(result.data);
 }

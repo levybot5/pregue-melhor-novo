@@ -11,6 +11,10 @@ export const MONTHLY_LIMIT = 500;
 // mesmo usuário. Não é regra comercial, não aparece na interface.
 export const MIN_INTERVAL_SECONDS = 5;
 
+// Trial sem login: gerações grátis por dispositivo, no total (não é
+// diário). Visível na interface ("N testes disponíveis").
+export const TRIAL_LIMIT = 3;
+
 // Depois desse tempo, um lock "em andamento" é considerado travado
 // (ex.: processo morreu no meio) e pode ser retomado por uma nova
 // tentativa.

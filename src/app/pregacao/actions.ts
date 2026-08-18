@@ -11,9 +11,9 @@ import {
 import { createContent } from "@/services/database";
 import { getCurrentUser } from "@/services/auth";
 import {
-  reserveGeneration,
-  releaseGenerationLock,
-  recordUsage,
+  reserveGenerationOrTrial,
+  releaseReservation,
+  recordReservationUsage,
   type GenerationBlockReason,
 } from "@/services/billing";
 import { THEME_MAX_LENGTH, THEME_MIN_LENGTH } from "./constants";
@@ -21,8 +21,11 @@ import { THEME_MAX_LENGTH, THEME_MIN_LENGTH } from "./constants";
 export type SermonActionResult =
   | { status: "error"; message: string }
   | { status: "blocked"; reason: GenerationBlockReason; message: string }
-  | { status: "saved"; contentId: string }
-  | { status: "generated_not_saved"; sermon: SermonContent; message: string };
+  | { status: "saved"; contentId: string; sermon: SermonContent }
+  | { status: "generated_not_saved"; sermon: SermonContent; message: string }
+  // Trial sem login: gerou com sucesso, mas não existe usuário para
+  // salvar na Biblioteca (ver reserveGenerationOrTrial, mode "trial").
+  | { status: "generated"; sermon: SermonContent };
 
 function validateInput(input: SermonInput): string | null {
   const theme = input.themeOrPassage.trim();
@@ -53,7 +56,7 @@ async function persistSermon(sermon: SermonContent): Promise<SermonActionResult>
       base_text: sermon.texto_base,
       content: { ...sermon },
     });
-    return { status: "saved", contentId: content.id };
+    return { status: "saved", contentId: content.id, sermon };
   } catch (error) {
     console.error("Falha ao salvar pregação:", error);
     return {
@@ -79,7 +82,7 @@ export async function generateAndSaveSermon(
     return { status: "error", message: validationError };
   }
 
-  const guard = await reserveGeneration("pregacao");
+  const guard = await reserveGenerationOrTrial("pregacao");
   if (!guard.allowed) {
     return { status: "blocked", reason: guard.reason, message: guard.message };
   }
@@ -91,14 +94,18 @@ export async function generateAndSaveSermon(
       themeOrPassage: input.themeOrPassage.trim(),
     });
   } finally {
-    await releaseGenerationLock();
+    await releaseReservation(guard);
   }
 
   if (!result.success) {
     return { status: "error", message: result.message };
   }
 
-  await recordUsage(guard.userId, "pregacao");
+  await recordReservationUsage(guard, "pregacao");
+
+  if (guard.mode === "trial") {
+    return { status: "generated", sermon: result.sermon };
+  }
 
   return persistSermon(result.sermon);
 }

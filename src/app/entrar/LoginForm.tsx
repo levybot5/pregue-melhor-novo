@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
+import { PasswordInput } from "@/components/PasswordInput";
 import { signInAction, type EntrarState } from "./actions";
 
 const initialState: EntrarState = { error: null };
@@ -11,6 +12,8 @@ export function LoginForm() {
   const [state, formAction, isPending] = useActionState(signInAction, initialState);
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirectTo") ?? "";
+
+  const [password, setPassword] = useState("");
 
   return (
     <>
@@ -28,35 +31,39 @@ export function LoginForm() {
           />
         </label>
 
-        <label className="flex flex-col gap-2">
-          <span className="text-sm font-semibold text-foreground">Senha</span>
-          <input
-            type="password"
-            name="password"
-            required
-            autoComplete="current-password"
-            className="min-h-[52px] rounded-2xl border border-card-border bg-card px-4 text-base text-foreground outline-none focus:border-primary"
-          />
-        </label>
+        <PasswordInput
+          name="password"
+          label="Senha"
+          autoComplete="current-password"
+          value={password}
+          onChange={setPassword}
+        />
 
-        {state.error && <p className="text-red-600">{state.error}</p>}
+        {state.error && <p className="text-sm text-red-600">{state.error}</p>}
 
         <button
           type="submit"
           disabled={isPending}
-          className="flex min-h-[52px] items-center justify-center rounded-2xl bg-primary px-5 font-semibold text-primary-foreground disabled:opacity-60"
+          className="flex min-h-[52px] items-center justify-center rounded-2xl bg-primary px-5 font-semibold uppercase tracking-wide text-primary-foreground disabled:opacity-60"
         >
           {isPending ? "Entrando..." : "Entrar"}
         </button>
       </form>
 
-      <p className="text-sm text-muted">
-        Não tem conta?{" "}
+      <Link
+        href="/esqueci-senha"
+        className="text-center text-sm font-medium text-muted underline underline-offset-4"
+      >
+        Esqueci minha senha
+      </Link>
+
+      <p className="text-center text-sm text-muted">
+        Ainda não tenho conta{" "}
         <Link
           href="/cadastrar"
           className="font-medium text-primary underline underline-offset-4"
         >
-          Cadastre-se
+          Cadastrar
         </Link>
       </p>
     </>

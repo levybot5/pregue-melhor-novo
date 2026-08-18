@@ -67,3 +67,12 @@ export async function getContentById(id: string): Promise<Content | null> {
   if (error) throw error;
   return data as Content | null;
 }
+
+// Não checa dono explicitamente: o RLS (delete_own_contents, auth.uid()
+// = user_id) já garante isso — tentar apagar um id de outro usuário só
+// afeta 0 linhas, sem erro e sem vazar se o registro existe.
+export async function deleteContent(id: string): Promise<void> {
+  const supabase = await getSupabaseServerClient();
+  const { error } = await supabase.from("contents").delete().eq("id", id);
+  if (error) throw error;
+}

@@ -2,7 +2,7 @@
 // falar diretamente com o Supabase — componentes e actions consomem
 // as funções abaixo, nunca o client bruto.
 
-export { createContent, listContents, getContentById } from "./contents";
+export { createContent, listContents, getContentById, deleteContent } from "./contents";
 export type { Content, NewContent } from "./contents";
 
 export { getProfile } from "./profiles";

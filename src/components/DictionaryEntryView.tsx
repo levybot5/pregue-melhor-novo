@@ -48,9 +48,14 @@ export function DictionaryEntryView({ entry }: DictionaryEntryViewProps) {
       <div className="flex flex-col gap-6">
         <TypeBadge tipo={entry.tipo} />
 
-        <p className="text-[17px] leading-[1.75] font-medium text-primary">
-          {entry.identificacao}
-        </p>
+        <section className="flex flex-col gap-1.5">
+          <h2 className="text-xs font-semibold tracking-wide uppercase text-primary">
+            Quem foi
+          </h2>
+          <p className="text-[17px] leading-[1.75] font-medium text-primary">
+            {entry.identificacao}
+          </p>
+        </section>
 
         {PERSON_FIELD_LABELS.map(
           ({ key, label }) =>

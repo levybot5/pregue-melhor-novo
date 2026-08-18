@@ -11,9 +11,9 @@ import {
 import { createContent } from "@/services/database";
 import { getCurrentUser } from "@/services/auth";
 import {
-  reserveGeneration,
-  releaseGenerationLock,
-  recordUsage,
+  reserveGenerationOrTrial,
+  releaseReservation,
+  recordReservationUsage,
   type GenerationBlockReason,
 } from "@/services/billing";
 import { OUTLINE_MAX_LENGTH, OUTLINE_MIN_LENGTH } from "./constants";
@@ -21,8 +21,9 @@ import { OUTLINE_MAX_LENGTH, OUTLINE_MIN_LENGTH } from "./constants";
 export type OutlineExpansionActionResult =
   | { status: "error"; message: string }
   | { status: "blocked"; reason: GenerationBlockReason; message: string }
-  | { status: "saved"; contentId: string }
-  | { status: "generated_not_saved"; content: OutlineExpansionContent; message: string };
+  | { status: "saved"; contentId: string; content: OutlineExpansionContent }
+  | { status: "generated_not_saved"; content: OutlineExpansionContent; message: string }
+  | { status: "generated"; content: OutlineExpansionContent };
 
 function validateInput(input: OutlineExpansionInput): string | null {
   const outline = input.outline.trim();
@@ -55,7 +56,7 @@ async function persistExpansion(
       base_text: expansion.texto_base,
       content: { ...expansion },
     });
-    return { status: "saved", contentId: content.id };
+    return { status: "saved", contentId: content.id, content: expansion };
   } catch (error) {
     console.error("Falha ao salvar pregação desenvolvida:", error);
     return {
@@ -75,7 +76,7 @@ export async function generateAndSaveExpansion(
     return { status: "error", message: validationError };
   }
 
-  const guard = await reserveGeneration("esboco_pregacao");
+  const guard = await reserveGenerationOrTrial("esboco_pregacao");
   if (!guard.allowed) {
     return { status: "blocked", reason: guard.reason, message: guard.message };
   }
@@ -84,14 +85,18 @@ export async function generateAndSaveExpansion(
   try {
     result = await expandOutline({ ...input, outline: input.outline.trim() });
   } finally {
-    await releaseGenerationLock();
+    await releaseReservation(guard);
   }
 
   if (!result.success) {
     return { status: "error", message: result.message };
   }
 
-  await recordUsage(guard.userId, "esboco_pregacao");
+  await recordReservationUsage(guard, "esboco_pregacao");
+
+  if (guard.mode === "trial") {
+    return { status: "generated", content: result.data };
+  }
 
   return persistExpansion(result.data);
 }

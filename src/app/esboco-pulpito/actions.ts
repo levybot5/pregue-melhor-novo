@@ -9,9 +9,9 @@ import {
 import { createContent } from "@/services/database";
 import { getCurrentUser } from "@/services/auth";
 import {
-  reserveGeneration,
-  releaseGenerationLock,
-  recordUsage,
+  reserveGenerationOrTrial,
+  releaseReservation,
+  recordReservationUsage,
   type GenerationBlockReason,
 } from "@/services/billing";
 import { SERMON_MAX_LENGTH, SERMON_MIN_LENGTH } from "./constants";
@@ -19,8 +19,9 @@ import { SERMON_MAX_LENGTH, SERMON_MIN_LENGTH } from "./constants";
 export type SermonOutlineActionResult =
   | { status: "error"; message: string }
   | { status: "blocked"; reason: GenerationBlockReason; message: string }
-  | { status: "saved"; contentId: string }
-  | { status: "generated_not_saved"; outline: SermonOutlineContent; message: string };
+  | { status: "saved"; contentId: string; outline: SermonOutlineContent }
+  | { status: "generated_not_saved"; outline: SermonOutlineContent; message: string }
+  | { status: "generated"; outline: SermonOutlineContent };
 
 function validateInput(input: SermonOutlineInput): string | null {
   const text = input.sermonText.trim();
@@ -47,7 +48,7 @@ async function persistOutline(
       base_text: outline.texto_base,
       content: { ...outline },
     });
-    return { status: "saved", contentId: content.id };
+    return { status: "saved", contentId: content.id, outline };
   } catch (error) {
     console.error("Falha ao salvar Pregação para Esboço:", error);
     return {
@@ -67,7 +68,7 @@ export async function generateAndSaveSermonOutline(
     return { status: "error", message: validationError };
   }
 
-  const guard = await reserveGeneration("esboco_pulpito");
+  const guard = await reserveGenerationOrTrial("esboco_pulpito");
   if (!guard.allowed) {
     return { status: "blocked", reason: guard.reason, message: guard.message };
   }
@@ -79,14 +80,18 @@ export async function generateAndSaveSermonOutline(
       level: input.level,
     });
   } finally {
-    await releaseGenerationLock();
+    await releaseReservation(guard);
   }
 
   if (!result.success) {
     return { status: "error", message: result.message };
   }
 
-  await recordUsage(guard.userId, "esboco_pulpito");
+  await recordReservationUsage(guard, "esboco_pulpito");
+
+  if (guard.mode === "trial") {
+    return { status: "generated", outline: result.data };
+  }
 
   return persistOutline(result.data);
 }

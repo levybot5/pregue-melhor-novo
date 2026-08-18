@@ -6,25 +6,43 @@ import type { BibleDictionaryEntry } from "@/services/ai";
 import { DictionaryEntryView } from "@/components/DictionaryEntryView";
 import { GenerationCounter } from "@/components/GenerationCounter";
 import { GenerationBlockedNotice } from "@/components/GenerationBlockedNotice";
+import { TrialCounter } from "@/components/TrialCounter";
+import { TrialSubscribeButton } from "@/components/TrialSubscribeButton";
+import { TrialPaywallNotice } from "@/components/TrialPaywallNotice";
+import { RenewalNotice } from "@/components/RenewalNotice";
 import { CopyIcon, SearchIcon, SpinnerIcon } from "@/components/icons";
-import { isLimitBlockReason } from "@/lib/billing-ui";
+import { isLimitBlockReason, isTrialExhaustedReason, isSubscriptionExpiredReason } from "@/lib/billing-ui";
 import { formatBibleDictionaryForCopy } from "@/lib/copy-content";
 import { searchBibleDictionaryAction, type DictionaryActionResult } from "./actions";
 import { QUERY_MAX_LENGTH, QUERY_MIN_LENGTH } from "./constants";
 
-export function DicionarioForm({ initialRemaining }: { initialRemaining: number }) {
+const EXAMPLE_QUERIES = ["Graça", "Getsêmani", "Davi", "Êxodo"];
+
+type DicionarioFormProps = {
+  mode: "subscriber" | "trial" | "expired";
+  initialRemaining: number;
+};
+
+export function DicionarioForm({ mode, initialRemaining }: DicionarioFormProps) {
+  const isTrial = mode === "trial";
   const [isGenerating, startGenerating] = useTransition();
 
   const [query, setQuery] = useState("");
   const [remaining, setRemaining] = useState(initialRemaining);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [limitNotice, setLimitNotice] = useState<string | null>(null);
+  const [trialExhausted, setTrialExhausted] = useState(false);
+  const [subscriptionExpired, setSubscriptionExpired] = useState(false);
   const [entry, setEntry] = useState<BibleDictionaryEntry | null>(null);
   const [copyLabel, setCopyLabel] = useState("Copiar");
 
   function handleResult(result: DictionaryActionResult) {
     if (result.status === "blocked") {
-      if (isLimitBlockReason(result.reason)) {
+      if (isSubscriptionExpiredReason(result.reason)) {
+        setSubscriptionExpired(true);
+      } else if (isTrialExhaustedReason(result.reason)) {
+        setTrialExhausted(true);
+      } else if (isLimitBlockReason(result.reason)) {
         setLimitNotice(result.message);
       } else {
         setErrorMessage(result.message);
@@ -62,6 +80,22 @@ export function DicionarioForm({ initialRemaining }: { initialRemaining: number 
   function handleNewSearch() {
     setEntry(null);
     setQuery("");
+  }
+
+  if (mode === "expired" || subscriptionExpired) {
+    return (
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
+        <RenewalNotice />
+      </main>
+    );
+  }
+
+  if (trialExhausted) {
+    return (
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
+        <TrialPaywallNotice />
+      </main>
+    );
   }
 
   if (limitNotice) {
@@ -108,14 +142,17 @@ export function DicionarioForm({ initialRemaining }: { initialRemaining: number 
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
-      <header className="flex flex-col gap-1">
-        <span className="flex items-center gap-2 text-primary">
-          <SearchIcon className="h-6 w-6" />
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            Dicionário Bíblico
-          </h1>
-        </span>
-        <p className="text-muted">Pesquise termos, lugares e personagens da Bíblia.</p>
+      <header className="flex items-start justify-between gap-2">
+        <div className="flex flex-col gap-1">
+          <span className="flex items-center gap-2 text-primary">
+            <SearchIcon className="h-6 w-6" />
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+              Dicionário Bíblico
+            </h1>
+          </span>
+          <p className="text-muted">Pesquise termos, lugares e personagens da Bíblia.</p>
+        </div>
+        {isTrial && <TrialSubscribeButton />}
       </header>
 
       <label className="flex flex-col gap-2">
@@ -131,6 +168,19 @@ export function DicionarioForm({ initialRemaining }: { initialRemaining: number 
         />
       </label>
 
+      <div className="flex flex-wrap gap-2">
+        {EXAMPLE_QUERIES.map((example) => (
+          <button
+            key={example}
+            type="button"
+            onClick={() => setQuery(example)}
+            className="min-h-[36px] rounded-full border border-card-border bg-card px-3 text-sm text-muted"
+          >
+            {example}
+          </button>
+        ))}
+      </div>
+
       <div className="flex flex-col items-center gap-2">
         <button
           type="button"
@@ -141,7 +191,7 @@ export function DicionarioForm({ initialRemaining }: { initialRemaining: number 
           {isGenerating && <SpinnerIcon className="h-5 w-5 animate-spin" />}
           {isGenerating ? "Pesquisando..." : "Pesquisar"}
         </button>
-        <GenerationCounter remaining={remaining} />
+        {isTrial ? <TrialCounter remaining={remaining} /> : <GenerationCounter remaining={remaining} />}
       </div>
 
       {errorMessage && (
