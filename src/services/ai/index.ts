@@ -18,9 +18,12 @@
 export {
   generateSermon,
   sermonContentSchema,
+  sermonMessageTypes,
   sermonAudiences,
   sermonStyles,
   sermonDurations,
+  sermonDepths,
+  bibleVersions,
 } from "./sermon";
 export type { SermonInput, SermonContent, GenerateSermonResult } from "./sermon";
 

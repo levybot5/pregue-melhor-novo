@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import type { BibleStudyContent } from "@/services/ai";
+import type { BibleStudyContent, BibleStudyInput } from "@/services/ai";
 import { BibleStudyView } from "@/components/BibleStudyView";
 import { ContentToolbar } from "@/components/ContentToolbar";
 import { BackLink, ReadingHeader } from "@/components/reading";
@@ -22,6 +22,16 @@ import { PASSAGE_MAX_LENGTH, PASSAGE_MIN_LENGTH } from "./constants";
 
 const EXAMPLE_PASSAGES = ["João 3:16", "Salmo 23", "Romanos 8:28", "Filipenses 4:6-7"];
 
+const BIBLE_VERSION_OPTIONS: { value: BibleStudyInput["bibleVersion"]; label: string }[] = [
+  { value: "padrao", label: "Padrão (recomendado)" },
+  { value: "ara", label: "Almeida Revista e Atualizada (ARA)" },
+  { value: "arc", label: "Almeida Revista e Corrigida (ARC)" },
+  { value: "naa", label: "Nova Almeida Atualizada (NAA)" },
+  { value: "nvi", label: "Nova Versão Internacional (NVI)" },
+  { value: "ntlh", label: "Nova Tradução na Linguagem de Hoje (NTLH)" },
+  { value: "acf", label: "Almeida Corrigida Fiel (ACF)" },
+];
+
 type BibliaFormProps = {
   mode: "subscriber" | "trial" | "expired";
   initialRemaining: number;
@@ -33,6 +43,7 @@ export function BibliaForm({ mode, initialRemaining }: BibliaFormProps) {
   const [isSaving, startSaving] = useTransition();
 
   const [passage, setPassage] = useState("");
+  const [bibleVersion, setBibleVersion] = useState<BibleStudyInput["bibleVersion"]>("padrao");
   const [remaining, setRemaining] = useState(initialRemaining);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [limitNotice, setLimitNotice] = useState<string | null>(null);
@@ -89,7 +100,7 @@ export function BibliaForm({ mode, initialRemaining }: BibliaFormProps) {
     setErrorMessage(null);
     setSaveWarning(null);
     startGenerating(async () => {
-      const result = await generateAndSaveBibleStudy(passage);
+      const result = await generateAndSaveBibleStudy(passage, bibleVersion);
       handleResult(result);
     });
   }
@@ -230,6 +241,21 @@ export function BibliaForm({ mode, initialRemaining }: BibliaFormProps) {
           </button>
         ))}
       </div>
+
+      <label className="flex flex-col gap-2">
+        <span className="text-sm font-semibold text-foreground">Versão da Bíblia</span>
+        <select
+          value={bibleVersion}
+          onChange={(e) => setBibleVersion(e.target.value as BibleStudyInput["bibleVersion"])}
+          className="min-h-[52px] rounded-2xl border border-card-border bg-card px-4 text-base text-foreground outline-none focus:border-primary"
+        >
+          {BIBLE_VERSION_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </label>
 
       <div className="flex flex-col items-center gap-2">
         <button

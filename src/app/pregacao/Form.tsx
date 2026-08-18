@@ -12,41 +12,70 @@ import { TrialCounter } from "@/components/TrialCounter";
 import { TrialSubscribeButton } from "@/components/TrialSubscribeButton";
 import { TrialPaywallNotice } from "@/components/TrialPaywallNotice";
 import { RenewalNotice } from "@/components/RenewalNotice";
-import { SpinnerIcon } from "@/components/icons";
+import { SpinnerIcon, ChevronDownIcon } from "@/components/icons";
 import { isLimitBlockReason, isTrialExhaustedReason, isSubscriptionExpiredReason } from "@/lib/billing-ui";
 import { generateAndSaveSermon, saveSermon, type SermonActionResult } from "./actions";
-import { THEME_MAX_LENGTH, THEME_MIN_LENGTH } from "./constants";
+import { PASSAGE_MAX_LENGTH, PASSAGE_MIN_LENGTH, THEME_MAX_LENGTH, NOTES_MAX_LENGTH } from "./constants";
+
+const MESSAGE_TYPE_OPTIONS: { value: SermonInput["messageType"] & string; label: string }[] = [
+  { value: "expositiva", label: "Expositiva" },
+  { value: "tematica", label: "Temática" },
+  { value: "textual", label: "Textual" },
+  { value: "evangelistica", label: "Evangelística" },
+  { value: "doutrinaria", label: "Doutrinária" },
+  { value: "encorajamento", label: "Encorajamento" },
+  { value: "culto_jovens", label: "Culto de Jovens" },
+  { value: "mulheres", label: "Mulheres" },
+  { value: "homens", label: "Homens" },
+  { value: "infantil", label: "Infantil" },
+  { value: "escola_biblica", label: "Escola Bíblica" },
+  { value: "missoes", label: "Missões" },
+];
 
 const AUDIENCE_OPTIONS: { value: SermonInput["audience"]; label: string }[] = [
-  { value: "domingo", label: "Culto de Domingo" },
-  { value: "ensino", label: "Culto de Ensino" },
-  { value: "oracao", label: "Culto de Oração" },
-  { value: "evangelistico", label: "Culto Evangelístico" },
-  { value: "jovens", label: "Culto de Jovens" },
-  { value: "mulheres", label: "Culto de Mulheres" },
-  { value: "homens", label: "Culto de Homens" },
-  { value: "santa_ceia", label: "Santa Ceia" },
-  { value: "congresso", label: "Congresso / Conferência" },
-  { value: "celula", label: "Célula / Pequeno Grupo" },
-  { value: "outro", label: "Outro" },
+  { value: "geral", label: "Igreja em Geral" },
+  { value: "jovens", label: "Jovens" },
+  { value: "adolescentes", label: "Adolescentes" },
+  { value: "criancas", label: "Crianças" },
+  { value: "mulheres", label: "Mulheres" },
+  { value: "homens", label: "Homens" },
+  { value: "lideres", label: "Líderes" },
+  { value: "obreiros", label: "Obreiros" },
+  { value: "evangelismo", label: "Evangelismo" },
 ];
 
 const STYLE_OPTIONS: { value: SermonInput["style"]; label: string }[] = [
-  { value: "expositivo", label: "Expositiva" },
-  { value: "tematico", label: "Temática" },
-  { value: "evangelistico", label: "Evangelística" },
-  { value: "ensino_biblico", label: "Ensino Bíblico" },
-  { value: "reflexiva", label: "Reflexiva" },
+  { value: "simples", label: "Simples" },
+  { value: "ensino", label: "Ensino" },
+  { value: "reflexivo", label: "Reflexivo" },
+  { value: "impactante", label: "Impactante" },
+  { value: "pastoral", label: "Pastoral" },
+  { value: "devocional", label: "Devocional" },
 ];
 
-const DURATION_OPTIONS: {
-  value: SermonInput["duration"];
-  label: string;
-  hint: string;
-}[] = [
-  { value: "curta", label: "Curta", hint: "10–15 min" },
-  { value: "media", label: "Média", hint: "20–30 min" },
-  { value: "completa", label: "Completa", hint: "40–60 min" },
+const DEPTH_OPTIONS: { value: SermonInput["depth"]; label: string }[] = [
+  { value: "basica", label: "Básica" },
+  { value: "intermediaria", label: "Intermediária" },
+  { value: "profunda", label: "Profunda" },
+  { value: "teologica", label: "Teológica" },
+];
+
+const DURATION_OPTIONS: { value: SermonInput["duration"]; label: string }[] = [
+  { value: "10", label: "10 min" },
+  { value: "20", label: "20 min" },
+  { value: "30", label: "30 min" },
+  { value: "40", label: "40 min" },
+  { value: "60", label: "60 min" },
+];
+
+const BIBLE_VERSION_OPTIONS: { value: SermonInput["bibleVersion"]; label: string }[] = [
+  { value: "padrao", label: "Padrão (recomendado)" },
+  { value: "ara", label: "Almeida Revista e Atualizada (ARA)" },
+  { value: "arc", label: "Almeida Revista e Corrigida (ARC)" },
+  { value: "naa", label: "Nova Almeida Atualizada (NAA)" },
+  { value: "nvi", label: "Nova Versão Internacional (NVI)" },
+  { value: "ntlh", label: "Nova Tradução na Linguagem de Hoje (NTLH)" },
+  { value: "acf", label: "Almeida Corrigida Fiel (ACF)" },
 ];
 
 type PregacaoFormProps = {
@@ -59,10 +88,16 @@ export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
   const [isGenerating, startGenerating] = useTransition();
   const [isSaving, startSaving] = useTransition();
 
-  const [themeOrPassage, setThemeOrPassage] = useState("");
-  const [audience, setAudience] = useState<SermonInput["audience"]>("domingo");
-  const [style, setStyle] = useState<SermonInput["style"]>("expositivo");
-  const [duration, setDuration] = useState<SermonInput["duration"]>("media");
+  const [passage, setPassage] = useState("");
+  const [theme, setTheme] = useState("");
+  const [messageType, setMessageType] = useState<SermonInput["messageType"]>(null);
+  const [audience, setAudience] = useState<SermonInput["audience"]>("geral");
+  const [duration, setDuration] = useState<SermonInput["duration"]>("20");
+  const [style, setStyle] = useState<SermonInput["style"]>("simples");
+  const [depth, setDepth] = useState<SermonInput["depth"]>("intermediaria");
+  const [bibleVersion, setBibleVersion] = useState<SermonInput["bibleVersion"]>("padrao");
+  const [notes, setNotes] = useState("");
+  const [showMoreOptions, setShowMoreOptions] = useState(false);
 
   const [remaining, setRemaining] = useState(initialRemaining);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -126,10 +161,15 @@ export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
     setSaveWarning(null);
     startGenerating(async () => {
       const result = await generateAndSaveSermon({
-        themeOrPassage,
+        passage,
+        theme,
+        messageType,
         audience,
-        style,
         duration,
+        style,
+        depth,
+        bibleVersion,
+        notes,
       });
       handleResult(result);
     });
@@ -243,93 +283,194 @@ export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
       <div className="flex flex-col gap-5">
         <label className="flex flex-col gap-2">
           <span className="text-sm font-semibold text-foreground">
-            Tema ou passagem bíblica
+            Texto bíblico ou passagem
           </span>
           <input
             type="text"
-            value={themeOrPassage}
-            onChange={(e) => setThemeOrPassage(e.target.value)}
-            placeholder="Ex: Salmo 23, oração, fé em tempos difíceis..."
-            minLength={THEME_MIN_LENGTH}
-            maxLength={THEME_MAX_LENGTH}
+            value={passage}
+            onChange={(e) => setPassage(e.target.value)}
+            placeholder="Ex: Salmo 23, João 3:16, fé em tempos difíceis..."
+            minLength={PASSAGE_MIN_LENGTH}
+            maxLength={PASSAGE_MAX_LENGTH}
             className="min-h-[52px] rounded-2xl border border-card-border bg-card px-4 text-base text-foreground outline-none focus:border-primary"
           />
           <span className="text-right text-xs text-muted">
-            {themeOrPassage.length}/{THEME_MAX_LENGTH}
+            {passage.length}/{PASSAGE_MAX_LENGTH}
           </span>
         </label>
 
-        <fieldset className="flex flex-col gap-2">
-          <legend className="text-sm font-semibold text-foreground">
-            Onde vai ministrar
-          </legend>
-          <div className="grid grid-cols-2 gap-2">
-            {AUDIENCE_OPTIONS.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => setAudience(option.value)}
-                className={`min-h-[48px] rounded-2xl border px-3 text-sm font-medium ${
-                  audience === option.value
-                    ? "border-primary bg-primary-soft text-primary"
-                    : "border-card-border bg-card text-foreground"
-                }`}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </fieldset>
-
-        <fieldset className="flex flex-col gap-2">
-          <legend className="text-sm font-semibold text-foreground">Estilo</legend>
-          <div className="grid grid-cols-3 gap-2">
-            {STYLE_OPTIONS.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => setStyle(option.value)}
-                className={`min-h-[48px] rounded-2xl border px-2 text-sm font-medium ${
-                  style === option.value
-                    ? "border-primary bg-primary-soft text-primary"
-                    : "border-card-border bg-card text-foreground"
-                }`}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </fieldset>
+        <label className="flex flex-col gap-2">
+          <span className="text-sm font-semibold text-foreground">
+            Tema <span className="font-normal text-muted">(opcional)</span>
+          </span>
+          <input
+            type="text"
+            value={theme}
+            onChange={(e) => setTheme(e.target.value)}
+            placeholder="Ex: perdão, esperança, família..."
+            maxLength={THEME_MAX_LENGTH}
+            className="min-h-[52px] rounded-2xl border border-card-border bg-card px-4 text-base text-foreground outline-none focus:border-primary"
+          />
+        </label>
 
         <fieldset className="flex flex-col gap-2">
           <legend className="text-sm font-semibold text-foreground">Duração</legend>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-5 gap-2">
             {DURATION_OPTIONS.map((option) => (
               <button
                 key={option.value}
                 type="button"
                 onClick={() => setDuration(option.value)}
-                className={`flex min-h-[52px] flex-col items-center justify-center rounded-2xl border px-2 text-sm font-medium ${
+                className={`min-h-[48px] rounded-2xl border px-1 text-sm font-medium ${
                   duration === option.value
                     ? "border-primary bg-primary-soft text-primary"
                     : "border-card-border bg-card text-foreground"
                 }`}
               >
-                <span>{option.label}</span>
-                <span className="text-xs text-muted">{option.hint}</span>
+                {option.label}
               </button>
             ))}
           </div>
         </fieldset>
+
+        <button
+          type="button"
+          onClick={() => setShowMoreOptions((current) => !current)}
+          aria-expanded={showMoreOptions}
+          className="flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-2xl border border-card-border bg-card text-sm font-semibold text-primary"
+        >
+          Mais opções
+          <ChevronDownIcon
+            className={`h-4 w-4 transition-transform ${showMoreOptions ? "rotate-180" : ""}`}
+          />
+        </button>
+
+        {showMoreOptions && (
+          <div className="flex flex-col gap-5 rounded-2xl border border-card-border bg-card-active p-4">
+            <fieldset className="flex flex-col gap-2">
+              <legend className="text-sm font-semibold text-foreground">Estilo</legend>
+              <div className="grid grid-cols-3 gap-2">
+                {STYLE_OPTIONS.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setStyle(option.value)}
+                    className={`min-h-[48px] rounded-2xl border px-2 text-sm font-medium ${
+                      style === option.value
+                        ? "border-primary bg-primary-soft text-primary"
+                        : "border-card-border bg-card text-foreground"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+
+            <fieldset className="flex flex-col gap-2">
+              <legend className="text-sm font-semibold text-foreground">
+                Tipo de mensagem <span className="font-normal text-muted">(opcional)</span>
+              </legend>
+              <div className="grid grid-cols-2 gap-2">
+                {MESSAGE_TYPE_OPTIONS.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() =>
+                      setMessageType((current) => (current === option.value ? null : option.value))
+                    }
+                    className={`min-h-[48px] rounded-2xl border px-3 text-sm font-medium ${
+                      messageType === option.value
+                        ? "border-primary bg-primary-soft text-primary"
+                        : "border-card-border bg-card text-foreground"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+
+            <fieldset className="flex flex-col gap-2">
+              <legend className="text-sm font-semibold text-foreground">Público</legend>
+              <div className="grid grid-cols-2 gap-2">
+                {AUDIENCE_OPTIONS.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setAudience(option.value)}
+                    className={`min-h-[48px] rounded-2xl border px-3 text-sm font-medium ${
+                      audience === option.value
+                        ? "border-primary bg-primary-soft text-primary"
+                        : "border-card-border bg-card text-foreground"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+
+            <fieldset className="flex flex-col gap-2">
+              <legend className="text-sm font-semibold text-foreground">Profundidade</legend>
+              <div className="grid grid-cols-2 gap-2">
+                {DEPTH_OPTIONS.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setDepth(option.value)}
+                    className={`min-h-[48px] rounded-2xl border px-3 text-sm font-medium ${
+                      depth === option.value
+                        ? "border-primary bg-primary-soft text-primary"
+                        : "border-card-border bg-card text-foreground"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-foreground">Versão da Bíblia</span>
+              <select
+                value={bibleVersion}
+                onChange={(e) => setBibleVersion(e.target.value as SermonInput["bibleVersion"])}
+                className="min-h-[48px] rounded-2xl border border-card-border bg-card px-4 text-sm text-foreground outline-none focus:border-primary"
+              >
+                {BIBLE_VERSION_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-foreground">
+                Observações adicionais <span className="font-normal text-muted">(opcional)</span>
+              </span>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Ex.: quero abordar perdão, incluir uma aplicação para famílias..."
+                maxLength={NOTES_MAX_LENGTH}
+                rows={3}
+                className="min-h-[80px] rounded-2xl border border-card-border bg-card px-4 py-3 text-base text-foreground outline-none focus:border-primary"
+              />
+              <span className="text-right text-xs text-muted">
+                {notes.length}/{NOTES_MAX_LENGTH}
+              </span>
+            </label>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col items-center gap-2">
         <button
           type="button"
           onClick={handleGenerate}
-          disabled={
-            isGenerating || remaining <= 0 || themeOrPassage.trim().length < THEME_MIN_LENGTH
-          }
+          disabled={isGenerating || remaining <= 0 || passage.trim().length < PASSAGE_MIN_LENGTH}
           className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl bg-primary px-5 font-semibold text-primary-foreground transition-opacity disabled:opacity-60"
         >
           {isGenerating && <SpinnerIcon className="h-5 w-5 animate-spin" />}

@@ -10,35 +10,79 @@ import { getGeminiClient } from "./gemini-client";
 // custo com os demais modelos Flash disponíveis em ai.google.dev/gemini-api/docs/pricing.
 const MODEL = "gemini-3.1-flash-lite";
 
-export const sermonAudiences = [
-  "domingo",
-  "ensino",
-  "oracao",
-  "evangelistico",
-  "jovens",
+// "Tipo de Mensagem" — abordagem estrutural/doutrinária da pregação.
+// Separado de "Estilo" de propósito (item 3/6 do pedido de revisão do
+// formulário): tipo decide O QUE a mensagem é estruturalmente,
+// estilo decide COMO ela soa. Substitui o antigo "Onde vai ministrar"
+// (sermonAudiences pré-revisão), que misturava as duas coisas.
+export const sermonMessageTypes = [
+  "expositiva",
+  "tematica",
+  "textual",
+  "evangelistica",
+  "doutrinaria",
+  "encorajamento",
+  "culto_jovens",
   "mulheres",
   "homens",
-  "santa_ceia",
-  "congresso",
-  "celula",
-  "outro",
+  "infantil",
+  "escola_biblica",
+  "missoes",
 ] as const;
 
+// "Público" — pra quem é a mensagem. Padrão: igreja em geral (item 4).
+export const sermonAudiences = [
+  "geral",
+  "jovens",
+  "adolescentes",
+  "criancas",
+  "mulheres",
+  "homens",
+  "lideres",
+  "obreiros",
+  "evangelismo",
+] as const;
+
+// Minutos falados, não mais "curta/média/completa" — mais preciso pro
+// pregador escolher (item 5 do pedido).
+export const sermonDurations = ["10", "20", "30", "40", "60"] as const;
+
+// "Estilo" — só linguagem/abordagem/tom/aplicação, nunca fidelidade
+// bíblica (item 6). Substitui o antigo sermonStyles
+// (expositivo/temático/evangelístico/...), que na prática duplicava o
+// que "Tipo de Mensagem" passou a cobrir.
 export const sermonStyles = [
-  "expositivo",
-  "tematico",
-  "evangelistico",
-  "ensino_biblico",
-  "reflexiva",
+  "simples",
+  "ensino",
+  "reflexivo",
+  "impactante",
+  "pastoral",
+  "devocional",
 ] as const;
 
-export const sermonDurations = ["curta", "media", "completa"] as const;
+// "Profundidade" — nível de análise (contexto, precisão conceitual,
+// relações do texto), não tamanho do texto (isso é papel da Duração).
+// Padrão: intermediária (item 7).
+export const sermonDepths = ["basica", "intermediaria", "profunda", "teologica"] as const;
+
+// "Versão da Bíblia" — preferência de registro/linguagem para
+// referências e citações, nunca instrução para reproduzir extensamente
+// o texto literal de uma tradução com direitos autorais (item 11: o
+// texto_base sempre foi gerado pela própria IA a partir do que ela sabe,
+// nunca copiado de uma base de dados de traduções bíblicas — não existe
+// esse acervo no projeto). "padrao" = sem preferência, a IA decide.
+export const bibleVersions = ["padrao", "ara", "arc", "naa", "nvi", "ntlh", "acf"] as const;
 
 export type SermonInput = {
-  themeOrPassage: string;
+  passage: string;
+  theme: string;
+  messageType: (typeof sermonMessageTypes)[number] | null;
   audience: (typeof sermonAudiences)[number];
-  style: (typeof sermonStyles)[number];
   duration: (typeof sermonDurations)[number];
+  style: (typeof sermonStyles)[number];
+  depth: (typeof sermonDepths)[number];
+  bibleVersion: (typeof bibleVersions)[number];
+  notes: string;
 };
 
 const palavraOriginalSchema = z.object({
@@ -143,27 +187,43 @@ export type GenerateSermonResult =
   | { success: true; sermon: SermonContent }
   | { success: false; message: string };
 
+// Duração agora controla SÓ volume/desenvolvimento de conteúdo —
+// Profundidade (mais abaixo) controla o nível de análise, são eixos
+// independentes (item 5/7 do pedido: não confundir "mais longo" com
+// "mais profundo").
 const DURATION_CONFIG: Record<
   SermonInput["duration"],
   { label: string; maxOutputTokens: number; guidance: string }
 > = {
-  curta: {
-    label: "10 a 15 minutos",
-    maxOutputTokens: 2048,
+  "10": {
+    label: "10 minutos",
+    maxOutputTokens: 1600,
     guidance:
-      "Bastante compacta (10 a 15 minutos falados). Introdução de 1 a 2 parágrafos curtos, 3 pontos objetivos com aplicação breve, conclusão e apelo diretos.",
+      "Muito compacta (10 minutos falados). Introdução de 1 parágrafo curto, 3 pontos objetivos com aplicação breve, conclusão e apelo diretos. Sem espaço para desenvolvimento extenso — vá direto ao essencial.",
   },
-  media: {
-    label: "20 a 30 minutos",
-    maxOutputTokens: 3072,
+  "20": {
+    label: "20 minutos",
+    maxOutputTokens: 2560,
     guidance:
-      "Compacta (20 a 30 minutos falados). Introdução de 2 parágrafos curtos, 3 pontos com um exemplo ou aplicação prática cada, aplicação geral e conclusão breves.",
+      "Compacta (20 minutos falados). Introdução de 1 a 2 parágrafos curtos, 3 pontos com aplicação breve cada, conclusão direta.",
   },
-  completa: {
-    label: "40 a 60 minutos",
+  "30": {
+    label: "30 minutos",
+    maxOutputTokens: 3584,
+    guidance:
+      "Média (30 minutos falados). Introdução de 2 parágrafos curtos, 3 pontos com um exemplo ou aplicação prática cada, aplicação geral e conclusão bem desenvolvidas.",
+  },
+  "40": {
+    label: "40 minutos",
+    maxOutputTokens: 4608,
+    guidance:
+      "Desenvolvida (40 minutos falados). Introdução de 2 a 3 parágrafos, 3 ou 4 pontos com exemplo e aplicação prática cada, aplicação final e conclusão substanciais.",
+  },
+  "60": {
+    label: "60 minutos",
     maxOutputTokens: 6000,
     guidance:
-      `Aprofundada, mas confortável de ler — isto é MATERIAL DE APOIO para o pregador desenvolver ao vivo por 40 a 60 minutos, não um texto para ser lido literalmente palavra por palavra. Não é um livro. Priorize conteúdo substancial sem redundância: cada seção deve trazer algo que as outras não trazem. Siga estas metas por campo (em parágrafos curtos — poucas frases cada, nunca um bloco único de texto):
+      `Aprofundada, mas confortável de ler — isto é MATERIAL DE APOIO para o pregador desenvolver ao vivo por até 60 minutos, não um texto para ser lido literalmente palavra por palavra. Não é um livro. Priorize conteúdo substancial sem redundância: cada seção deve trazer algo que as outras não trazem. Siga estas metas por campo (em parágrafos curtos — poucas frases cada, nunca um bloco único de texto):
 - introducao: 3 a 4 parágrafos curtos.
 - contexto_biblico: 2 a 3 parágrafos curtos.
 - pontos: 3 ou 4 pontos principais.
@@ -179,26 +239,56 @@ Não empobreça a teologia para reduzir o tamanho — corte redundância, não p
   },
 };
 
+const MESSAGE_TYPE_LABELS: Record<(typeof sermonMessageTypes)[number], string> = {
+  expositiva: "expositiva (desenvolve o texto bíblico verso a verso ou por unidades naturais)",
+  tematica: "temática (organizada em torno de um tema, com apoio de várias passagens)",
+  textual: "textual (estrutura extraída diretamente dos pontos de um único texto curto)",
+  evangelistica: "evangelística (com convite claro à fé em Cristo)",
+  doutrinaria: "doutrinária (explica e fundamenta uma doutrina bíblica específica)",
+  encorajamento: "de encorajamento (foco em consolar e fortalecer)",
+  culto_jovens: "para culto de jovens",
+  mulheres: "para reunião de mulheres",
+  homens: "para reunião de homens",
+  infantil: "infantil (linguagem simples para crianças)",
+  escola_biblica: "para Escola Bíblica Dominical (formato de ensino em classe)",
+  missoes: "sobre missões",
+};
+
 const AUDIENCE_LABELS: Record<SermonInput["audience"], string> = {
-  domingo: "culto de domingo",
-  ensino: "culto de ensino",
-  oracao: "culto de oração",
-  evangelistico: "culto evangelístico",
-  jovens: "culto de jovens",
-  mulheres: "culto de mulheres",
-  homens: "culto de homens",
-  santa_ceia: "culto de Santa Ceia",
-  congresso: "congresso ou conferência",
-  celula: "célula ou pequeno grupo",
-  outro: "outro contexto de ministração",
+  geral: "igreja em geral",
+  jovens: "jovens",
+  adolescentes: "adolescentes",
+  criancas: "crianças",
+  mulheres: "mulheres",
+  homens: "homens",
+  lideres: "líderes da igreja",
+  obreiros: "obreiros",
+  evangelismo: "público de evangelismo (pessoas ainda não convertidas)",
 };
 
 const STYLE_LABELS: Record<SermonInput["style"], string> = {
-  expositivo: "expositivo",
-  tematico: "temático",
-  evangelistico: "evangelístico",
-  ensino_biblico: "ensino bíblico",
-  reflexiva: "reflexiva",
+  simples: "simples e direto",
+  ensino: "de ensino, didático",
+  reflexivo: "reflexivo, que convida à meditação",
+  impactante: "impactante, com força retórica",
+  pastoral: "pastoral, acolhedor",
+  devocional: "devocional, íntimo",
+};
+
+const DEPTH_GUIDANCE: Record<SermonInput["depth"], string> = {
+  basica: "Básica: explicação acessível e direta, sem se demorar em nuances de contexto ou teologia — foque no essencial do texto de forma clara.",
+  intermediaria: "Intermediária: bom equilíbrio entre acessibilidade e profundidade — explique o contexto e os conceitos com cuidado, sem virar aula.",
+  profunda: "Profunda: aprofunde a análise do contexto histórico/literário, seja mais preciso nos conceitos bíblicos e explore relações importantes do texto com outras passagens — sem transformar a mensagem em aula acadêmica. Profundidade é sobre qualidade da análise, não sobre escrever mais por escrever.",
+  teologica: "Teológica: aprofunde ainda mais a análise do contexto, a precisão conceitual e as relações bíblicas do texto, trazendo uma leitura teologicamente robusta — mas continue em linguagem pregável e pastoral, nunca em jargão acadêmico. Não é uma aula de seminário.",
+};
+
+const BIBLE_VERSION_LABELS: Record<Exclude<SermonInput["bibleVersion"], "padrao">, string> = {
+  ara: "Almeida Revista e Atualizada (ARA)",
+  arc: "Almeida Revista e Corrigida (ARC)",
+  naa: "Nova Almeida Atualizada (NAA)",
+  nvi: "Nova Versão Internacional (NVI)",
+  ntlh: "Nova Tradução na Linguagem de Hoje (NTLH)",
+  acf: "Almeida Corrigida Fiel (ACF)",
 };
 
 const SYSTEM_INSTRUCTION = `Você ajuda pregadores cristãos a preparar mensagens para o púlpito, em português do Brasil.
@@ -207,24 +297,46 @@ Regras de estilo:
 - Escreva de forma natural, pastoral e pregável — nunca acadêmica ou rebuscada.
 - Nunca use títulos teológicos artificiais. Prefira títulos simples e diretos.
 - Seja bíblico, claro e aplicável à vida real do ouvinte.
-- Use como base o tema ou passagem informados pelo usuário.
-- Adapte vocabulário, exemplos, aplicação e tom ao Estilo e ao Onde vai ministrar informados — uma mensagem para "culto de ensino" com estilo "ensino bíblico" deve ser claramente diferente de uma mensagem para "culto evangelístico" com estilo "evangelístico" (esta última deve incluir convite claro à fé em Cristo; a primeira deve aprofundar o ensino do texto).
+- Use como base o texto/passagem e o tema informados pelo usuário (quando os dois forem dados, o tema direciona o ângulo da mensagem sobre aquele texto).
+- "Tipo de mensagem" define a ABORDAGEM ESTRUTURAL da pregação (ex.: expositiva desenvolve o texto verso a verso, evangelística tem apelo claro à conversão, doutrinária fundamenta uma doutrina). "Estilo" define só LINGUAGEM, TOM E FORMA DE APLICAÇÃO (ex.: simples, impactante, reflexivo) — nunca muda a fidelidade bíblica do conteúdo. São coisas diferentes: uma mensagem expositiva pode ter estilo simples ou estilo impactante, por exemplo.
+- "Público" ajusta vocabulário e exemplos para quem vai ouvir (crianças pedem linguagem bem simples; líderes/obreiros toleram mais profundidade prática).
+- "Profundidade" controla o NÍVEL DE ANÁLISE (contexto, precisão conceitual, relações do texto) — nunca o tamanho do texto, que é controlado pela Duração. Uma mensagem de 10 minutos com profundidade "profunda" deve ser curta E analiticamente cuidadosa, não uma mensagem longa.
 - Toda pregação precisa de aplicação prática real em cada ponto — nunca entregue só explicação bíblica.
 - "palavra_original": inclua uma palavra em hebraico (Antigo Testamento) ou grego (Novo Testamento) apenas quando ela realmente ajudar a entender o ponto; use null quando não houver uma palavra relevante. Nunca invente etimologias, transliterações ou significados — se não tiver certeza, use null.
+- Se uma versão da Bíblia for indicada como preferência, use-a como referência de registro/linguagem ao citar ou parafrasear o texto (mais formal ou mais contemporânea, conforme a tradução) — nunca copie um trecho extenso e literal de uma tradução específica; texto_base e qualquer citação devem ser uma citação/paráfrase fiel e concisa, no seu próprio texto, nunca uma reprodução extensa de uma obra com direitos autorais.
+- Se houver observações adicionais do usuário, respeite essas instruções específicas dentro do que for bíblica e pastoralmente responsável.
 - Em todo campo de texto mais longo (introducao, contexto_biblico, explicacao de cada ponto, aplicacao_final, conclusao): escreva em parágrafos curtos (poucas frases cada), separados por uma linha em branco entre eles — nunca um bloco único de texto extenso. Isso é para leitura confortável em celular.
 - Evite repetir a mesma ideia, explicação ou aplicação em seções diferentes (introdução, pontos, aplicação final, conclusão) — cada seção deve trazer conteúdo distinto.
-- O tempo de duração (ex.: "40 a 60 minutos") representa material de apoio suficiente para o pregador desenvolver ao vivo nesse tempo, não um texto para ser lido literalmente do início ao fim.
+- O tempo de duração representa material de apoio suficiente para o pregador desenvolver ao vivo nesse tempo, não um texto para ser lido literalmente do início ao fim.
 - Responda sempre em português do Brasil.
 - Responda SOMENTE com JSON seguindo exatamente o schema fornecido, sem texto fora do JSON.`;
 
 function buildPrompt(input: SermonInput): string {
   const duration = DURATION_CONFIG[input.duration];
-  return `Tema ou passagem bíblica: ${input.themeOrPassage}
-Onde vai ser ministrada: ${AUDIENCE_LABELS[input.audience]}
-Estilo: ${STYLE_LABELS[input.style]}
-Duração alvo: ${duration.label}
+
+  const lines = [`Texto bíblico ou passagem: ${input.passage}`];
+  if (input.theme.trim()) {
+    lines.push(`Tema: ${input.theme.trim()}`);
+  }
+  if (input.messageType) {
+    lines.push(`Tipo de mensagem: ${MESSAGE_TYPE_LABELS[input.messageType]}`);
+  }
+  lines.push(`Público: ${AUDIENCE_LABELS[input.audience]}`);
+  lines.push(`Duração alvo: ${duration.label}`);
+  lines.push(`Estilo: ${STYLE_LABELS[input.style]}`);
+  lines.push(`Profundidade: ${input.depth}`);
+  if (input.bibleVersion !== "padrao") {
+    lines.push(`Versão da Bíblia de referência: ${BIBLE_VERSION_LABELS[input.bibleVersion]}`);
+  }
+  if (input.notes.trim()) {
+    lines.push(`Observações adicionais do pastor: ${input.notes.trim()}`);
+  }
+
+  return `${lines.join("\n")}
 
 ${duration.guidance}
+
+${DEPTH_GUIDANCE[input.depth]}
 
 Gere uma pregação completa e um esboço resumido para o púlpito, seguindo o formato pedido.`;
 }
@@ -297,7 +409,7 @@ export async function generateSermon(
   } finally {
     const latencyMs = Date.now() - start;
     console.log(
-      `[AI-LOG] tool=pregacao model=${MODEL} duration=${input.duration} input_tokens=${usage.total_input_tokens} output_tokens=${usage.total_output_tokens} total_tokens=${usage.total_tokens} latency_ms=${latencyMs} success=${success}`,
+      `[AI-LOG] tool=pregacao model=${MODEL} duration=${input.duration}min input_tokens=${usage.total_input_tokens} output_tokens=${usage.total_output_tokens} total_tokens=${usage.total_tokens} latency_ms=${latencyMs} success=${success}`,
     );
   }
 }

@@ -1,6 +1,6 @@
 "use server";
 
-import { generateBibleStudy, type BibleStudyContent } from "@/services/ai";
+import { generateBibleStudy, bibleVersions, type BibleStudyContent, type BibleStudyInput } from "@/services/ai";
 import { createContent } from "@/services/database";
 import { getCurrentUser } from "@/services/auth";
 import {
@@ -41,6 +41,7 @@ async function persistStudy(study: BibleStudyContent): Promise<BibleStudyActionR
 // Sem retry automático.
 export async function generateAndSaveBibleStudy(
   passage: string,
+  bibleVersion: BibleStudyInput["bibleVersion"] = "padrao",
 ): Promise<BibleStudyActionResult> {
   const trimmed = passage.trim();
   if (trimmed.length < PASSAGE_MIN_LENGTH) {
@@ -48,6 +49,9 @@ export async function generateAndSaveBibleStudy(
   }
   if (trimmed.length > PASSAGE_MAX_LENGTH) {
     return { status: "error", message: "Use uma passagem com até 500 caracteres." };
+  }
+  if (!(bibleVersions as readonly string[]).includes(bibleVersion)) {
+    return { status: "error", message: "Selecione uma versão da Bíblia válida." };
   }
 
   const guard = await reserveGenerationOrTrial("biblia_explicada");
@@ -57,7 +61,7 @@ export async function generateAndSaveBibleStudy(
 
   let result: Awaited<ReturnType<typeof generateBibleStudy>>;
   try {
-    result = await generateBibleStudy({ passage: trimmed });
+    result = await generateBibleStudy({ passage: trimmed, bibleVersion });
   } finally {
     await releaseReservation(guard);
   }

@@ -1,9 +1,20 @@
 import "server-only";
 import { z } from "zod";
 import { generateStructured, toGeminiJsonSchema, type GenerateStructuredResult } from "./generate";
+import type { SermonInput } from "./sermon";
 
 export type BibleStudyInput = {
   passage: string;
+  bibleVersion: SermonInput["bibleVersion"];
+};
+
+const BIBLE_VERSION_LABELS: Record<Exclude<SermonInput["bibleVersion"], "padrao">, string> = {
+  ara: "Almeida Revista e Atualizada (ARA)",
+  arc: "Almeida Revista e Corrigida (ARC)",
+  naa: "Nova Almeida Atualizada (NAA)",
+  nvi: "Nova Versão Internacional (NVI)",
+  ntlh: "Nova Tradução na Linguagem de Hoje (NTLH)",
+  acf: "Almeida Corrigida Fiel (ACF)",
 };
 
 const originalWordSchema = z.object({
@@ -84,11 +95,17 @@ Regras:
 - Evite repetição entre contexto, explicação e resumo — cada seção traz algo que as outras não trazem.
 - Parágrafos curtos (poucas frases cada) — nunca um bloco único de texto extenso. É para leitura confortável no celular.
 - Isto NÃO é uma pregação — não estruture como sermão com pontos numerados.
+- Se uma versão da Bíblia for indicada como preferência, use-a como referência de registro/linguagem ao citar ou parafrasear o texto (mais formal ou mais contemporânea, conforme a tradução) — nunca copie um trecho extenso e literal de uma tradução específica; a passagem em "passagem" deve ser uma citação/paráfrase fiel e concisa, no seu próprio texto, nunca uma reprodução extensa de uma obra com direitos autorais.
 - Responda sempre em português do Brasil.
 - Responda SOMENTE com JSON seguindo exatamente o schema fornecido, sem texto fora do JSON.`;
 
 function buildPrompt(input: BibleStudyInput): string {
-  return `Passagem bíblica: ${input.passage}
+  const lines = [`Passagem bíblica: ${input.passage}`];
+  if (input.bibleVersion !== "padrao") {
+    lines.push(`Versão da Bíblia de referência: ${BIBLE_VERSION_LABELS[input.bibleVersion]}`);
+  }
+
+  return `${lines.join("\n")}
 
 Explique essa passagem de forma clara, pastoral e prática, seguindo o formato pedido.`;
 }

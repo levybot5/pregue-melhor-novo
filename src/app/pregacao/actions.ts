@@ -2,9 +2,12 @@
 
 import {
   generateSermon,
+  sermonMessageTypes,
   sermonAudiences,
   sermonDurations,
   sermonStyles,
+  sermonDepths,
+  bibleVersions,
   type SermonContent,
   type SermonInput,
 } from "@/services/ai";
@@ -16,7 +19,12 @@ import {
   recordReservationUsage,
   type GenerationBlockReason,
 } from "@/services/billing";
-import { THEME_MAX_LENGTH, THEME_MIN_LENGTH } from "./constants";
+import {
+  PASSAGE_MAX_LENGTH,
+  PASSAGE_MIN_LENGTH,
+  THEME_MAX_LENGTH,
+  NOTES_MAX_LENGTH,
+} from "./constants";
 
 export type SermonActionResult =
   | { status: "error"; message: string }
@@ -28,22 +36,37 @@ export type SermonActionResult =
   | { status: "generated"; sermon: SermonContent };
 
 function validateInput(input: SermonInput): string | null {
-  const theme = input.themeOrPassage.trim();
+  const passage = input.passage.trim();
 
-  if (theme.length < THEME_MIN_LENGTH) {
-    return "Use um tema ou passagem com pelo menos 3 caracteres.";
+  if (passage.length < PASSAGE_MIN_LENGTH) {
+    return "Use um texto bíblico ou passagem com pelo menos 3 caracteres.";
   }
-  if (theme.length > THEME_MAX_LENGTH) {
-    return "Use um tema ou passagem com até 500 caracteres.";
+  if (passage.length > PASSAGE_MAX_LENGTH) {
+    return "Use um texto bíblico ou passagem com até 500 caracteres.";
+  }
+  if (input.theme.trim().length > THEME_MAX_LENGTH) {
+    return `Use um tema com até ${THEME_MAX_LENGTH} caracteres.`;
+  }
+  if (input.messageType !== null && !(sermonMessageTypes as readonly string[]).includes(input.messageType)) {
+    return "Selecione um tipo de mensagem válido.";
   }
   if (!(sermonAudiences as readonly string[]).includes(input.audience)) {
-    return "Selecione onde vai ministrar.";
+    return "Selecione um público.";
+  }
+  if (!(sermonDurations as readonly string[]).includes(input.duration)) {
+    return "Selecione uma duração.";
   }
   if (!(sermonStyles as readonly string[]).includes(input.style)) {
     return "Selecione um estilo.";
   }
-  if (!(sermonDurations as readonly string[]).includes(input.duration)) {
-    return "Selecione uma duração.";
+  if (!(sermonDepths as readonly string[]).includes(input.depth)) {
+    return "Selecione uma profundidade.";
+  }
+  if (!(bibleVersions as readonly string[]).includes(input.bibleVersion)) {
+    return "Selecione uma versão da Bíblia válida.";
+  }
+  if (input.notes.trim().length > NOTES_MAX_LENGTH) {
+    return `Use observações com até ${NOTES_MAX_LENGTH} caracteres.`;
   }
   return null;
 }
@@ -91,7 +114,9 @@ export async function generateAndSaveSermon(
   try {
     result = await generateSermon({
       ...input,
-      themeOrPassage: input.themeOrPassage.trim(),
+      passage: input.passage.trim(),
+      theme: input.theme.trim(),
+      notes: input.notes.trim(),
     });
   } finally {
     await releaseReservation(guard);
