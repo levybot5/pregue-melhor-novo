@@ -9,7 +9,7 @@ import type {
   OutlineExpansionContent,
 } from "@/services/ai";
 import { OutlineExpansionView } from "@/components/OutlineExpansionView";
-import { ReadingHeader } from "@/components/reading";
+import { BackLink, ReadingHeader } from "@/components/reading";
 import { GenerationCounter } from "@/components/GenerationCounter";
 import { GenerationBlockedNotice } from "@/components/GenerationBlockedNotice";
 import { TrialCounter } from "@/components/TrialCounter";
@@ -130,6 +130,7 @@ export function EsbocoPregacaoForm({ mode, initialRemaining }: EsbocoPregacaoFor
   if (mode === "expired" || subscriptionExpired) {
     return (
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
+        <BackLink href="/" />
         <RenewalNotice />
       </main>
     );
@@ -138,6 +139,7 @@ export function EsbocoPregacaoForm({ mode, initialRemaining }: EsbocoPregacaoFor
   if (trialExhausted) {
     return (
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
+        <BackLink href="/" />
         <TrialPaywallNotice />
       </main>
     );
@@ -146,6 +148,7 @@ export function EsbocoPregacaoForm({ mode, initialRemaining }: EsbocoPregacaoFor
   if (limitNotice) {
     return (
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
+        <BackLink href="/" />
         <GenerationBlockedNotice
           message={limitNotice}
           variant="limit"
@@ -158,6 +161,7 @@ export function EsbocoPregacaoForm({ mode, initialRemaining }: EsbocoPregacaoFor
   if (pendingContent) {
     return (
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
+        <BackLink href="/" />
         <ReadingHeader title={pendingContent.titulo} baseText={pendingContent.texto_base} />
         {saveWarning && (
           <div className="rounded-2xl border border-red-300 bg-red-50 p-4 text-sm text-red-700">
@@ -206,6 +210,7 @@ export function EsbocoPregacaoForm({ mode, initialRemaining }: EsbocoPregacaoFor
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
+      <BackLink href="/" />
       <header className="flex items-start justify-between gap-2">
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
@@ -315,13 +320,6 @@ export function EsbocoPregacaoForm({ mode, initialRemaining }: EsbocoPregacaoFor
           {errorMessage}
         </p>
       )}
-
-      <Link
-        href="/"
-        className="text-sm font-medium text-muted underline underline-offset-4"
-      >
-        Voltar para o início
-      </Link>
     </main>
   );
 }

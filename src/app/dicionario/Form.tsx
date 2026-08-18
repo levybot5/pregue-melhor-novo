@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useState, useTransition } from "react";
 import type { BibleDictionaryEntry } from "@/services/ai";
 import { DictionaryEntryView } from "@/components/DictionaryEntryView";
@@ -10,6 +9,7 @@ import { TrialCounter } from "@/components/TrialCounter";
 import { TrialSubscribeButton } from "@/components/TrialSubscribeButton";
 import { TrialPaywallNotice } from "@/components/TrialPaywallNotice";
 import { RenewalNotice } from "@/components/RenewalNotice";
+import { BackLink } from "@/components/reading";
 import { CopyIcon, SearchIcon, SpinnerIcon } from "@/components/icons";
 import { isLimitBlockReason, isTrialExhaustedReason, isSubscriptionExpiredReason } from "@/lib/billing-ui";
 import { formatBibleDictionaryForCopy } from "@/lib/copy-content";
@@ -85,6 +85,7 @@ export function DicionarioForm({ mode, initialRemaining }: DicionarioFormProps) 
   if (mode === "expired" || subscriptionExpired) {
     return (
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
+        <BackLink href="/" />
         <RenewalNotice />
       </main>
     );
@@ -93,6 +94,7 @@ export function DicionarioForm({ mode, initialRemaining }: DicionarioFormProps) 
   if (trialExhausted) {
     return (
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
+        <BackLink href="/" />
         <TrialPaywallNotice />
       </main>
     );
@@ -101,6 +103,7 @@ export function DicionarioForm({ mode, initialRemaining }: DicionarioFormProps) 
   if (limitNotice) {
     return (
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
+        <BackLink href="/" />
         <GenerationBlockedNotice
           message={limitNotice}
           variant="limit"
@@ -113,6 +116,7 @@ export function DicionarioForm({ mode, initialRemaining }: DicionarioFormProps) 
   if (entry) {
     return (
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
+        <BackLink href="/" />
         <header className="flex flex-col gap-1">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">{entry.termo}</h1>
         </header>
@@ -142,6 +146,7 @@ export function DicionarioForm({ mode, initialRemaining }: DicionarioFormProps) 
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
+      <BackLink href="/" />
       <header className="flex items-start justify-between gap-2">
         <div className="flex flex-col gap-1">
           <span className="flex items-center gap-2 text-primary">
@@ -199,13 +204,6 @@ export function DicionarioForm({ mode, initialRemaining }: DicionarioFormProps) 
           {errorMessage}
         </p>
       )}
-
-      <Link
-        href="/"
-        className="text-sm font-medium text-muted underline underline-offset-4"
-      >
-        Voltar para o início
-      </Link>
     </main>
   );
 }
