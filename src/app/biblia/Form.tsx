@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import type { BibleStudyContent } from "@/services/ai";
 import { BibleStudyView } from "@/components/BibleStudyView";
+import { ContentToolbar } from "@/components/ContentToolbar";
 import { BackLink, ReadingHeader } from "@/components/reading";
 import { GenerationCounter } from "@/components/GenerationCounter";
 import { GenerationBlockedNotice } from "@/components/GenerationBlockedNotice";
@@ -136,7 +137,7 @@ export function BibliaForm({ mode, initialRemaining }: BibliaFormProps) {
     return (
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
         <BackLink href="/" />
-        <ReadingHeader title={pendingStudy.titulo} baseText={pendingStudy.passagem} />
+        <ReadingHeader title={pendingStudy.titulo} />
         {saveWarning && (
           <div className="rounded-2xl border border-red-300 bg-red-50 p-4 text-sm text-red-700">
             <p>{saveWarning}</p>
@@ -170,6 +171,12 @@ export function BibliaForm({ mode, initialRemaining }: BibliaFormProps) {
         )}
 
         <BibleStudyView study={pendingStudy} />
+
+        <ContentToolbar
+          contentType="biblia_explicada"
+          content={pendingStudy}
+          title={pendingStudy.titulo}
+        />
 
         <button
           type="button"

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import type { SermonContent, SermonInput } from "@/services/ai";
 import { SermonView } from "@/components/SermonView";
+import { ContentToolbar } from "@/components/ContentToolbar";
 import { BackLink, ReadingHeader } from "@/components/reading";
 import { GenerationCounter } from "@/components/GenerationCounter";
 import { GenerationBlockedNotice } from "@/components/GenerationBlockedNotice";
@@ -177,7 +178,7 @@ export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
     return (
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
         <BackLink href="/" />
-        <ReadingHeader title={pendingSermon.titulo} baseText={pendingSermon.texto_base} />
+        <ReadingHeader title={pendingSermon.titulo} />
 
         {saveWarning && (
           <div className="rounded-2xl border border-red-300 bg-red-50 p-4 text-sm text-red-700">
@@ -212,6 +213,8 @@ export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
         )}
 
         <SermonView sermon={pendingSermon} />
+
+        <ContentToolbar contentType="pregacao" content={pendingSermon} title={pendingSermon.titulo} />
 
         <button
           type="button"

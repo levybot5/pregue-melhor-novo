@@ -100,7 +100,7 @@ export function DevocionalForm({ mode, initialRemaining }: DevocionalFormProps) 
     return (
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
         <BackLink href="/" />
-        <ReadingHeader title={devotional.titulo} baseText={devotional.texto_base} />
+        <ReadingHeader title={devotional.titulo} />
         <DevotionalView devotional={devotional} />
         <ContentToolbar contentType="devocional" content={devotional} title={devotional.titulo} />
         <button

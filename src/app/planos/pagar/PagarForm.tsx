@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { CheckIcon, SpinnerIcon } from "@/components/icons";
+import { BackLink } from "@/components/reading";
 import { createPixPurchaseAction, getPurchaseStatusAction } from "./actions";
 
 // Só Pix neste lançamento (cartão fica pronto no backend, mas sem
@@ -96,6 +96,7 @@ export function PagarForm() {
   if (step === "qr" && qrCodeBase64 && copyPaste) {
     return (
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col items-center gap-5 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)] text-center">
+        <BackLink href="/" className="self-start" />
         <header className="flex flex-col gap-1">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
             Escaneie o QR Code
@@ -127,16 +128,13 @@ export function PagarForm() {
           <SpinnerIcon className="h-4 w-4 shrink-0 animate-spin text-primary" />
           Assim que o pagamento for confirmado, seu acesso será liberado automaticamente.
         </div>
-
-        <Link href="/" className="text-sm font-medium text-muted underline underline-offset-4">
-          Voltar para o início
-        </Link>
       </main>
     );
   }
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
+      <BackLink href="/" />
       <header className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold tracking-tight text-foreground">Pregue Melhor Pro</h1>
         <span className="text-xs font-semibold uppercase tracking-wide text-accent">
@@ -191,10 +189,6 @@ export function PagarForm() {
         <CheckIcon className="h-3.5 w-3.5 shrink-0 text-primary" />
         Cancele quando quiser.
       </p>
-
-      <Link href="/" className="text-sm font-medium text-muted underline underline-offset-4">
-        Voltar para o início
-      </Link>
     </main>
   );
 }

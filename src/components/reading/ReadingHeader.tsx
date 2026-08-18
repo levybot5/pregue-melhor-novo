@@ -4,14 +4,17 @@ import { ChevronLeftIcon, StarIcon } from "@/components/icons";
 type BackLinkProps = {
   href: string;
   label?: string;
+  className?: string;
 };
 
 // "Voltar" fica no topo, acima do título — não no rodapé da página.
-export function BackLink({ href, label = "Voltar" }: BackLinkProps) {
+// className extra é só pra sobrescrever alinhamento (ex.: self-start
+// dentro de um <main> centralizado) — nunca pra mudar a aparência base.
+export function BackLink({ href, label = "Voltar", className = "" }: BackLinkProps) {
   return (
     <Link
       href={href}
-      className="inline-flex min-h-[36px] w-fit items-center gap-1 text-sm font-medium text-muted"
+      className={`inline-flex min-h-[36px] w-fit items-center gap-1 text-sm font-medium text-muted ${className}`}
     >
       <ChevronLeftIcon className="h-4 w-4" />
       {label}

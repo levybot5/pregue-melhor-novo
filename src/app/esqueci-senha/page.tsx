@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useActionState } from "react";
 import { AuthLogo } from "@/components/AuthLogo";
+import { BackLink } from "@/components/reading";
 import { requestPasswordResetAction, type EsqueciSenhaState } from "./actions";
 
 const initialState: EsqueciSenhaState = { submitted: false, error: null };
@@ -15,6 +15,7 @@ export default function EsqueciSenhaPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
+      <BackLink href="/entrar" />
       <AuthLogo />
 
       <header className="flex flex-col items-center gap-1 text-center">
@@ -55,13 +56,6 @@ export default function EsqueciSenhaPage() {
           </button>
         </form>
       )}
-
-      <Link
-        href="/entrar"
-        className="text-center text-sm font-medium text-primary underline underline-offset-4"
-      >
-        Voltar para o login
-      </Link>
     </main>
   );
 }

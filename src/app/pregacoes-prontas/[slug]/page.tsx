@@ -42,7 +42,6 @@ export default async function PregacaoProntaDetailPage({
 
       <ReadingHeader
         title={sermon.title}
-        baseText={sermon.base_text}
         categoryLabel={categoryLabel}
         favorited={isFavorited}
       />

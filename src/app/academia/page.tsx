@@ -9,6 +9,7 @@ import {
 } from "@/lib/academy/course-data";
 import { PSE_COURSE, getPseLesson } from "@/lib/academy/pse-course-data";
 import { GraduationCapIcon } from "@/components/icons";
+import { BackLink } from "@/components/reading";
 import { ContinueCard } from "@/components/academy/ContinueCard";
 import { ExternalLinkCard } from "@/components/academy/ExternalLinkCard";
 
@@ -89,6 +90,7 @@ export default async function AcademiaPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
+      <BackLink href="/" />
       <header className="flex flex-col gap-1">
         <span className="flex items-center gap-2 text-primary">
           <GraduationCapIcon className="h-6 w-6" />
@@ -169,13 +171,6 @@ export default async function AcademiaPage() {
           ))}
         </div>
       </section>
-
-      <Link
-        href="/"
-        className="text-sm font-medium text-muted underline underline-offset-4"
-      >
-        Voltar para o início
-      </Link>
     </main>
   );
 }

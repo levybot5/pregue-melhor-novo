@@ -42,7 +42,6 @@ export default async function EsbocoProntoDetailPage({
 
       <ReadingHeader
         title={outline.title}
-        baseText={outline.base_text}
         categoryLabel={categoryLabel}
         favorited={isFavorited}
       />

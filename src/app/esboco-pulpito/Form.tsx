@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import type { SermonOutlineContent, SermonOutlineSummaryLevel } from "@/services/ai";
 import { SermonOutlineView } from "@/components/SermonOutlineView";
+import { ContentToolbar } from "@/components/ContentToolbar";
 import { BackLink, ReadingHeader } from "@/components/reading";
 import { GenerationCounter } from "@/components/GenerationCounter";
 import { GenerationBlockedNotice } from "@/components/GenerationBlockedNotice";
@@ -142,7 +143,7 @@ export function EsbocoPulpitoForm({ mode, initialRemaining }: EsbocoPulpitoFormP
     return (
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
         <BackLink href="/" />
-        <ReadingHeader title={pendingOutline.titulo} baseText={pendingOutline.texto_base} />
+        <ReadingHeader title={pendingOutline.titulo} />
         {saveWarning && (
           <div className="rounded-2xl border border-red-300 bg-red-50 p-4 text-sm text-red-700">
             <p>{saveWarning}</p>
@@ -176,6 +177,12 @@ export function EsbocoPulpitoForm({ mode, initialRemaining }: EsbocoPulpitoFormP
         )}
 
         <SermonOutlineView outline={pendingOutline} />
+
+        <ContentToolbar
+          contentType="esboco_pulpito"
+          content={pendingOutline}
+          title={pendingOutline.titulo}
+        />
 
         <button
           type="button"

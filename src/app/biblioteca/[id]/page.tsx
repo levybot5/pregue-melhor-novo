@@ -40,7 +40,7 @@ function renderByType(type: string, raw: Record<string, unknown>, title: string,
       if (!parsed.success) return null;
       return (
         <>
-          <ReadingHeader title={parsed.data.titulo} baseText={parsed.data.texto_base} />
+          <ReadingHeader title={parsed.data.titulo} />
           <SermonView sermon={parsed.data} />
           <ContentToolbar
             contentType="pregacao"
@@ -56,7 +56,7 @@ function renderByType(type: string, raw: Record<string, unknown>, title: string,
       if (!parsed.success) return null;
       return (
         <>
-          <ReadingHeader title={parsed.data.titulo} baseText={parsed.data.passagem} />
+          <ReadingHeader title={parsed.data.titulo} />
           <BibleStudyView study={parsed.data} />
           <ContentToolbar
             contentType="biblia_explicada"
@@ -72,7 +72,7 @@ function renderByType(type: string, raw: Record<string, unknown>, title: string,
       if (!parsed.success) return null;
       return (
         <>
-          <ReadingHeader title={parsed.data.titulo} baseText={parsed.data.texto_base} />
+          <ReadingHeader title={parsed.data.titulo} />
           <OutlineExpansionView content={parsed.data} />
           <ContentToolbar
             contentType="esboco_pregacao"
@@ -92,7 +92,7 @@ function renderByType(type: string, raw: Record<string, unknown>, title: string,
       if (parsedNew.success) {
         return (
           <>
-            <ReadingHeader title={parsedNew.data.titulo} baseText={parsedNew.data.texto_base} />
+            <ReadingHeader title={parsedNew.data.titulo} />
             <SermonOutlineView outline={parsedNew.data} />
             <ContentToolbar
               contentType="esboco_pulpito"
@@ -107,7 +107,7 @@ function renderByType(type: string, raw: Record<string, unknown>, title: string,
       if (!parsedOld.success) return null;
       return (
         <>
-          <ReadingHeader title={parsedOld.data.tema} baseText={parsedOld.data.texto_base} />
+          <ReadingHeader title={parsedOld.data.tema} />
           <PulpitOutlineView outline={parsedOld.data} />
           <ContentToolbar
             contentType="esboco_pulpito_legacy"

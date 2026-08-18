@@ -27,7 +27,7 @@ export function TrialPaywallNotice() {
 
       <Link
         href="/planos/pagar"
-        className="mx-auto flex min-h-[48px] w-full items-center justify-center rounded-2xl bg-primary px-6 font-semibold text-primary-foreground"
+        className="mx-auto flex min-h-[48px] w-full items-center justify-center rounded-2xl bg-primary px-6 font-semibold uppercase tracking-wide text-primary-foreground"
       >
         Assinar Pregue Melhor
       </Link>
