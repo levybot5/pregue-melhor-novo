@@ -62,7 +62,7 @@ export default async function PseLessonPage({
           </p>
           <Link
             href="/planos"
-            className="flex min-h-[48px] w-full items-center justify-center rounded-2xl bg-primary px-5 font-semibold text-primary-foreground"
+            className="flex min-h-[48px] w-full items-center justify-center rounded-2xl bg-primary px-5 font-semibold uppercase tracking-wide text-primary-foreground"
           >
             Assinar Pregue Melhor Pro
           </Link>

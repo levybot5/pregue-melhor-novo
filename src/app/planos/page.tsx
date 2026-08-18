@@ -38,7 +38,7 @@ export default function PlanosPage() {
 
         <Link
           href="/planos/pagar"
-          className="flex min-h-[52px] items-center justify-center rounded-2xl bg-primary px-5 font-semibold text-primary-foreground"
+          className="flex min-h-[52px] items-center justify-center rounded-2xl bg-primary px-5 font-semibold uppercase tracking-wide text-primary-foreground"
         >
           Assinar Pregue Melhor
         </Link>
