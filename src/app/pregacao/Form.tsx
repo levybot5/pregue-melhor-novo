@@ -36,17 +36,6 @@ const AUDIENCE_OPTIONS: { value: SermonInput["audience"]; label: string }[] = [
   { value: "obreiros", label: "Obreiros" },
 ];
 
-const OCCASION_OPTIONS: { value: SermonInput["occasion"] & string; label: string }[] = [
-  { value: "culto", label: "Culto" },
-  { value: "escola_biblica", label: "Escola Bíblica" },
-  { value: "missoes", label: "Missões" },
-  { value: "evangelismo", label: "Evangelismo" },
-  { value: "celebracao", label: "Celebração" },
-  { value: "encorajamento", label: "Encorajamento" },
-  { value: "reuniao_lideres", label: "Reunião de Líderes" },
-  { value: "culto_infantil", label: "Culto Infantil" },
-];
-
 const STYLE_OPTIONS: { value: SermonInput["style"]; label: string }[] = [
   { value: "simples", label: "Simples" },
   { value: "ensino", label: "Ensino" },
@@ -95,7 +84,6 @@ export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
   const [theme, setTheme] = useState("");
   const [format, setFormat] = useState<SermonInput["format"]>(null);
   const [audience, setAudience] = useState<SermonInput["audience"]>("geral");
-  const [occasion, setOccasion] = useState<SermonInput["occasion"]>(null);
   const [duration, setDuration] = useState<SermonInput["duration"]>("20");
   const [style, setStyle] = useState<SermonInput["style"]>("simples");
   const [depth, setDepth] = useState<SermonInput["depth"]>("intermediaria");
@@ -169,7 +157,6 @@ export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
         theme,
         format,
         audience,
-        occasion,
         duration,
         style,
         depth,
@@ -406,30 +393,6 @@ export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
                     onClick={() => setAudience(option.value)}
                     className={`min-h-[48px] rounded-2xl border px-3 text-sm font-medium ${
                       audience === option.value
-                        ? "border-primary bg-primary-soft text-primary"
-                        : "border-card-border bg-card text-foreground"
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </fieldset>
-
-            <fieldset className="flex flex-col gap-2">
-              <legend className="text-sm font-semibold text-foreground">
-                Ocasião <span className="font-normal text-muted">(opcional)</span>
-              </legend>
-              <div className="grid grid-cols-2 gap-2">
-                {OCCASION_OPTIONS.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() =>
-                      setOccasion((current) => (current === option.value ? null : option.value))
-                    }
-                    className={`min-h-[48px] rounded-2xl border px-3 text-sm font-medium ${
-                      occasion === option.value
                         ? "border-primary bg-primary-soft text-primary"
                         : "border-card-border bg-card text-foreground"
                     }`}

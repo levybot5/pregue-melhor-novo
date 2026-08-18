@@ -20,7 +20,6 @@ export {
   sermonContentSchema,
   sermonFormats,
   sermonAudiences,
-  sermonOccasions,
   sermonStyles,
   sermonDurations,
   sermonDepths,

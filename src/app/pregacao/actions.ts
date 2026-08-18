@@ -4,7 +4,6 @@ import {
   generateSermon,
   sermonFormats,
   sermonAudiences,
-  sermonOccasions,
   sermonDurations,
   sermonStyles,
   sermonDepths,
@@ -53,9 +52,6 @@ function validateInput(input: SermonInput): string | null {
   }
   if (!(sermonAudiences as readonly string[]).includes(input.audience)) {
     return "Selecione um público.";
-  }
-  if (input.occasion !== null && !(sermonOccasions as readonly string[]).includes(input.occasion)) {
-    return "Selecione uma ocasião válida.";
   }
   if (!(sermonDurations as readonly string[]).includes(input.duration)) {
     return "Selecione uma duração.";
