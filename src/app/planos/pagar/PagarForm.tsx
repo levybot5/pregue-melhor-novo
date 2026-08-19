@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { CheckIcon, SpinnerIcon } from "@/components/icons";
 import { BackLink } from "@/components/reading";
 import { createPixPurchaseAction, getPurchaseStatusAction } from "./actions";
@@ -70,6 +70,8 @@ export function PagarForm() {
   const [copyPaste, setCopyPaste] = useState<string | null>(null);
   const [copyLabel, setCopyLabel] = useState("Copiar código Pix");
   const [paid, setPaid] = useState(false);
+  const [isCheckingManually, startCheckingManually] = useTransition();
+  const [manualCheckMessage, setManualCheckMessage] = useState<string | null>(null);
 
   // Restaura a compra pendente se a página recarregou (usuário saiu
   // pra pagar no app do banco e voltou) — sem isso a tela reiniciava
@@ -88,23 +90,27 @@ export function PagarForm() {
   // Fica esperando a confirmação chegar pelo webhook — nunca decide
   // sozinho que o pagamento aconteceu (nem por "voltei da tela", nem
   // por ?success=true). Só o servidor, consultando o estado real da
-  // compra, pode dizer que está pago (item 5 do pedido).
+  // compra, pode dizer que está pago (item 5 do pedido). Compartilhada
+  // entre o polling automático e o botão "Já paguei" (checagem manual).
+  const checkStatus = useCallback(async () => {
+    if (!purchaseId) return false;
+    const status = await getPurchaseStatusAction(purchaseId);
+    if (!status) return false;
+    if (status.status === "paid") {
+      setPaid(true);
+      clearStoredPurchase();
+      if (status.needsAccount) {
+        router.push(`/planos/retorno?purchase=${purchaseId}`);
+      } else {
+        router.push("/planos/retorno");
+      }
+      return true;
+    }
+    return false;
+  }, [purchaseId, router]);
+
   useEffect(() => {
     if (step !== "qr" || !purchaseId || paid) return;
-
-    async function checkStatus() {
-      const status = await getPurchaseStatusAction(purchaseId!);
-      if (!status) return;
-      if (status.status === "paid") {
-        setPaid(true);
-        clearStoredPurchase();
-        if (status.needsAccount) {
-          router.push(`/planos/retorno?purchase=${purchaseId}`);
-        } else {
-          router.push("/planos/retorno");
-        }
-      }
-    }
 
     const interval = setInterval(checkStatus, POLL_INTERVAL_MS);
 
@@ -121,7 +127,19 @@ export function PagarForm() {
       clearInterval(interval);
       document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, [step, purchaseId, paid, router]);
+  }, [step, purchaseId, paid, checkStatus]);
+
+  function handleManualCheck() {
+    setManualCheckMessage(null);
+    startCheckingManually(async () => {
+      const wasPaid = await checkStatus();
+      if (!wasPaid) {
+        setManualCheckMessage(
+          "Ainda não identificamos o pagamento. Se você já pagou, aguarde alguns segundos e tente de novo.",
+        );
+      }
+    });
+  }
 
   function handleGeneratePix() {
     setErrorMessage(null);
@@ -200,6 +218,22 @@ export function PagarForm() {
         <div className="flex items-center gap-2 rounded-2xl border border-card-border bg-card px-4 py-3 text-sm text-muted">
           <SpinnerIcon className="h-4 w-4 shrink-0 animate-spin text-primary" />
           Assim que o pagamento for confirmado, seu acesso será liberado automaticamente.
+        </div>
+
+        <div className="flex w-full flex-col gap-2">
+          <button
+            type="button"
+            onClick={handleManualCheck}
+            disabled={isCheckingManually}
+            className="flex min-h-[48px] items-center justify-center rounded-2xl border border-card-border bg-card px-5 font-semibold text-foreground disabled:opacity-60"
+          >
+            {isCheckingManually ? "Verificando..." : "Já paguei"}
+          </button>
+          {manualCheckMessage && (
+            <p role="status" className="text-sm text-muted">
+              {manualCheckMessage}
+            </p>
+          )}
         </div>
       </main>
     );
