@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import type { SermonContent, SermonInput } from "@/services/ai";
 import { SermonView } from "@/components/SermonView";
 import { ContentToolbar } from "@/components/ContentToolbar";
@@ -99,6 +99,15 @@ export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
   const [pendingSermon, setPendingSermon] = useState<SermonContent | null>(null);
   const [savedContentId, setSavedContentId] = useState<string | null>(null);
   const [saveWarning, setSaveWarning] = useState<string | null>(null);
+
+  // Ao trocar do formulário (rolado até o botão "Gerar") pra tela de
+  // resultado, volta pro topo — sem isso a página fica no meio, onde o
+  // usuário estava rolado quando clicou em gerar.
+  useEffect(() => {
+    if (pendingSermon || trialExhausted || subscriptionExpired || limitNotice) {
+      window.scrollTo({ top: 0 });
+    }
+  }, [pendingSermon, trialExhausted, subscriptionExpired, limitNotice]);
 
   function handleResult(result: SermonActionResult) {
     if (result.status === "blocked") {

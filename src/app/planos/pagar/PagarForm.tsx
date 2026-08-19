@@ -13,6 +13,45 @@ type Step = "form" | "qr";
 
 const POLL_INTERVAL_MS = 4000;
 
+// Sobrevive a uma recarga da página: no Android é comum o navegador
+// ser encerrado pelo sistema (memória) quando o usuário sai pra pagar
+// no app do banco — sem isso, ao voltar o React perde o purchaseId e o
+// QR Code, e a tela reinicia do zero em vez de continuar aguardando
+// (ou pular direto pro pós-pagamento, se já tiver sido pago).
+const STORAGE_KEY = "pregue-melhor-pending-pix";
+
+type StoredPurchase = {
+  purchaseId: string;
+  qrCodeBase64: string;
+  copyPaste: string;
+};
+
+function readStoredPurchase(): StoredPurchase | null {
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as StoredPurchase) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredPurchase(value: StoredPurchase) {
+  try {
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(value));
+  } catch {
+    // sessionStorage indisponível (modo privado etc.) — só perde a
+    // recuperação após reload, o fluxo normal continua funcionando.
+  }
+}
+
+function clearStoredPurchase() {
+  try {
+    sessionStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // Ver comentário em writeStoredPurchase.
+  }
+}
+
 function formatCpf(value: string): string {
   return value.replace(/\D/g, "").slice(0, 11);
 }
@@ -32,6 +71,20 @@ export function PagarForm() {
   const [copyLabel, setCopyLabel] = useState("Copiar código Pix");
   const [paid, setPaid] = useState(false);
 
+  // Restaura a compra pendente se a página recarregou (usuário saiu
+  // pra pagar no app do banco e voltou) — sem isso a tela reiniciava
+  // do zero em vez de continuar aguardando o pagamento.
+  useEffect(() => {
+    const stored = readStoredPurchase();
+    if (stored) {
+      setPurchaseId(stored.purchaseId);
+      setQrCodeBase64(stored.qrCodeBase64);
+      setCopyPaste(stored.copyPaste);
+      setStep("qr");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Fica esperando a confirmação chegar pelo webhook — nunca decide
   // sozinho que o pagamento aconteceu (nem por "voltei da tela", nem
   // por ?success=true). Só o servidor, consultando o estado real da
@@ -39,20 +92,35 @@ export function PagarForm() {
   useEffect(() => {
     if (step !== "qr" || !purchaseId || paid) return;
 
-    const interval = setInterval(async () => {
-      const status = await getPurchaseStatusAction(purchaseId);
+    async function checkStatus() {
+      const status = await getPurchaseStatusAction(purchaseId!);
       if (!status) return;
       if (status.status === "paid") {
         setPaid(true);
+        clearStoredPurchase();
         if (status.needsAccount) {
           router.push(`/planos/retorno?purchase=${purchaseId}`);
         } else {
           router.push("/planos/retorno");
         }
       }
-    }, POLL_INTERVAL_MS);
+    }
 
-    return () => clearInterval(interval);
+    const interval = setInterval(checkStatus, POLL_INTERVAL_MS);
+
+    // Timers em segundo plano são pausados/limitados pelo navegador —
+    // ao voltar a aba pra frente (ex.: depois de pagar no app do
+    // banco), checa na hora em vez de esperar o próximo tick do
+    // interval, que pode demorar ou nunca ter rodado enquanto oculta.
+    function handleVisibility() {
+      if (document.visibilityState === "visible") checkStatus();
+    }
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
   }, [step, purchaseId, paid, router]);
 
   function handleGeneratePix() {
@@ -78,6 +146,11 @@ export function PagarForm() {
       setQrCodeBase64(result.qrCodeBase64);
       setCopyPaste(result.copyPaste);
       setStep("qr");
+      writeStoredPurchase({
+        purchaseId: result.purchaseId,
+        qrCodeBase64: result.qrCodeBase64,
+        copyPaste: result.copyPaste,
+      });
     });
   }
 
