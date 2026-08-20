@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/services/auth";
-import { getCurrentSubscription, type SubscriptionStatus } from "@/services/billing";
+import { getCurrentSubscription, getDaysUntilExpiry, type SubscriptionStatus } from "@/services/billing";
+import { DeleteAccountButton } from "./DeleteAccountButton";
+
+const SUPPORT_WHATSAPP_URL = "https://wa.me/5591982486230?text=Quero%20suporte%20no%20Pregue%20Melhor";
 
 const STATUS_LABELS: Record<SubscriptionStatus, string> = {
   active: "Ativa",
@@ -28,6 +31,7 @@ export default async function ContaPage() {
   const subscription = await getCurrentSubscription(user.id);
   const isActive = subscription?.status === "active";
   const isPastDue = subscription?.status === "past_due";
+  const daysUntilExpiry = getDaysUntilExpiry(subscription);
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
@@ -49,15 +53,20 @@ export default async function ContaPage() {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-muted">Valor</span>
-              <span className="font-medium">R$14,90/mês</span>
+              <span className="font-medium">R$10/mês</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-muted">Status</span>
               <span className="font-medium">{STATUS_LABELS[subscription.status]}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-muted">Próxima cobrança</span>
-              <span className="font-medium">{formatDate(subscription.current_period_end)}</span>
+              <span className="text-muted">Vence em</span>
+              <span className="font-medium">
+                {formatDate(subscription.current_period_end)}
+                {daysUntilExpiry !== null && daysUntilExpiry >= 0 && (
+                  <span className="text-muted"> ({daysUntilExpiry} dias)</span>
+                )}
+              </span>
             </div>
           </div>
         ) : (
@@ -66,21 +75,24 @@ export default async function ContaPage() {
 
         {isPastDue && (
           <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700">
-            Não conseguimos confirmar sua última cobrança. Verifique o pagamento no
-            Mercado Pago para continuar gerando conteúdos novos — sua Biblioteca continua
-            disponível normalmente.
+            Não conseguimos confirmar seu último pagamento. Sua Biblioteca continua
+            disponível normalmente, mas gerar conteúdo novo pode estar bloqueado.
           </p>
         )}
 
         {isActive ? (
-          <a
-            href="https://www.mercadopago.com.br/subscriptions"
-            target="_blank"
-            rel="noreferrer"
-            className="flex min-h-[48px] items-center justify-center rounded-2xl border border-card-border px-5 font-semibold text-foreground"
-          >
-            Gerenciar assinatura
-          </a>
+          <>
+            <p className="text-sm text-muted">
+              Pix não renova sozinho — quando estiver perto de vencer, é só pagar de novo
+              pra continuar com acesso.
+            </p>
+            <Link
+              href="/planos/pagar"
+              className="flex min-h-[48px] items-center justify-center rounded-2xl border border-card-border px-5 font-semibold text-foreground"
+            >
+              Renovar com Pix
+            </Link>
+          </>
         ) : (
           <>
             <p className="text-foreground">Sua assinatura não está ativa.</p>
@@ -94,12 +106,23 @@ export default async function ContaPage() {
         )}
       </section>
 
+      <a
+        href={SUPPORT_WHATSAPP_URL}
+        target="_blank"
+        rel="noreferrer"
+        className="flex min-h-[48px] items-center justify-center rounded-2xl border border-card-border bg-card px-5 font-semibold text-foreground"
+      >
+        Falar com o suporte
+      </a>
+
       <Link
         href="/"
         className="text-sm font-medium text-muted underline underline-offset-4"
       >
         Voltar para o início
       </Link>
+
+      <DeleteAccountButton />
     </main>
   );
 }

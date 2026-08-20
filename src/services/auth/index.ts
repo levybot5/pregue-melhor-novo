@@ -1,6 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { getSupabaseServerClient } from "@/services/database/server-client";
+import { getSupabaseAdminClient } from "@/services/database/admin-client";
 
 export type CurrentUser = {
   id: string;
@@ -102,6 +103,36 @@ export async function updatePassword(password: string): Promise<AuthActionResult
     return { status: "error", message: translateAuthError(error.message) };
   }
 
+  return { status: "ok" };
+}
+
+// LGPD: a pessoa tem que poder excluir a própria conta sem depender de
+// pedir pra alguém (é assim que o app fica sem operações manuais
+// arriscadas — ver histórico de exclusão feita por engano nesta
+// sessão). auth.admin.deleteUser() só existe na API admin (service
+// role) — não tem "self-delete" no client SDK do Supabase. Único caso
+// aprovado de usar o admin client num clique do usuário, porque o id
+// vem exclusivamente de getCurrentUser() (sessão validada no
+// servidor), nunca de um parâmetro — não dá pra essa função apagar a
+// conta de outra pessoa. FKs em cascade (contents, subscriptions,
+// favorites, course_progress etc.) limpam o resto sozinhas.
+export async function deleteOwnAccount(): Promise<AuthActionResult> {
+  const user = await getCurrentUser();
+  if (!user) {
+    return { status: "error", message: "Você precisa entrar para excluir sua conta." };
+  }
+
+  const admin = getSupabaseAdminClient();
+  const { error } = await admin.auth.admin.deleteUser(user.id);
+  if (error) {
+    console.error("Falha ao excluir conta:", error.status, error.message);
+    return {
+      status: "error",
+      message: "Não foi possível excluir sua conta agora. Tente novamente.",
+    };
+  }
+
+  await signOut();
   return { status: "ok" };
 }
 
