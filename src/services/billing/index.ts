@@ -27,6 +27,7 @@ export {
   createCardCheckout,
   getPurchaseStatus,
   claimPendingPurchase,
+  InvalidPixPurchaseInputError,
 } from "./purchase";
 export type {
   PaymentMethod,

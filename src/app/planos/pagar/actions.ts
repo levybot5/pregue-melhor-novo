@@ -1,6 +1,11 @@
 "use server";
 
-import { createPixPurchase, getPurchaseStatus, type PixPurchaseInput } from "@/services/billing";
+import {
+  createPixPurchase,
+  getPurchaseStatus,
+  InvalidPixPurchaseInputError,
+  type PixPurchaseInput,
+} from "@/services/billing";
 
 export type PixPurchaseActionResult =
   | { success: true; purchaseId: string; qrCodeBase64: string; copyPaste: string; expirationDate: string }
@@ -13,6 +18,9 @@ export async function createPixPurchaseAction(
     const result = await createPixPurchase(input);
     return { success: true, ...result };
   } catch (error) {
+    if (error instanceof InvalidPixPurchaseInputError) {
+      return { success: false, message: error.message };
+    }
     console.error("Falha ao criar cobrança PIX:", error);
     return {
       success: false,

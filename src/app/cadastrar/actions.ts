@@ -5,6 +5,8 @@ import { signUp } from "@/services/auth";
 
 export type CadastrarState = { error: string | null; checkEmail: boolean };
 
+const NAME_MAX_LENGTH = 100;
+
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
@@ -20,6 +22,9 @@ export async function signUpAction(
 
   if (!name) {
     return { error: "Digite seu nome.", checkEmail: false };
+  }
+  if (name.length > NAME_MAX_LENGTH) {
+    return { error: `Use um nome com até ${NAME_MAX_LENGTH} caracteres.`, checkEmail: false };
   }
   if (!email || !isValidEmail(email)) {
     return { error: "Digite um e-mail válido.", checkEmail: false };

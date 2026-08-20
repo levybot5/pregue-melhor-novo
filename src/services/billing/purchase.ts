@@ -70,12 +70,38 @@ export type PixPurchaseResult = {
   expirationDate: string;
 };
 
+// O formulário (PagarForm.tsx) já valida nome/CPF antes de chamar a
+// action, mas Server Actions são endpoints públicos — quem chamar
+// createPixPurchaseAction() diretamente (sem passar pelo form) pula
+// essa validação do cliente. Revalida aqui, no servidor, antes de
+// gastar uma chamada à API da Asaas com dado inválido.
+export class InvalidPixPurchaseInputError extends Error {}
+
+const PIX_NAME_MAX_LENGTH = 100;
+
+function validatePixPurchaseInput(input: PixPurchaseInput): void {
+  const name = input.name.trim();
+  if (name.length < 3) {
+    throw new InvalidPixPurchaseInputError("Digite seu nome completo.");
+  }
+  if (name.length > PIX_NAME_MAX_LENGTH) {
+    throw new InvalidPixPurchaseInputError(`Use um nome com até ${PIX_NAME_MAX_LENGTH} caracteres.`);
+  }
+
+  const digits = input.cpfCnpj.replace(/\D/g, "");
+  if (digits.length !== 11 && digits.length !== 14) {
+    throw new InvalidPixPurchaseInputError("Digite um CPF ou CNPJ válido.");
+  }
+}
+
 // Cobrança PIX DIRETA (nunca Pix Automático — item 21 do pedido): só
 // pede nome + CPF (exigência mínima da Asaas para criar um cliente),
 // sem endereço nem celular — o QR code e o copia-e-cola aparecem na
 // nossa própria tela. Se o visitante já estiver logado, a compra já
 // nasce vinculada à conta (item 14: não pede cadastro de novo depois).
 export async function createPixPurchase(input: PixPurchaseInput): Promise<PixPurchaseResult> {
+  validatePixPurchaseInput(input);
+
   const deviceId = await getOrCreateDeviceId();
   const user = await getCurrentUser();
 
