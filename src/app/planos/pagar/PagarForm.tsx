@@ -75,16 +75,21 @@ export function PagarForm() {
 
   // Restaura a compra pendente se a página recarregou (usuário saiu
   // pra pagar no app do banco e voltou) — sem isso a tela reiniciava
-  // do zero em vez de continuar aguardando o pagamento.
+  // do zero em vez de continuar aguardando o pagamento. Só existe no
+  // client (sessionStorage), por isso não dá pra ler no render inicial
+  // (SSR não tem acesso) — precisa ser um efeito de montagem mesmo.
   useEffect(() => {
     const stored = readStoredPurchase();
     if (stored) {
+      /* eslint-disable react-hooks/set-state-in-effect -- restauração
+         única na montagem, a partir do sessionStorage (não existe no
+         SSR pra virar estado inicial via useState) */
       setPurchaseId(stored.purchaseId);
       setQrCodeBase64(stored.qrCodeBase64);
       setCopyPaste(stored.copyPaste);
       setStep("qr");
+      /* eslint-enable react-hooks/set-state-in-effect */
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Fica esperando a confirmação chegar pelo webhook — nunca decide
