@@ -139,7 +139,7 @@ export default function CadastrarPage() {
 
           <Link
             href="/entrar"
-            className="text-center text-sm font-medium text-primary underline underline-offset-4"
+            className="flex min-h-[52px] items-center justify-center rounded-2xl border border-card-border px-5 font-semibold text-primary"
           >
             Já sou assinante
           </Link>
