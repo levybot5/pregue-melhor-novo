@@ -197,6 +197,12 @@ export default async function Home() {
           Pregue Melhor é um apoio para sua preparação — não substitui o cuidado pastoral nem o
           estudo pessoal da Palavra.
         </p>
+        <Link
+          href="/privacidade"
+          className="text-center text-xs text-muted underline underline-offset-4"
+        >
+          Política de Privacidade
+        </Link>
       </main>
     </>
   );

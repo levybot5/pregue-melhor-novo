@@ -143,6 +143,14 @@ export default function CadastrarPage() {
           >
             Já sou assinante
           </Link>
+
+          <p className="text-center text-xs text-muted">
+            Ao se cadastrar, você concorda com nossa{" "}
+            <Link href="/privacidade" className="underline underline-offset-4">
+              Política de Privacidade
+            </Link>
+            .
+          </p>
         </>
       )}
     </main>
