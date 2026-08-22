@@ -25,16 +25,20 @@ export type AuthActionResult =
   | { status: "check_email" }
   | { status: "error"; message: string };
 
+// "name" é opcional: o cadastro normal (/cadastrar) não pede mais nome
+// (só e-mail + senha) — o parâmetro só existe pra manter o fluxo
+// pós-pagamento (planos/retorno/AsaasSignupForm.tsx, que ainda pede
+// nome) funcionando sem mudar aquela tela.
 export async function signUp(
-  name: string,
   email: string,
   password: string,
+  name?: string,
 ): Promise<AuthActionResult> {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { name } },
+    options: name ? { data: { name } } : undefined,
   });
 
   if (error) {

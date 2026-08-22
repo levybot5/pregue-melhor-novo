@@ -7,10 +7,9 @@ import { PregacaoForm } from "./Form";
 // Gemini terminar, principalmente na versão "Completa".
 export const maxDuration = 60;
 
-// Sem login: trial de 3 gerações grátis por dispositivo (ver
-// services/billing/trial.ts) — a rota não é mais protegida pelo proxy.
-// Logado sem Pro ativo também cai no trial (por device_id, não reseta
-// por login/logout).
+// Cadastro é obrigatório antes de chegar aqui (ver proxy.ts) — quem
+// nunca assinou cai no trial de 3 gerações grátis por CONTA (ver
+// services/billing/trial.ts), não mais por dispositivo.
 export default async function PregacaoPage() {
   const user = await getCurrentUser();
 

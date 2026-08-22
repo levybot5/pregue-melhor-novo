@@ -16,7 +16,6 @@ function isValidEmail(email: string): boolean {
 export default function CadastrarPage() {
   const [state, formAction, isPending] = useActionState(signUpAction, initialState);
 
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [emailTouched, setEmailTouched] = useState(false);
   const [password, setPassword] = useState("");
@@ -76,20 +75,7 @@ export default function CadastrarPage() {
         <>
           <form action={formAction} onSubmit={handleSubmit} className="flex flex-col gap-4">
             <label className="flex flex-col gap-2">
-              <span className="text-sm font-semibold text-foreground">Nome</span>
-              <input
-                type="text"
-                name="name"
-                required
-                autoComplete="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="min-h-[52px] rounded-2xl border border-card-border bg-card px-4 text-base text-foreground outline-none focus:border-primary"
-              />
-            </label>
-
-            <label className="flex flex-col gap-2">
-              <span className="text-sm font-semibold text-foreground">Digite seu e-mail</span>
+              <span className="text-sm font-semibold text-foreground">E-mail</span>
               <input
                 type="email"
                 name="email"
@@ -116,7 +102,7 @@ export default function CadastrarPage() {
 
             <PasswordInput
               name="confirmPassword"
-              label="Confirme sua senha"
+              label="Confirmar senha"
               autoComplete="new-password"
               defaultVisible
               value={confirmPassword}
@@ -133,7 +119,7 @@ export default function CadastrarPage() {
               disabled={isPending}
               className="flex min-h-[52px] items-center justify-center rounded-2xl bg-primary px-5 font-semibold uppercase tracking-wide text-primary-foreground disabled:opacity-60"
             >
-              {isPending ? "Cadastrando..." : "Cadastrar"}
+              {isPending ? "Criando..." : "Criar meu acesso"}
             </button>
           </form>
 
@@ -141,7 +127,7 @@ export default function CadastrarPage() {
             href="/entrar"
             className="flex min-h-[52px] items-center justify-center rounded-2xl border border-card-border bg-card px-5 font-semibold text-primary"
           >
-            Já sou assinante
+            Já possui uma conta? Entrar
           </Link>
 
           <p className="text-center text-xs text-muted">

@@ -2,18 +2,27 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { DEVICE_ID_COOKIE } from "@/services/billing/device";
 
-// As 6 ferramentas com geração por IA (pregacao, biblia, esboco-*,
-// devocional, dicionario) NÃO ficam mais aqui: visitante sem login
-// pode usá-las em modo trial (3 gerações grátis por dispositivo — ver
-// services/billing/trial.ts). O que continua exigindo conta é o que
-// depende de dado pertencente ao usuário (Biblioteca, Academia,
-// conteúdo pronto).
-const PROTECTED_PREFIXES = [
-  "/biblioteca",
-  "/pregacoes-prontas",
-  "/esbocos-prontos",
-  "/academia",
+// Cadastro é obrigatório antes de QUALQUER acesso ao app — inclusive
+// as 6 ferramentas de IA e a Home. O trial (3 gerações grátis) agora é
+// por conta (auth.uid(), ver services/billing/trial.ts), não mais por
+// device_id/cookie. Por isso o modelo de gate virou o oposto de antes:
+// em vez de listar rotas protegidas, listamos as poucas rotas
+// PÚBLICAS — tudo que não estiver aqui exige sessão.
+const PUBLIC_PATHS = [
+  "/entrar",
+  "/cadastrar",
+  "/esqueci-senha",
+  "/redefinir-senha",
+  "/privacidade",
+  // Reconciliação de compras Pix antigas pagas mas nunca vinculadas a
+  // uma conta (de antes desta mudança) — ver AsaasSignupForm.tsx e o
+  // branch anônimo de planos/retorno/page.tsx. Não é mais alcançável
+  // por compras novas (checkout agora só existe logado), mas precisa
+  // continuar público pra quem ainda tiver um link antigo.
+  "/planos/retorno",
 ];
+
+const PUBLIC_API_PREFIXES = ["/api/webhooks", "/api/auth/callback", "/api/cron"];
 
 const AUTH_PATHS = ["/entrar", "/cadastrar"];
 
@@ -21,8 +30,9 @@ const DEVICE_ID_MAX_AGE_SECONDS = 60 * 60 * 24 * 400; // ~400 dias (máximo acei
 
 // Renomeado de middleware.ts para proxy.ts no Next.js 16 (mesma função).
 // Responsabilidades: renovar a sessão a cada navegação, garantir o
-// device_id do trial (cookie HttpOnly, nunca localStorage) e bloquear
-// o acesso às rotas protegidas antes de renderizar. Isso é só a camada
+// device_id (cookie HttpOnly, nunca localStorage — ainda usado pelo
+// checkout, mas não mais pelo trial) e bloquear o acesso a tudo que
+// não estiver em PUBLIC_PATHS antes de renderizar. Isso é só a camada
 // de UX — cada Server Action/página também reverifica sessão e trial,
 // porque um matcher mal configurado não pode ser a única proteção (ver
 // services de auth, database e billing).
@@ -78,13 +88,17 @@ export async function proxy(request: NextRequest) {
   const isAuthenticated = Boolean(data?.claims);
 
   const { pathname } = request.nextUrl;
-  const isProtected = PROTECTED_PREFIXES.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
-  );
+  const isPublic =
+    PUBLIC_PATHS.includes(pathname) ||
+    PUBLIC_API_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
   const isAuthPath = AUTH_PATHS.includes(pathname);
 
-  if (isProtected && !isAuthenticated) {
-    const redirectUrl = new URL("/entrar", request.url);
+  if (!isPublic && !isAuthenticated) {
+    // /cadastrar, não /entrar: quem chega pela primeira vez raramente
+    // já tem conta — "Entrar" pressupõe credencial existente e confunde
+    // visitante novo. A tela de cadastro já linka pra "Já possui uma
+    // conta? Entrar" pra quem precisar.
+    const redirectUrl = new URL("/cadastrar", request.url);
     redirectUrl.searchParams.set("redirectTo", pathname);
     return finishWithDeviceCookie(NextResponse.redirect(redirectUrl));
   }

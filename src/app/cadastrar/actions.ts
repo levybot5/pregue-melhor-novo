@@ -5,8 +5,6 @@ import { signUp } from "@/services/auth";
 
 export type CadastrarState = { error: string | null; checkEmail: boolean };
 
-const NAME_MAX_LENGTH = 100;
-
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
@@ -15,17 +13,10 @@ export async function signUpAction(
   _prevState: CadastrarState,
   formData: FormData,
 ): Promise<CadastrarState> {
-  const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const confirmPassword = String(formData.get("confirmPassword") ?? "");
 
-  if (!name) {
-    return { error: "Digite seu nome.", checkEmail: false };
-  }
-  if (name.length > NAME_MAX_LENGTH) {
-    return { error: `Use um nome com até ${NAME_MAX_LENGTH} caracteres.`, checkEmail: false };
-  }
   if (!email || !isValidEmail(email)) {
     return { error: "Digite um e-mail válido.", checkEmail: false };
   }
@@ -36,7 +27,7 @@ export async function signUpAction(
     return { error: "As senhas não coincidem.", checkEmail: false };
   }
 
-  const result = await signUp(name, email, password);
+  const result = await signUp(email, password);
 
   if (result.status === "error") {
     return { error: result.message, checkEmail: false };

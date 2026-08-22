@@ -42,7 +42,7 @@ export async function signUpAndClaimAction(
     return { error: "As senhas não coincidem.", checkEmail: false };
   }
 
-  const result = await signUp(name, email, password);
+  const result = await signUp(email, password, name);
 
   if (result.status === "error") {
     return { error: result.message, checkEmail: false };

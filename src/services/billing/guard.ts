@@ -17,11 +17,12 @@ export type GenerationBlockReason =
 
 // Resultado de reserveGenerationOrTrial(): "subscriber" é o fluxo
 // normal (autenticado + Pro ativo, limites diário/mensal); "trial" é
-// visitante sem login OU logado sem Pro (ver item 13 do pedido),
-// controlado por device_id em vez de user_id.
+// usuário autenticado sem Pro (cadastro é obrigatório antes de
+// qualquer acesso ao app — não existe mais visitante anônimo aqui),
+// controlado por user_id.
 export type GenerationReservation =
   | { allowed: true; mode: "subscriber"; userId: string; dailyRemainingAfter: number }
-  | { allowed: true; mode: "trial"; deviceId: string }
+  | { allowed: true; mode: "trial" }
   | { allowed: false; reason: GenerationBlockReason; message: string };
 
 const DAILY_LIMIT_MESSAGE =
@@ -47,11 +48,10 @@ function logDecision(params: {
 }
 
 // Checagem completa antes de QUALQUER chamada de IA nas 6 ferramentas
-// elegíveis ao trial (ver USAGE_TOOLS). Autenticado com Pro ativo:
-// mesmos limites diário/mensal de sempre (mode "subscriber") — quem
-// não tem Pro ativo cai no trial por device_id (mode "trial"), tanto para
-// visitante sem conta quanto para usuário logado sem assinatura ativa
-// (o trial é por dispositivo, nunca reinicia por login/logout). Se
+// elegíveis ao trial (ver USAGE_TOOLS). O proxy já garante que só
+// chega aqui usuário autenticado. Com Pro ativo: mesmos limites
+// diário/mensal de sempre (mode "subscriber") — quem não tem Pro
+// ativo (nunca assinou) cai no trial por user_id (mode "trial"). Se
 // allowed=true, o chamador DEVE chamar releaseReservation() depois
 // (sucesso ou falha), em um finally.
 export async function reserveGenerationOrTrial(tool: UsageTool): Promise<GenerationReservation> {
@@ -103,8 +103,8 @@ export async function reserveGenerationOrTrial(tool: UsageTool): Promise<Generat
         message: SUBSCRIPTION_EXPIRED_MESSAGE,
       };
     }
-    // Nunca assinou: cai no trial por device_id abaixo (item 13 do
-    // pedido) — não bloqueia mais com "inactive_subscription".
+    // Nunca assinou: cai no trial por user_id abaixo — não bloqueia
+    // mais com "inactive_subscription".
   }
 
   const trial = await reserveTrialGeneration();
@@ -115,7 +115,7 @@ export async function reserveGenerationOrTrial(tool: UsageTool): Promise<Generat
     return { allowed: false, reason: "concurrent", message: CONCURRENT_MESSAGE };
   }
 
-  return { allowed: true, mode: "trial", deviceId: trial.deviceId };
+  return { allowed: true, mode: "trial" };
 }
 
 // Libera o lock certo (subscriber ou trial) — sempre em um finally,
@@ -125,7 +125,7 @@ export async function releaseReservation(reservation: GenerationReservation): Pr
   if (reservation.mode === "subscriber") {
     await releaseGenerationLock();
   } else {
-    await releaseTrialLock(reservation.deviceId);
+    await releaseTrialLock();
   }
 }
 
@@ -139,6 +139,6 @@ export async function recordReservationUsage(
   if (reservation.mode === "subscriber") {
     await recordUsage(reservation.userId, tool);
   } else {
-    await recordTrialUsage(reservation.deviceId, tool);
+    await recordTrialUsage(tool);
   }
 }
