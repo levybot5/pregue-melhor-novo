@@ -1,15 +1,6 @@
 import Link from "next/link";
 import { PLANS } from "@/services/billing/pricing";
 
-const BENEFITS = [
-  "Pregação Completa",
-  "Bíblia Explicada",
-  "Esboço em Pregação",
-  "Pregação para Esboço",
-  "Biblioteca com salvamento automático",
-  "Até 20 gerações por dia",
-];
-
 const TRIMESTRAL_MONTHLY_EQUIVALENT = (PLANS.trimestral.price / 3).toFixed(2).replace(".", ",");
 
 export default function PlanosPage() {
@@ -19,17 +10,7 @@ export default function PlanosPage() {
         <h1 className="text-2xl font-bold tracking-tight text-foreground">
           Pregue Melhor Pro
         </h1>
-        <p className="text-muted">Tudo que você precisa para preparar suas mensagens.</p>
       </header>
-
-      <ul className="flex flex-col gap-2">
-        {BENEFITS.map((benefit) => (
-          <li key={benefit} className="flex items-center gap-2 text-foreground">
-            <span className="text-primary">✓</span>
-            {benefit}
-          </li>
-        ))}
-      </ul>
 
       <div className="flex flex-col gap-4 rounded-2xl border-2 border-primary bg-card p-6 shadow-sm">
         <span className="w-fit rounded-full bg-primary px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary-foreground">
