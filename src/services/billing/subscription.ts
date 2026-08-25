@@ -33,11 +33,24 @@ export async function getCurrentSubscription(userId: string): Promise<Subscripti
 // desatualizado, já que os webhooks mantêm current_period_end em dia,
 // mas a checagem é a mesma pros dois — "não criar duas formas
 // diferentes de verificar 'é Pro'", item 15).
+//
+// "cancelled" e "past_due" NÃO cortam acesso na hora — a pessoa já
+// pagou aquele período, continua Pro até current_period_end vencer de
+// verdade (cancelamento de renovação ≠ revogação imediata). Revogação
+// imediata (estorno/chargeback) não é um estado à parte: funciona
+// zerando current_period_end no momento do evento (ver
+// syncPaymentRefunded), então cai nesta mesma checagem de data — sem
+// precisar de um "cancel_at_period_end" separado. Só "inactive" (nunca
+// assinou) é negado incondicionalmente.
 export async function isSubscriptionActive(userId: string): Promise<boolean> {
   const subscription = await getCurrentSubscription(userId);
-  if (subscription?.status !== "active") return false;
-  if (!subscription.current_period_end) return true;
-  return new Date(subscription.current_period_end) > new Date();
+  if (!subscription || subscription.status === "inactive") return false;
+
+  if (subscription.status === "active" && !subscription.current_period_end) {
+    return true;
+  }
+
+  return Boolean(subscription.current_period_end) && new Date(subscription.current_period_end as string) > new Date();
 }
 
 // Só faz sentido para PIX — cartão renova sozinho, não precisa de

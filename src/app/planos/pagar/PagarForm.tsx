@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { CheckIcon, SpinnerIcon } from "@/components/icons";
 import { BackLink } from "@/components/reading";
+import { PLANS, KIT_PRICE, KIT_LABEL, type PlanId } from "@/services/billing/pricing";
 import { createPixPurchaseAction, getPurchaseStatusAction } from "./actions";
 
 // Só Pix neste lançamento (cartão fica pronto no backend, mas sem
@@ -56,7 +57,7 @@ function formatCpf(value: string): string {
   return value.replace(/\D/g, "").slice(0, 11);
 }
 
-export function PagarForm() {
+export function PagarForm({ planId }: { planId: PlanId }) {
   const router = useRouter();
   const [step, setStep] = useState<Step>("form");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -64,6 +65,10 @@ export function PagarForm() {
 
   const [name, setName] = useState("");
   const [cpfCnpj, setCpfCnpj] = useState("");
+  const [includeKit, setIncludeKit] = useState(false);
+
+  const plan = PLANS[planId];
+  const total = Math.round((plan.price + (includeKit ? KIT_PRICE : 0)) * 100) / 100;
 
   const [purchaseId, setPurchaseId] = useState<string | null>(null);
   const [qrCodeBase64, setQrCodeBase64] = useState<string | null>(null);
@@ -160,6 +165,8 @@ export function PagarForm() {
       const result = await createPixPurchaseAction({
         name: name.trim(),
         cpfCnpj,
+        planId,
+        includeKit,
       });
       if (!result.success) {
         setErrorMessage(result.message);
@@ -250,13 +257,38 @@ export function PagarForm() {
       <header className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold tracking-tight text-foreground">Pregue Melhor Pro</h1>
         <span className="text-xs font-semibold uppercase tracking-wide text-accent">
-          Valor de lançamento
+          Plano {plan.label}
         </span>
         <p className="text-3xl font-bold text-foreground">
-          R$10<span className="text-base font-medium text-muted">/mês</span>
+          R${plan.price}
+          <span className="text-base font-medium text-muted"> / {plan.days} dias</span>
         </p>
-        <p className="text-muted">Pagamento único via Pix — 30 dias de acesso.</p>
+        <p className="text-muted">Pagamento único via Pix — {plan.days} dias de acesso.</p>
       </header>
+
+      <label className="flex items-start gap-3 rounded-2xl border border-card-border bg-card p-4">
+        <input
+          type="checkbox"
+          checked={includeKit}
+          onChange={(e) => setIncludeKit(e.target.checked)}
+          className="mt-1 h-5 w-5 shrink-0 accent-primary"
+        />
+        <span className="flex flex-col gap-0.5">
+          <span className="text-sm font-semibold text-foreground">
+            Adicionar {KIT_LABEL} — +R${KIT_PRICE.toFixed(2).replace(".", ",")}
+          </span>
+          <span className="text-xs text-muted">
+            Acesso permanente, não expira com a assinatura.
+          </span>
+        </span>
+      </label>
+
+      <div className="flex items-center justify-between rounded-2xl bg-card px-4 py-3 text-sm">
+        <span className="text-muted">Total</span>
+        <span className="text-lg font-bold text-foreground">
+          R${total.toFixed(2).replace(".", ",")}
+        </span>
+      </div>
 
       <label className="flex flex-col gap-2">
         <span className="text-sm font-semibold text-foreground">Nome completo</span>

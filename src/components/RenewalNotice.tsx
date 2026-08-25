@@ -10,15 +10,15 @@ export function RenewalNotice() {
       <div className="flex flex-col gap-1">
         <h2 className="text-lg font-bold text-foreground">Seu acesso venceu</h2>
         <p className="text-sm text-muted">
-          Renove por R$10 e receba mais 30 dias de Pregue Melhor Pro.
+          Escolha um plano e continue com o Pregue Melhor Pro.
         </p>
       </div>
 
       <Link
-        href="/planos/pagar"
+        href="/planos"
         className="flex min-h-[48px] items-center justify-center rounded-2xl bg-primary px-6 font-semibold text-primary-foreground"
       >
-        Renovar com Pix
+        Ver planos
       </Link>
 
       <p className="text-xs text-muted">

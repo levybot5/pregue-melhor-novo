@@ -1,7 +1,13 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/services/auth";
-import { getCurrentSubscription, getDaysUntilExpiry, type SubscriptionStatus } from "@/services/billing";
+import {
+  getCurrentSubscription,
+  getDaysUntilExpiry,
+  PLANS,
+  isPlanId,
+  type SubscriptionStatus,
+} from "@/services/billing";
 import { DeleteAccountButton } from "./DeleteAccountButton";
 
 const SUPPORT_WHATSAPP_URL = "https://wa.me/5591982486230?text=Quero%20suporte%20no%20Pregue%20Melhor";
@@ -32,6 +38,10 @@ export default async function ContaPage() {
   const isActive = subscription?.status === "active";
   const isPastDue = subscription?.status === "past_due";
   const daysUntilExpiry = getDaysUntilExpiry(subscription);
+  const planId = subscription && isPlanId(subscription.plan) ? subscription.plan : null;
+  const planValueLabel = planId
+    ? `R$${PLANS[planId].price.toFixed(2).replace(".", ",")} / ${PLANS[planId].days} dias`
+    : "R$10/mês";
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
@@ -53,7 +63,7 @@ export default async function ContaPage() {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-muted">Valor</span>
-              <span className="font-medium">R$10/mês</span>
+              <span className="font-medium">{planValueLabel}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-muted">Status</span>
@@ -87,7 +97,7 @@ export default async function ContaPage() {
               pra continuar com acesso.
             </p>
             <Link
-              href="/planos/pagar"
+              href="/planos"
               className="flex min-h-[48px] items-center justify-center rounded-2xl border border-card-border px-5 font-semibold text-foreground"
             >
               Renovar com Pix

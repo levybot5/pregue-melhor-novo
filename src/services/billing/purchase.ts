@@ -8,14 +8,14 @@ import {
   getPixQrCode,
   createCardCheckout as createAsaasCardCheckout,
 } from "./providers/asaas";
+import { recordSubscriptionEvent, type SubscriptionStatusValue } from "./subscription-events";
+import { grantKitAccess } from "./kit";
+import { PLANS, KIT_PRICE, KIT_LABEL, PRO_PRICE, isPlanId, type PlanId } from "./pricing";
 
 // Ponto único que a UI chama para iniciar um pagamento ou reivindicar
 // uma compra já paga. Nada fora de src/services/billing deve importar
 // diretamente de ./providers/asaas — nem a UI, nem as Server Actions
 // das páginas de checkout.
-
-const PRO_PRICE = 10;
-const PIX_ACCESS_DAYS = 30;
 
 export type PaymentMethod = "pix" | "credit_card";
 
@@ -29,6 +29,9 @@ export type PendingPurchaseRow = {
   provider_checkout_id: string | null;
   amount: number;
   status: "pending" | "paid" | "expired" | "cancelled";
+  plan_id: PlanId | null;
+  duration_days: number | null;
+  includes_kit: boolean;
   paid_at: string | null;
   access_expires_at: string | null;
   claimed_by_user_id: string | null;
@@ -40,6 +43,12 @@ async function insertPendingPurchase(
   paymentMethod: PaymentMethod,
   deviceId: string,
   claimedByUserId: string | null,
+  options?: {
+    amount?: number;
+    planId?: PlanId;
+    durationDays?: number;
+    includesKit?: boolean;
+  },
 ): Promise<PendingPurchaseRow> {
   const admin = getSupabaseAdminClient();
   const { data, error } = await admin
@@ -47,7 +56,10 @@ async function insertPendingPurchase(
     .insert({
       device_id: deviceId,
       payment_method: paymentMethod,
-      amount: PRO_PRICE,
+      amount: options?.amount ?? PRO_PRICE,
+      plan_id: options?.planId ?? null,
+      duration_days: options?.durationDays ?? null,
+      includes_kit: options?.includesKit ?? false,
       claimed_by_user_id: claimedByUserId,
     })
     .select()
@@ -61,6 +73,8 @@ export type PixPurchaseInput = {
   name: string;
   cpfCnpj: string;
   email?: string;
+  planId: PlanId;
+  includeKit: boolean;
 };
 
 export type PixPurchaseResult = {
@@ -101,11 +115,25 @@ function validatePixPurchaseInput(input: PixPurchaseInput): void {
 // nasce vinculada à conta (item 14: não pede cadastro de novo depois).
 export async function createPixPurchase(input: PixPurchaseInput): Promise<PixPurchaseResult> {
   validatePixPurchaseInput(input);
+  if (!isPlanId(input.planId)) {
+    throw new InvalidPixPurchaseInputError("Plano inválido.");
+  }
+
+  const plan = PLANS[input.planId];
+  const amount = Math.round((plan.price + (input.includeKit ? KIT_PRICE : 0)) * 100) / 100;
+  const description = input.includeKit
+    ? `Pregue Melhor Pro ${plan.label} + ${KIT_LABEL} — ${plan.days} dias de acesso`
+    : `Pregue Melhor Pro ${plan.label} — ${plan.days} dias de acesso`;
 
   const deviceId = await getOrCreateDeviceId();
   const user = await getCurrentUser();
 
-  const purchase = await insertPendingPurchase("pix", deviceId, user?.id ?? null);
+  const purchase = await insertPendingPurchase("pix", deviceId, user?.id ?? null, {
+    amount,
+    planId: plan.id,
+    durationDays: plan.days,
+    includesKit: input.includeKit,
+  });
 
   const customer = await createAsaasCustomer({
     name: input.name,
@@ -116,9 +144,9 @@ export async function createPixPurchase(input: PixPurchaseInput): Promise<PixPur
 
   const payment = await createPixPayment({
     customerId: customer.id,
-    value: PRO_PRICE,
+    value: amount,
     externalReference: purchase.id,
-    description: "Pregue Melhor Pro — 30 dias de acesso",
+    description,
   });
 
   const admin = getSupabaseAdminClient();
@@ -300,35 +328,48 @@ export async function activateSubscriptionFromPurchase(
 
   const admin = getSupabaseAdminClient();
   const now = new Date();
+  const userId = purchase.claimed_by_user_id;
+  // Linhas antigas (antes da migration de Trimestral) e compras de
+  // cartão sempre têm duration_days null — 30 reproduz exatamente o
+  // comportamento de antes.
+  const accessDays = purchase.duration_days ?? 30;
+
+  // Busca sempre (não só no ramo Pix, como antes) — precisamos do
+  // status anterior pra saber se isto é uma ativação nova ou uma
+  // renovação, só pra fins de trilha de auditoria (subscription_events,
+  // usada pelo painel /admin). Não muda nada no cálculo de datas.
+  const { data: existing } = await admin
+    .from("subscriptions")
+    .select("status, current_period_end")
+    .eq("user_id", userId)
+    .maybeSingle();
 
   let currentPeriodEnd: string;
   if (purchase.payment_method === "pix") {
-    const { data: existing } = await admin
-      .from("subscriptions")
-      .select("current_period_end")
-      .eq("user_id", purchase.claimed_by_user_id)
-      .maybeSingle();
-
     // Renovar antes de vencer nunca faz perder os dias que sobravam
     // (item 8 do pedido): a base é o maior entre "agora" e o
-    // vencimento atual, e só depois somamos 30 dias.
+    // vencimento atual, e só depois somamos os dias da compra —
+    // funciona igual pra Mensal, Trimestral, ou trocar de um pro
+    // outro, sem nenhum caso especial.
     const existingEnd = existing?.current_period_end
       ? new Date(existing.current_period_end as string)
       : null;
     const base = existingEnd && existingEnd > now ? existingEnd : now;
-    const newEnd = new Date(base.getTime() + PIX_ACCESS_DAYS * 24 * 60 * 60 * 1000);
+    const newEnd = new Date(base.getTime() + accessDays * 24 * 60 * 60 * 1000);
     currentPeriodEnd = newEnd.toISOString();
   } else {
     // Cartão: a Asaas é quem manda no calendário de cobrança — o
     // webhook já buscou o nextDueDate real da assinatura na API antes
     // de chamar esta função.
-    currentPeriodEnd = cardCurrentPeriodEnd ?? new Date(now.getTime() + PIX_ACCESS_DAYS * 24 * 60 * 60 * 1000).toISOString();
+    currentPeriodEnd = cardCurrentPeriodEnd ?? new Date(now.getTime() + accessDays * 24 * 60 * 60 * 1000).toISOString();
   }
 
   const { error } = await admin.from("subscriptions").upsert(
     {
-      user_id: purchase.claimed_by_user_id,
-      plan: "pro",
+      user_id: userId,
+      // Fallback "pro" preserva o texto de exibição de linhas antigas
+      // (de antes de existir plan_id) e de compras via cartão.
+      plan: purchase.plan_id ?? "pro",
       status: "active",
       payment_method: purchase.payment_method,
       provider: "asaas",
@@ -339,4 +380,25 @@ export async function activateSubscriptionFromPurchase(
     { onConflict: "user_id" },
   );
   if (error) throw error;
+
+  // Kit é independente do ciclo de assinatura, mas nasce do MESMO
+  // pagamento — concedido aqui (não só no webhook) porque este é o
+  // único ponto por onde TODA ativação passa, inclusive quando o
+  // pagamento aconteceu sem conta e foi reivindicado depois em
+  // claimPendingPurchase(). Idempotente (upsert com ignoreDuplicates),
+  // seguro chamar de novo em qualquer retry.
+  if (purchase.includes_kit) {
+    await grantKitAccess(admin, userId);
+  }
+
+  const previousStatus = (existing?.status as SubscriptionStatusValue | undefined) ?? null;
+  await recordSubscriptionEvent(admin, {
+    userId,
+    eventType: previousStatus === "active" ? "renewed" : "activated",
+    previousStatus,
+    newStatus: "active",
+    paymentMethod: purchase.payment_method,
+    amount: purchase.amount,
+    occurredAt: now.toISOString(),
+  });
 }

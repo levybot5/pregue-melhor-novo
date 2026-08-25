@@ -8,29 +8,14 @@ import {
   getLessonByGlobalNumber,
 } from "@/lib/academy/course-data";
 import { PSE_COURSE, getPseLesson } from "@/lib/academy/pse-course-data";
-import { GraduationCapIcon } from "@/components/icons";
+import { KIT_MATERIALS, KIT_SECTION_ANCHOR } from "@/lib/academy/kit-materials";
+import { hasKitAccess, KIT_LABEL, KIT_PRICE } from "@/services/billing";
+import { GraduationCapIcon, LockIcon } from "@/components/icons";
 import { BackLink } from "@/components/reading";
 import { ContinueCard } from "@/components/academy/ContinueCard";
 import { ExternalLinkCard } from "@/components/academy/ExternalLinkCard";
 
 export const dynamic = "force-dynamic";
-
-// Materiais em PDF — curadoria nossa, vinha da antiga página "Apoio do
-// Pregador". Fica direto nesta tela (não atrás de um "Ver curso").
-const SUPPORT_MATERIALS = [
-  {
-    title: "Pregue com Segurança",
-    url: "https://drive.google.com/file/d/17HQFUQ4yFFpUAoOBOMnMBqVDt5v1NI5P/view?usp=sharing",
-  },
-  {
-    title: "Guia Prático Para Preparar seus Sermões",
-    url: "https://drive.google.com/file/d/16BhkzurwNBC3ynnaIj8ZLHZgnwfzfVs1/view?usp=sharing",
-  },
-  {
-    title: "Como Interpretar a Bíblia",
-    url: "https://drive.google.com/file/d/1dhIwJRtyHn4ETjRa69uHDFPB6tWgqGRC/view?usp=sharing",
-  },
-] as const;
 
 // Resolve a aula mais recente (de qualquer um dos dois cursos) pro
 // card "Continuar estudando" — cada curso tem seu próprio formato de
@@ -77,10 +62,11 @@ export default async function AcademiaPage() {
     redirect("/entrar?redirectTo=/academia");
   }
 
-  const [teologiaProgress, pseProgress, continueLesson] = await Promise.all([
+  const [teologiaProgress, pseProgress, continueLesson, ownsKit] = await Promise.all([
     getCourseProgress(user.id, ACADEMY_COURSE.id),
     getCourseProgress(user.id, PSE_COURSE.id),
     getContinueLesson(user.id),
+    hasKitAccess(user.id),
   ]);
 
   const teologiaCompletedCount = teologiaProgress.filter((p) => p.completedAt).length;
@@ -157,18 +143,50 @@ export default async function AcademiaPage() {
         </Link>
       </section>
 
-      <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-bold text-foreground">Materiais em PDF</h2>
+      <section id={KIT_SECTION_ANCHOR} className="flex flex-col gap-3 scroll-mt-6">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-lg font-bold text-foreground">{KIT_LABEL}</h2>
+          {ownsKit && (
+            <span className="w-fit shrink-0 rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold uppercase tracking-wide text-accent">
+              Acesso permanente
+            </span>
+          )}
+        </div>
 
         <div className="flex flex-col gap-3">
-          {SUPPORT_MATERIALS.map((material) => (
-            <ExternalLinkCard
-              key={material.title}
-              title={material.title}
-              url={material.url}
-              cta="Abrir PDF"
-            />
-          ))}
+          {ownsKit ? (
+            KIT_MATERIALS.map((material) => (
+              <ExternalLinkCard
+                key={material.id}
+                title={material.title}
+                url={material.url}
+                cta="Abrir PDF"
+              />
+            ))
+          ) : (
+            <>
+              {KIT_MATERIALS.map((material) => (
+                <div
+                  key={material.id}
+                  className="flex items-center justify-between gap-3 rounded-2xl border border-card-border bg-card p-4 shadow-sm opacity-70"
+                >
+                  <span className="min-w-0 flex-1 text-base font-semibold text-foreground">
+                    {material.title}
+                  </span>
+                  <LockIcon
+                    className="h-4 w-4 shrink-0 text-muted"
+                    aria-label={`Exclusivo de quem comprou o ${KIT_LABEL}`}
+                  />
+                </div>
+              ))}
+              <Link
+                href="/planos/pagar"
+                className="flex min-h-[48px] items-center justify-center rounded-2xl bg-primary px-5 font-semibold text-primary-foreground"
+              >
+                Adquirir o {KIT_LABEL} — R${KIT_PRICE.toFixed(2).replace(".", ",")}
+              </Link>
+            </>
+          )}
         </div>
       </section>
     </main>

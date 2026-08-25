@@ -37,3 +37,7 @@ export type {
   PurchaseStatusResult,
   ClaimPurchaseResult,
 } from "./purchase";
+
+export { PLANS, KIT_PRICE, KIT_LABEL, DEFAULT_PLAN_ID, isPlanId, PRO_PRICE } from "./pricing";
+export type { PlanId, Plan } from "./pricing";
+export { hasKitAccess } from "./kit";

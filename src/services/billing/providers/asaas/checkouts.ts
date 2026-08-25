@@ -1,5 +1,6 @@
 import "server-only";
 import { asaasRequest } from "./client";
+import { PRO_PRICE } from "../../pricing";
 
 // https://docs.asaas.com/reference/create-new-checkout — checkout
 // HOSPEDADO da Asaas, só para cartão. Nosso servidor nunca vê número
@@ -25,8 +26,6 @@ export type AsaasCheckout = {
   status: string;
 };
 
-const PRO_VALUE = 10;
-
 function todayIsoDate(): string {
   return new Date().toISOString().slice(0, 10);
 }
@@ -49,7 +48,7 @@ export async function createCardCheckout(
         name: "Pregue Melhor Pro",
         description: "Assinatura mensal",
         quantity: 1,
-        value: PRO_VALUE,
+        value: PRO_PRICE,
       },
     ],
     subscription: {
