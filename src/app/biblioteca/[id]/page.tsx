@@ -7,12 +7,14 @@ import {
   outlineExpansionContentSchema,
   pulpitOutlineContentSchema,
   sermonOutlineContentSchema,
+  aulaBiblicaContentSchema,
 } from "@/services/ai";
 import { SermonView } from "@/components/SermonView";
 import { BibleStudyView } from "@/components/BibleStudyView";
 import { OutlineExpansionView } from "@/components/OutlineExpansionView";
 import { PulpitOutlineView } from "@/components/PulpitOutlineView";
 import { SermonOutlineView } from "@/components/SermonOutlineView";
+import { AulaBiblicaView } from "@/components/AulaBiblicaView";
 import { ContentToolbar } from "@/components/ContentToolbar";
 import { BackLink, ReadingHeader } from "@/components/reading";
 import { getCurrentUser } from "@/services/auth";
@@ -112,6 +114,22 @@ function renderByType(type: string, raw: Record<string, unknown>, title: string,
           <ContentToolbar
             contentType="esboco_pulpito_legacy"
             content={parsedOld.data}
+            title={title}
+            deletable={deletable}
+          />
+        </>
+      );
+    }
+    case "aula_biblica": {
+      const parsed = aulaBiblicaContentSchema.safeParse(raw);
+      if (!parsed.success) return null;
+      return (
+        <>
+          <ReadingHeader title={parsed.data.titulo} />
+          <AulaBiblicaView aula={parsed.data} />
+          <ContentToolbar
+            contentType="aula_biblica"
+            content={parsed.data}
             title={title}
             deletable={deletable}
           />

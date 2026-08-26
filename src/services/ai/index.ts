@@ -69,3 +69,14 @@ export {
   ministryDurations,
 } from "./ministry-options";
 export type { MinistryAudience, MinistryStyle, MinistryDuration } from "./ministry-options";
+
+export {
+  generateAulaBiblica,
+  aulaBiblicaContentSchema,
+  aulaBiblicaAmbientes,
+  aulaBiblicaPublicos,
+  aulaBiblicaDuracoes,
+  aulaBiblicaProfundidades,
+  aulaBiblicaBibleVersions,
+} from "./aula-biblica";
+export type { AulaBiblicaInput, AulaBiblicaContent } from "./aula-biblica";

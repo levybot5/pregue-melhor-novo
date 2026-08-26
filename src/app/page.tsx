@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ToolCard, HeroToolCard } from "@/components/ToolCard";
 import {
@@ -11,6 +12,7 @@ import {
   HeartIcon,
   GraduationCapIcon,
   SearchIcon,
+  ChalkboardIcon,
 } from "@/components/icons";
 import { getCurrentUser } from "@/services/auth";
 import { getProfile } from "@/services/database";
@@ -27,6 +29,12 @@ import { InstallPwaBanner } from "@/components/InstallPwaBanner";
 import { signOutAction } from "./actions";
 
 const tools = [
+  {
+    href: "/aula-biblica",
+    title: "Criar Aula Bíblica",
+    description: "Prepare aulas para EBD, células e pequenos grupos.",
+    icon: <ChalkboardIcon className="h-6 w-6" />,
+  },
   {
     href: "/esboco-pregacao",
     title: "Esboço em Pregação",
@@ -97,9 +105,13 @@ export default async function Home() {
       <header className="bg-primary text-primary-foreground">
         <div className="mx-auto flex w-full max-w-xl items-center justify-between px-4 py-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] lg:max-w-[1100px] lg:px-8">
           <span className="flex items-center gap-2">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-base font-bold text-accent-foreground">
-              P
-            </span>
+            <Image
+              src="/brand/icon-source.png"
+              alt=""
+              width={36}
+              height={36}
+              className="h-9 w-9 shrink-0 rounded-full object-cover"
+            />
             <span className="text-lg font-bold tracking-tight">Pregue Melhor</span>
           </span>
 

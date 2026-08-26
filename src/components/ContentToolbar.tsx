@@ -9,6 +9,7 @@ import type {
   PulpitOutlineContent,
   SermonOutlineContent,
   DevotionalContent,
+  AulaBiblicaContent,
 } from "@/services/ai";
 import type { ReadySermon, ReadyOutline, FavoriteContentType } from "@/services/database";
 import type { PulpitModeContent } from "@/lib/pulpit-mode";
@@ -17,7 +18,10 @@ import { FavoriteButton } from "./FavoriteButton";
 import { PodiumIcon, PdfIcon, CopyIcon, TrashIcon } from "./icons";
 import { deleteContentAction } from "@/app/biblioteca/actions";
 
-const NO_PULPIT_MODE_TYPES = new Set(["biblia_explicada", "devocional"]);
+// Aula Bíblica: ensino/classe, não ministração de púlpito — mesmo
+// grupo de biblia_explicada/devocional (formato que Modo Púlpito não
+// serve).
+const NO_PULPIT_MODE_TYPES = new Set(["biblia_explicada", "devocional", "aula_biblica"]);
 
 export type ContentToolbarProps = (
   | { contentType: "pregacao"; content: SermonContent; title: string }
@@ -30,6 +34,7 @@ export type ContentToolbarProps = (
   | { contentType: "pregacao_pronta"; content: ReadySermon; title: string }
   | { contentType: "esboco_pronto"; content: ReadyOutline; title: string }
   | { contentType: "devocional"; content: DevotionalContent; title: string }
+  | { contentType: "aula_biblica"; content: AulaBiblicaContent; title: string }
 ) & {
   // Só presente no acervo editorial (Pregações/Esboços Prontos) — a
   // Biblioteca pessoal não tem favoritos.
@@ -96,6 +101,10 @@ async function buildPdfBlob(props: ContentToolbarProps): Promise<Blob> {
     const { ReadyOutlinePdfDocument } = await import("@/lib/pdf/ready-outline-pdf");
     return pdf(<ReadyOutlinePdfDocument outline={props.content} />).toBlob();
   }
+  if (props.contentType === "aula_biblica") {
+    const { AulaBiblicaPdfDocument } = await import("@/lib/pdf/aula-biblica-pdf");
+    return pdf(<AulaBiblicaPdfDocument aula={props.content} />).toBlob();
+  }
   const { DevotionalPdfDocument } = await import("@/lib/pdf/devotional-pdf");
   return pdf(<DevotionalPdfDocument devotional={props.content} />).toBlob();
 }
@@ -110,6 +119,7 @@ async function buildCopyText(props: ContentToolbarProps): Promise<string> {
     formatReadySermonForCopy,
     formatReadyOutlineForCopy,
     formatDevotionalForCopy,
+    formatAulaBiblicaForCopy,
   } = await import("@/lib/copy-content");
 
   if (props.contentType === "pregacao") return formatSermonForCopy(props.content);
@@ -119,6 +129,7 @@ async function buildCopyText(props: ContentToolbarProps): Promise<string> {
   if (props.contentType === "esboco_pulpito_legacy") return formatPulpitOutlineForCopy(props.content);
   if (props.contentType === "pregacao_pronta") return formatReadySermonForCopy(props.content);
   if (props.contentType === "esboco_pronto") return formatReadyOutlineForCopy(props.content);
+  if (props.contentType === "aula_biblica") return formatAulaBiblicaForCopy(props.content);
   return formatDevotionalForCopy(props.content);
 }
 

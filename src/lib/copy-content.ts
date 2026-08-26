@@ -6,6 +6,7 @@ import type {
   SermonOutlineContent,
   DevotionalContent,
   BibleDictionaryEntry,
+  AulaBiblicaContent,
 } from "@/services/ai";
 import type { ReadySermon, ReadyOutline } from "@/services/database";
 import { normalizeOutlinePointTitle } from "./outline";
@@ -216,5 +217,43 @@ export function formatReadyOutlineForCopy(outline: ReadyOutline): string {
     points,
     bulletBlock("APLICAÇÕES", outline.applications),
     outline.conclusion_appeal ? `CONCLUSÃO / APELO\n${outline.conclusion_appeal}` : null,
+  ]);
+}
+
+export function formatAulaBiblicaForCopy(aula: AulaBiblicaContent): string {
+  const pontos = aula.pontos
+    .map((ponto, index) =>
+      joinBlocks([
+        `${index + 1}. ${ponto.titulo}`,
+        ponto.explicacao,
+        ponto.referencias.length > 0 ? ponto.referencias.join(" · ") : null,
+        ponto.exemplo_aplicacao,
+        `Pergunta: ${ponto.pergunta_participacao}`,
+      ]),
+    )
+    .join("\n\n");
+
+  const conceitos = aula.conceitos_importantes
+    ? bulletBlock(
+        "CONCEITOS IMPORTANTES",
+        aula.conceitos_importantes.map((c) => `${c.termo}: ${c.explicacao}`),
+      )
+    : null;
+
+  return joinBlocks([
+    aula.titulo,
+    aula.texto_base,
+    `OBJETIVO DA AULA\n${aula.objetivo_aula}`,
+    `INTRODUÇÃO\n${aula.introducao}`,
+    `CONTEXTO BÍBLICO\n${aula.contexto_biblico}`,
+    pontos,
+    conceitos,
+    `APLICAÇÃO PRÁTICA\n${aula.aplicacao_pratica}`,
+    bulletBlock("PERGUNTAS PARA DISCUSSÃO", aula.perguntas_discussao),
+    aula.atividade_dinamica
+      ? `ATIVIDADE: ${aula.atividade_dinamica.titulo}\n${aula.atividade_dinamica.instrucoes}`
+      : null,
+    `CONCLUSÃO\n${aula.conclusao}`,
+    `DESAFIO DA SEMANA\n${aula.desafio_semana}`,
   ]);
 }

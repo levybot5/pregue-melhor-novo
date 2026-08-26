@@ -142,6 +142,16 @@ export function CopyIcon({ className }: IconProps) {
   );
 }
 
+export function ChalkboardIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <rect x="3" y="4" width="18" height="12" rx="1.5" />
+      <path d="M8 8h8M8 11.5h5" />
+      <path d="M9 20l3-4 3 4" />
+    </svg>
+  );
+}
+
 // Use com "animate-spin" no elemento pai/próprio className para indicar
 // carregamento — só o traço arqueado gira, sem preencher o círculo todo.
 export function SpinnerIcon({ className }: IconProps) {
