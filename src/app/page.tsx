@@ -95,7 +95,7 @@ export default async function Home() {
   return (
     <>
       <header className="bg-primary text-primary-foreground">
-        <div className="mx-auto flex w-full max-w-xl items-center justify-between px-4 py-3 pt-[calc(env(safe-area-inset-top)+0.75rem)]">
+        <div className="mx-auto flex w-full max-w-xl items-center justify-between px-4 py-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] lg:max-w-[1100px] lg:px-8">
           <span className="flex items-center gap-2">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-base font-bold text-accent-foreground">
               P
@@ -120,39 +120,45 @@ export default async function Home() {
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-6">
-        <p className="text-muted">Prepare sua mensagem com mais clareza.</p>
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-6 lg:max-w-[1100px] lg:px-8 lg:gap-8">
+        <div className="flex flex-col gap-6 lg:flex-row lg:flex-wrap lg:items-start lg:justify-between lg:gap-x-8 lg:gap-y-4">
+          <p className="text-muted lg:order-1 lg:pt-2">Prepare sua mensagem com mais clareza.</p>
 
-        <InstallPwaBanner />
+          <div className="empty:hidden lg:order-3 lg:basis-full">
+            <InstallPwaBanner />
+          </div>
 
-        {generationStatus?.subscriptionActive ? (
-          <>
-            <div className="flex items-center justify-between rounded-2xl border border-card-border bg-card px-4 py-3">
-              <span className="text-sm font-medium text-foreground">Pregue Melhor Pro</span>
-              <GenerationCounter remaining={generationStatus.dailyRemaining} />
-            </div>
-            {showRenewalReminder && (
-              <div className="flex items-center justify-between rounded-2xl border border-accent/40 bg-accent-soft px-4 py-3">
-                <span className="text-sm text-foreground">
-                  Seu acesso vence em {daysUntilExpiry} {daysUntilExpiry === 1 ? "dia" : "dias"}.
-                </span>
-                <Link
-                  href="/planos/pagar"
-                  className="text-sm font-semibold text-accent underline underline-offset-4"
-                >
-                  Renovar
-                </Link>
-              </div>
+          <div className="flex flex-col gap-3 lg:order-2 lg:w-auto lg:min-w-[320px]">
+            {generationStatus?.subscriptionActive ? (
+              <>
+                <div className="flex items-center justify-between rounded-2xl border border-card-border bg-card px-4 py-3">
+                  <span className="text-sm font-medium text-foreground">Pregue Melhor Pro</span>
+                  <GenerationCounter remaining={generationStatus.dailyRemaining} />
+                </div>
+                {showRenewalReminder && (
+                  <div className="flex items-center justify-between rounded-2xl border border-accent/40 bg-accent-soft px-4 py-3">
+                    <span className="text-sm text-foreground">
+                      Seu acesso vence em {daysUntilExpiry} {daysUntilExpiry === 1 ? "dia" : "dias"}.
+                    </span>
+                    <Link
+                      href="/planos/pagar"
+                      className="text-sm font-semibold text-accent underline underline-offset-4"
+                    >
+                      Renovar
+                    </Link>
+                  </div>
+                )}
+              </>
+            ) : (
+              trialRemaining !== null && (
+                <div className="flex items-center justify-between rounded-2xl border border-card-border bg-card px-4 py-3">
+                  <TrialCounter remaining={trialRemaining} className="text-sm font-medium text-foreground" />
+                  <TrialSubscribeButton />
+                </div>
+              )
             )}
-          </>
-        ) : (
-          trialRemaining !== null && (
-            <div className="flex items-center justify-between rounded-2xl border border-card-border bg-card px-4 py-3">
-              <TrialCounter remaining={trialRemaining} className="text-sm font-medium text-foreground" />
-              <TrialSubscribeButton />
-            </div>
-          )
-        )}
+          </div>
+        </div>
 
         <HeroToolCard
           href="/pregacao"
@@ -162,7 +168,7 @@ export default async function Home() {
           cta="Começar"
         />
 
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 lg:grid lg:grid-cols-2 lg:gap-4">
           {tools.map((tool) => (
             <ToolCard key={tool.href} {...tool} />
           ))}
