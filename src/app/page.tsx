@@ -24,8 +24,6 @@ import {
   getCurrentSubscription,
   getDaysUntilExpiry,
 } from "@/services/billing";
-import { GenerationCounter } from "@/components/GenerationCounter";
-import { TrialCounter } from "@/components/TrialCounter";
 import { TrialSubscribeButton } from "@/components/TrialSubscribeButton";
 import { InstallPwaBanner } from "@/components/InstallPwaBanner";
 import { signOutAction } from "./actions";
@@ -112,38 +110,23 @@ export default async function Home() {
           </div>
 
           {/* Discreto de propósito — informação de conta, não uma ação
-              da home. Mesma árvore de decisão de antes, só reestilizada. */}
+              da home. Nome do plano e contagem de gerações não aparecem
+              mais aqui (ficam na Conta e em cada ferramenta, perto do
+              botão de gerar) — a home só mantém o que é acionável. */}
           <div className="flex flex-col gap-2 text-xs lg:order-2 lg:w-auto lg:min-w-[280px] lg:items-end lg:text-right lg:text-sm">
             {generationStatus?.subscriptionActive ? (
-              <>
-                <div className="flex items-center gap-2 text-slate-400">
-                  <span>Pregue Melhor Pro</span>
-                  <GenerationCounter
-                    remaining={generationStatus.dailyRemaining}
-                    className="text-xs text-slate-400 lg:text-sm"
-                  />
-                </div>
-                {showRenewalReminder && (
-                  <div className="flex items-center gap-2 text-accent">
-                    <span>
-                      Vence em {daysUntilExpiry} {daysUntilExpiry === 1 ? "dia" : "dias"}.
-                    </span>
-                    <Link href="/planos/pagar" className="font-semibold underline underline-offset-4">
-                      Renovar
-                    </Link>
-                  </div>
-                )}
-              </>
-            ) : (
-              trialRemaining !== null && (
-                <div className="flex items-center gap-3">
-                  <TrialCounter
-                    remaining={trialRemaining}
-                    className="text-xs text-slate-400 lg:text-sm"
-                  />
-                  <TrialSubscribeButton />
+              showRenewalReminder && (
+                <div className="flex items-center gap-2 text-accent">
+                  <span>
+                    Vence em {daysUntilExpiry} {daysUntilExpiry === 1 ? "dia" : "dias"}.
+                  </span>
+                  <Link href="/planos/pagar" className="font-semibold underline underline-offset-4">
+                    Renovar
+                  </Link>
                 </div>
               )
+            ) : (
+              trialRemaining !== null && <TrialSubscribeButton />
             )}
           </div>
         </div>
