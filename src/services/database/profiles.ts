@@ -19,3 +19,16 @@ export async function getProfile(userId: string): Promise<Profile | null> {
   if (error) throw error;
   return data as Profile | null;
 }
+
+// RLS (update_own_profile) já garante que só o próprio profile pode ser
+// atualizado — não é preciso filtrar por usuário aqui. `name` vazio
+// limpa o campo (volta a usar o e-mail como saudação).
+export async function updateProfileName(userId: string, name: string): Promise<void> {
+  const supabase = await getSupabaseServerClient();
+  const { error } = await supabase
+    .from("profiles")
+    .update({ name: name.trim() || null })
+    .eq("id", userId);
+
+  if (error) throw error;
+}

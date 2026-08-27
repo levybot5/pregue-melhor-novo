@@ -5,7 +5,7 @@
 export { createContent, listContents, getContentById, deleteContent } from "./contents";
 export type { Content, NewContent } from "./contents";
 
-export { getProfile } from "./profiles";
+export { getProfile, updateProfileName } from "./profiles";
 export type { Profile } from "./profiles";
 
 export {

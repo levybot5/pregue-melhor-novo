@@ -96,7 +96,7 @@ export default async function Home() {
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-2 lg:max-w-[1100px] lg:gap-10 lg:px-8 lg:pb-10 lg:pt-6">
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-2 lg:max-w-[1100px] lg:gap-6 lg:px-8 lg:pb-10 lg:pt-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-start lg:justify-between lg:gap-x-8 lg:gap-y-4">
           <div className="flex flex-col gap-0.5 lg:order-1">
             <h1 className="text-xl font-bold tracking-tight text-white lg:text-3xl">
@@ -145,7 +145,7 @@ export default async function Home() {
         <section className="flex flex-col gap-3">
           <SectionHeader title="Ferramentas" />
 
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 lg:gap-4">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4 xl:grid-cols-4">
             <ToolCoverCard
               href="/esboco-pregacao"
               title="Esboço em Pregação"

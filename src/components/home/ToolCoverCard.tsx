@@ -40,17 +40,25 @@ export function ToolCoverCard({
   return (
     <Link
       href={href}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#101B2D] transition-all duration-300 hover:-translate-y-1 hover:border-accent/50"
+      className={`group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#101B2D] transition-all duration-300 hover:-translate-y-1 hover:border-accent/50 ${
+        featured ? "lg:flex-row lg:items-stretch" : ""
+      }`}
     >
       <div
-        className={`relative w-full shrink-0 overflow-hidden ${featured ? "aspect-[2/1] lg:aspect-[3/1]" : "aspect-[4/3]"}`}
+        className={`relative w-full shrink-0 overflow-hidden ${
+          featured ? "aspect-[2/1] lg:aspect-auto lg:w-[60%]" : "aspect-[4/3] lg:aspect-[3/2]"
+        }`}
       >
         {coverImage ? (
           <Image
             src={coverImage}
             alt=""
             fill
-            sizes={featured ? "100vw" : "(min-width: 1024px) 33vw, 50vw"}
+            sizes={
+              featured
+                ? "(min-width: 1024px) 60vw, 100vw"
+                : "(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, 50vw"
+            }
             style={{ objectPosition: coverPosition }}
             className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
@@ -82,7 +90,9 @@ export function ToolCoverCard({
       </div>
 
       <div
-        className={`flex flex-1 flex-col gap-1.5 ${featured ? "p-5" : "px-2.5 py-2 lg:p-3"}`}
+        className={`flex flex-1 flex-col gap-1.5 ${
+          featured ? "p-5 lg:flex-none lg:w-[40%] lg:justify-center lg:gap-2 lg:p-6" : "px-2.5 py-2 lg:p-3"
+        }`}
       >
         <div className="flex items-center gap-2">
           <span

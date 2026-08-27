@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/services/auth";
+import { getProfile } from "@/services/database";
 import {
   getCurrentSubscription,
   getDaysUntilExpiry,
@@ -9,6 +10,7 @@ import {
   type SubscriptionStatus,
 } from "@/services/billing";
 import { DeleteAccountButton } from "./DeleteAccountButton";
+import { EditNameForm } from "./EditNameForm";
 import { AppHeader } from "@/components/AppHeader";
 import { BottomNav } from "@/components/home/BottomNav";
 
@@ -36,7 +38,10 @@ export default async function ContaPage() {
     redirect("/entrar?redirectTo=/conta");
   }
 
-  const subscription = await getCurrentSubscription(user.id);
+  const [profile, subscription] = await Promise.all([
+    getProfile(user.id),
+    getCurrentSubscription(user.id),
+  ]);
   const isActive = subscription?.status === "active";
   const isPastDue = subscription?.status === "past_due";
   const daysUntilExpiry = getDaysUntilExpiry(subscription);
@@ -53,6 +58,8 @@ export default async function ContaPage() {
         <h1 className="text-2xl font-bold tracking-tight text-foreground">Minha Conta</h1>
         <p className="text-muted">{user.email}</p>
       </header>
+
+      <EditNameForm initialName={profile?.name ?? null} />
 
       <section className="flex flex-col gap-3 rounded-2xl border border-card-border bg-card p-6 shadow-sm">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-primary">
