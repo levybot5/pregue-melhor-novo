@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { PLANS } from "@/services/billing/pricing";
+import { AppHeader } from "@/components/AppHeader";
+import { BottomNav } from "@/components/home/BottomNav";
 
 function formatPrice(value: number): string {
   return value.toFixed(2).replace(".", ",");
@@ -9,7 +11,9 @@ const TRIMESTRAL_MONTHLY_EQUIVALENT = formatPrice(PLANS.trimestral.price / 3);
 
 export default function PlanosPage() {
   return (
-    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
+    <>
+      <AppHeader backHref="/" />
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-6 lg:pb-10">
       <header className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold tracking-tight text-foreground">
           Pregue Melhor Pro
@@ -32,14 +36,11 @@ export default function PlanosPage() {
           href="/planos/pagar?plan=trimestral"
           className="flex min-h-[52px] items-center justify-center rounded-2xl bg-primary px-5 font-semibold uppercase tracking-wide text-primary-foreground"
         >
-          Assinar Trimestral
+          ASSINAR 3 MESES
         </Link>
       </div>
 
       <div className="flex flex-col gap-4 rounded-2xl border border-card-border bg-card p-6 shadow-sm">
-        <span className="text-xs font-semibold uppercase tracking-wide text-accent">
-          Valor de lançamento
-        </span>
         <p className="text-3xl font-bold text-foreground">
           R${formatPrice(PLANS.mensal.price)}
           <span className="text-base font-medium text-muted"> / {PLANS.mensal.days} dias</span>
@@ -49,7 +50,7 @@ export default function PlanosPage() {
           href="/planos/pagar?plan=mensal"
           className="flex min-h-[52px] items-center justify-center rounded-2xl border border-card-border px-5 font-semibold text-foreground"
         >
-          Assinar Mensal
+          ASSINAR 1 MÊS
         </Link>
       </div>
 
@@ -59,6 +60,8 @@ export default function PlanosPage() {
       >
         Voltar para o início
       </Link>
-    </main>
+      </main>
+      <BottomNav />
+    </>
   );
 }

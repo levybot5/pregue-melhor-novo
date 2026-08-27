@@ -3,7 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { CheckIcon, SpinnerIcon } from "@/components/icons";
-import { BackLink } from "@/components/reading";
+import { AppHeader } from "@/components/AppHeader";
+import { BottomNav } from "@/components/home/BottomNav";
 import { PLANS, KIT_PRICE, KIT_LABEL, type PlanId } from "@/services/billing/pricing";
 import { createPixPurchaseAction, getPurchaseStatusAction } from "./actions";
 
@@ -198,8 +199,9 @@ export function PagarForm({ planId }: { planId: PlanId }) {
 
   if (step === "qr" && qrCodeBase64 && copyPaste) {
     return (
-      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col items-center gap-5 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)] text-center">
-        <BackLink href="/" className="self-start" />
+      <>
+        <AppHeader backHref="/" />
+        <main className="mx-auto flex w-full max-w-xl flex-1 flex-col items-center gap-5 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-6 text-center lg:pb-10">
         <header className="flex flex-col gap-1">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
             Escaneie o QR Code
@@ -247,13 +249,16 @@ export function PagarForm({ planId }: { planId: PlanId }) {
             </p>
           )}
         </div>
-      </main>
+        </main>
+        <BottomNav />
+      </>
     );
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
-      <BackLink href="/" />
+    <>
+      <AppHeader backHref="/" />
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-6 lg:pb-10">
       <header className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold tracking-tight text-foreground">Pregue Melhor Pro</h1>
         <span className="text-xs font-semibold uppercase tracking-wide text-accent">
@@ -278,7 +283,8 @@ export function PagarForm({ planId }: { planId: PlanId }) {
             Adicionar {KIT_LABEL} — +R${KIT_PRICE.toFixed(2).replace(".", ",")}
           </span>
           <span className="text-xs text-muted">
-            Acesso permanente, não expira com a assinatura.
+            Tenha um apoio prático para se preparar melhor e pregar com mais segurança, mesmo
+            quando bater o nervosismo.
           </span>
         </span>
       </label>
@@ -333,6 +339,8 @@ export function PagarForm({ planId }: { planId: PlanId }) {
         <CheckIcon className="h-3.5 w-3.5 shrink-0 text-primary" />
         Cancele quando quiser.
       </p>
-    </main>
+      </main>
+      <BottomNav />
+    </>
   );
 }

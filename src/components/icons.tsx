@@ -12,6 +12,24 @@ const base = {
   "aria-hidden": true,
 };
 
+export function HomeIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M4 11.5 12 4l8 7.5" />
+      <path d="M6 10v9a1 1 0 0 0 1 1h3v-5h4v5h3a1 1 0 0 0 1-1v-9" />
+    </svg>
+  );
+}
+
+export function UserIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <circle cx="12" cy="8" r="3.5" />
+      <path d="M5 20c0-3.6 3.13-6 7-6s7 2.4 7 6" />
+    </svg>
+  );
+}
+
 export function MessageIcon({ className }: IconProps) {
   return (
     <svg {...base} className={className}>
@@ -81,7 +99,7 @@ export function ClipboardListIcon({ className }: IconProps) {
 export function HeartIcon({ className }: IconProps) {
   return (
     <svg {...base} className={className}>
-      <path d="M12 20s-7-4.35-9.5-8.5C1 8.5 2.5 5 6 5c2 0 3.5 1.2 4 2.5.5-1.3 2-2.5 4-2.5 3.5 0 5 3.5 3.5 6.5C19 15.65 12 20 12 20Z" />
+      <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
     </svg>
   );
 }

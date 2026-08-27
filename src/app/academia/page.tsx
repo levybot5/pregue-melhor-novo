@@ -11,7 +11,8 @@ import { PSE_COURSE, getPseLesson } from "@/lib/academy/pse-course-data";
 import { KIT_MATERIALS, KIT_SECTION_ANCHOR } from "@/lib/academy/kit-materials";
 import { hasKitAccess, KIT_LABEL, KIT_PRICE } from "@/services/billing";
 import { GraduationCapIcon, LockIcon } from "@/components/icons";
-import { BackLink } from "@/components/reading";
+import { AppHeader } from "@/components/AppHeader";
+import { BottomNav } from "@/components/home/BottomNav";
 import { ContinueCard } from "@/components/academy/ContinueCard";
 import { ExternalLinkCard } from "@/components/academy/ExternalLinkCard";
 
@@ -75,8 +76,9 @@ export default async function AcademiaPage() {
   const continueCardData = resolveContinueCard(continueLesson);
 
   return (
-    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
-      <BackLink href="/" />
+    <>
+      <AppHeader backHref="/" />
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-6 lg:pb-10">
       <header className="flex flex-col gap-1">
         <span className="flex items-center gap-2 text-primary">
           <GraduationCapIcon className="h-6 w-6" />
@@ -189,6 +191,8 @@ export default async function AcademiaPage() {
           )}
         </div>
       </section>
-    </main>
+      </main>
+      <BottomNav />
+    </>
   );
 }

@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { listContents } from "@/services/database";
 import { getCurrentUser } from "@/services/auth";
 import { getContentTypeLabel } from "@/lib/content-types";
+import { AppHeader } from "@/components/AppHeader";
+import { BottomNav } from "@/components/home/BottomNav";
 
 // Sempre busca no request: a biblioteca não pode ficar "congelada"
 // com os dados que existiam no momento do build.
@@ -35,7 +37,9 @@ export default async function BibliotecaPage() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
+    <>
+      <AppHeader backHref="/" />
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-6 lg:pb-10">
       <header className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold tracking-tight text-foreground">
           Minha Biblioteca
@@ -80,6 +84,8 @@ export default async function BibliotecaPage() {
       >
         Voltar para o início
       </Link>
-    </main>
+      </main>
+      <BottomNav />
+    </>
   );
 }

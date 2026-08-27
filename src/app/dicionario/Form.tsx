@@ -9,7 +9,8 @@ import { TrialCounter } from "@/components/TrialCounter";
 import { TrialSubscribeButton } from "@/components/TrialSubscribeButton";
 import { TrialPaywallNotice } from "@/components/TrialPaywallNotice";
 import { RenewalNotice } from "@/components/RenewalNotice";
-import { BackLink } from "@/components/reading";
+import { AppHeader } from "@/components/AppHeader";
+import { BottomNav } from "@/components/home/BottomNav";
 import { CopyIcon, SearchIcon, SpinnerIcon } from "@/components/icons";
 import { isLimitBlockReason, isTrialExhaustedReason, isSubscriptionExpiredReason } from "@/lib/billing-ui";
 import { formatBibleDictionaryForCopy } from "@/lib/copy-content";
@@ -84,39 +85,49 @@ export function DicionarioForm({ mode, initialRemaining }: DicionarioFormProps) 
 
   if (mode === "expired" || subscriptionExpired) {
     return (
-      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
-        <BackLink href="/" />
-        <RenewalNotice />
-      </main>
+      <>
+        <AppHeader backHref="/" />
+        <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-6 lg:pb-10">
+          <RenewalNotice />
+        </main>
+        <BottomNav />
+      </>
     );
   }
 
   if (trialExhausted) {
     return (
-      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
-        <BackLink href="/" />
-        <TrialPaywallNotice />
-      </main>
+      <>
+        <AppHeader backHref="/" />
+        <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-6 lg:pb-10">
+          <TrialPaywallNotice />
+        </main>
+        <BottomNav />
+      </>
     );
   }
 
   if (limitNotice) {
     return (
-      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
-        <BackLink href="/" />
-        <GenerationBlockedNotice
-          message={limitNotice}
-          variant="limit"
-          onDismiss={() => setLimitNotice(null)}
-        />
-      </main>
+      <>
+        <AppHeader backHref="/" />
+        <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-6 lg:pb-10">
+          <GenerationBlockedNotice
+            message={limitNotice}
+            variant="limit"
+            onDismiss={() => setLimitNotice(null)}
+          />
+        </main>
+        <BottomNav />
+      </>
     );
   }
 
   if (entry) {
     return (
-      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
-        <BackLink href="/" />
+      <>
+        <AppHeader backHref="/" />
+        <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-6 lg:pb-10">
         <header className="flex flex-col gap-1">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">{entry.termo}</h1>
         </header>
@@ -140,13 +151,16 @@ export function DicionarioForm({ mode, initialRemaining }: DicionarioFormProps) 
             Nova pesquisa
           </button>
         </div>
-      </main>
+        </main>
+        <BottomNav />
+      </>
     );
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
-      <BackLink href="/" />
+    <>
+      <AppHeader backHref="/" />
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-6 lg:pb-10">
       <header className="flex items-start justify-between gap-2">
         <div className="flex flex-col gap-1">
           <span className="flex items-center gap-2 text-primary">
@@ -204,6 +218,8 @@ export function DicionarioForm({ mode, initialRemaining }: DicionarioFormProps) 
           {errorMessage}
         </p>
       )}
-    </main>
+      </main>
+      <BottomNav />
+    </>
   );
 }

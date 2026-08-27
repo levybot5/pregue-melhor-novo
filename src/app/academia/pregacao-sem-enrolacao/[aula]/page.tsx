@@ -12,7 +12,8 @@ import {
   getPseWatchUrl,
   type PseLesson,
 } from "@/lib/academy/pse-course-data";
-import { BackLink } from "@/components/reading";
+import { AppHeader } from "@/components/AppHeader";
+import { BottomNav } from "@/components/home/BottomNav";
 import { LessonCompleteButton } from "@/components/academy/LessonCompleteButton";
 
 export const dynamic = "force-dynamic";
@@ -45,29 +46,31 @@ export default async function PseLessonPage({
   // player, sem carregar nenhum iframe do YouTube.
   if (!hasProAccess) {
     return (
-      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
-        <BackLink href="/academia/pregacao-sem-enrolacao" label="Voltar para o curso" />
+      <>
+        <AppHeader backHref="/academia/pregacao-sem-enrolacao" />
+        <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-6 lg:pb-10">
+          <header className="flex flex-col gap-1">
+            <p className="text-sm font-semibold text-muted">{PSE_COURSE.title}</p>
+            <h1 className="text-xl font-bold leading-snug tracking-tight text-foreground">
+              {lesson.title}
+            </h1>
+          </header>
 
-        <header className="flex flex-col gap-1">
-          <p className="text-sm font-semibold text-muted">{PSE_COURSE.title}</p>
-          <h1 className="text-xl font-bold leading-snug tracking-tight text-foreground">
-            {lesson.title}
-          </h1>
-        </header>
-
-        <div className="flex flex-col items-center gap-3 rounded-2xl border border-card-border bg-card p-6 text-center">
-          <p className="text-foreground">
-            Essa aula faz parte do Pregue Melhor Pro. Assine para assistir a todo o{" "}
-            {PSE_COURSE.title}.
-          </p>
-          <Link
-            href="/planos"
-            className="flex min-h-[48px] w-full items-center justify-center rounded-2xl bg-primary px-5 font-semibold uppercase tracking-wide text-primary-foreground"
-          >
-            Assinar Pregue Melhor Pro
-          </Link>
-        </div>
-      </main>
+          <div className="flex flex-col items-center gap-3 rounded-2xl border border-card-border bg-card p-6 text-center">
+            <p className="text-foreground">
+              Essa aula faz parte do Pregue Melhor Pro. Assine para assistir a todo o{" "}
+              {PSE_COURSE.title}.
+            </p>
+            <Link
+              href="/planos"
+              className="flex min-h-[48px] w-full items-center justify-center rounded-2xl bg-primary px-5 font-semibold uppercase tracking-wide text-primary-foreground"
+            >
+              Assinar Pregue Melhor Pro
+            </Link>
+          </div>
+        </main>
+        <BottomNav />
+      </>
     );
   }
 
@@ -83,9 +86,9 @@ export default async function PseLessonPage({
   const nextHref = lessonHref(next);
 
   return (
-    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-5 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
-      <BackLink href="/academia/pregacao-sem-enrolacao" label="Voltar para o curso" />
-
+    <>
+      <AppHeader backHref="/academia/pregacao-sem-enrolacao" />
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-5 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-6 lg:pb-10">
       <header className="flex flex-col gap-1">
         <p className="text-sm font-semibold text-muted">{PSE_COURSE.title}</p>
         <p className="text-xs text-muted">
@@ -148,6 +151,8 @@ export default async function PseLessonPage({
           <span className="flex-1" />
         )}
       </div>
-    </main>
+      </main>
+      <BottomNav />
+    </>
   );
 }

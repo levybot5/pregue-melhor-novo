@@ -16,7 +16,9 @@ import { PulpitOutlineView } from "@/components/PulpitOutlineView";
 import { SermonOutlineView } from "@/components/SermonOutlineView";
 import { AulaBiblicaView } from "@/components/AulaBiblicaView";
 import { ContentToolbar } from "@/components/ContentToolbar";
-import { BackLink, ReadingHeader } from "@/components/reading";
+import { ReadingHeader } from "@/components/reading";
+import { AppHeader } from "@/components/AppHeader";
+import { BottomNav } from "@/components/home/BottomNav";
 import { getCurrentUser } from "@/services/auth";
 import { getContentTypeLabel } from "@/lib/content-types";
 
@@ -168,15 +170,19 @@ export default async function ContentDetailPage({
 
   if (loadError) {
     return (
-      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
-        <p className="text-red-600">Não foi possível carregar este conteúdo agora.</p>
-        <Link
-          href="/biblioteca"
-          className="text-sm font-medium text-primary underline underline-offset-4"
-        >
-          Voltar para a Biblioteca
-        </Link>
-      </main>
+      <>
+        <AppHeader backHref="/biblioteca" />
+        <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-6 lg:pb-10">
+          <p className="text-red-600">Não foi possível carregar este conteúdo agora.</p>
+          <Link
+            href="/biblioteca"
+            className="text-sm font-medium text-primary underline underline-offset-4"
+          >
+            Voltar para a Biblioteca
+          </Link>
+        </main>
+        <BottomNav />
+      </>
     );
   }
 
@@ -187,29 +193,31 @@ export default async function ContentDetailPage({
   const rendered = renderByType(content.type, content.content, content.title, content.id);
 
   return (
-    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
-      <BackLink href="/biblioteca" />
-
-      {rendered ? (
-        <>
-          <p className="-mt-2 text-xs text-muted">{formatDate(content.created_at)}</p>
-          {rendered}
-        </>
-      ) : (
-        <>
-          <header className="flex flex-col gap-1">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              {content.title}
-            </h1>
-            <p className="text-sm text-muted">
-              {getContentTypeLabel(content.type)}
-              {content.base_text ? ` · ${content.base_text}` : ""} ·{" "}
-              {formatDate(content.created_at)}
-            </p>
-          </header>
-          <p className="text-red-600">Não foi possível exibir este conteúdo.</p>
-        </>
-      )}
-    </main>
+    <>
+      <AppHeader backHref="/biblioteca" />
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-6 lg:pb-10">
+        {rendered ? (
+          <>
+            <p className="-mt-2 text-xs text-muted">{formatDate(content.created_at)}</p>
+            {rendered}
+          </>
+        ) : (
+          <>
+            <header className="flex flex-col gap-1">
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                {content.title}
+              </h1>
+              <p className="text-sm text-muted">
+                {getContentTypeLabel(content.type)}
+                {content.base_text ? ` · ${content.base_text}` : ""} ·{" "}
+                {formatDate(content.created_at)}
+              </p>
+            </header>
+            <p className="text-red-600">Não foi possível exibir este conteúdo.</p>
+          </>
+        )}
+      </main>
+      <BottomNav />
+    </>
   );
 }

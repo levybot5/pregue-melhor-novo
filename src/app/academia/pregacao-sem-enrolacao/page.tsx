@@ -5,7 +5,8 @@ import { getCourseProgress } from "@/services/academy";
 import { PSE_COURSE, PSE_LESSONS } from "@/lib/academy/pse-course-data";
 import { ProgressBar } from "@/components/academy/ProgressBar";
 import { LessonRow } from "@/components/academy/LessonRow";
-import { BackLink } from "@/components/reading";
+import { AppHeader } from "@/components/AppHeader";
+import { BottomNav } from "@/components/home/BottomNav";
 
 export const dynamic = "force-dynamic";
 
@@ -30,9 +31,9 @@ export default async function PregacaoSemEnrolacaoPage() {
     PSE_COURSE.totalLessons > 0 ? (completedCount / PSE_COURSE.totalLessons) * 100 : 0;
 
   return (
-    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
-      <BackLink href="/academia" label="Academia do Pregador" />
-
+    <>
+      <AppHeader backHref="/academia" />
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-6 lg:pb-10">
       <header className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold tracking-tight text-foreground">{PSE_COURSE.title}</h1>
         <p className="text-muted">{PSE_COURSE.description}</p>
@@ -69,6 +70,8 @@ export default async function PregacaoSemEnrolacaoPage() {
           />
         ))}
       </section>
-    </main>
+      </main>
+      <BottomNav />
+    </>
   );
 }

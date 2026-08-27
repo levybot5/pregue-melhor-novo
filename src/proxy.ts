@@ -112,10 +112,11 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // "brand" adicionado nesta etapa: o otimizador de imagem do Next
-    // (/_next/image) busca o arquivo original em /brand/... por baixo
-    // dos panos — sem essa exceção, esse fetch interno caía no gate de
-    // auth e a logo (AuthLogo) quebrava nas telas de cadastro/login.
-    "/((?!_next/static|_next/image|favicon.ico|icon$|icon-192|icon-512|apple-icon|manifest.webmanifest|sw.js|brand/).*)",
+    // "brand" e "home" excluídos pelo mesmo motivo: o otimizador de
+    // imagem do Next (/_next/image) busca o arquivo original em
+    // /brand/... e /home/... por baixo dos panos — sem essa exceção,
+    // esse fetch interno caía no gate de auth (AuthLogo quebrou antes
+    // por isso; agora as capas dos cards da home fariam o mesmo).
+    "/((?!_next/static|_next/image|favicon.ico|icon$|icon-192|icon-512|apple-icon|manifest.webmanifest|sw.js|brand/|home/).*)",
   ],
 };

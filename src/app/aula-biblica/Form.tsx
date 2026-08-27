@@ -5,7 +5,9 @@ import { useEffect, useState, useTransition } from "react";
 import type { AulaBiblicaContent, AulaBiblicaInput } from "@/services/ai";
 import { AulaBiblicaView } from "@/components/AulaBiblicaView";
 import { ContentToolbar } from "@/components/ContentToolbar";
-import { BackLink, ReadingHeader } from "@/components/reading";
+import { ReadingHeader } from "@/components/reading";
+import { AppHeader } from "@/components/AppHeader";
+import { BottomNav } from "@/components/home/BottomNav";
 import { GenerationCounter } from "@/components/GenerationCounter";
 import { GenerationBlockedNotice } from "@/components/GenerationBlockedNotice";
 import { TrialCounter } from "@/components/TrialCounter";
@@ -163,39 +165,49 @@ export function AulaBiblicaForm({ mode, initialRemaining }: AulaBiblicaFormProps
 
   if (mode === "expired" || subscriptionExpired) {
     return (
-      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
-        <BackLink href="/" />
-        <RenewalNotice />
-      </main>
+      <>
+        <AppHeader backHref="/" />
+        <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-6 lg:pb-10">
+          <RenewalNotice />
+        </main>
+        <BottomNav />
+      </>
     );
   }
 
   if (trialExhausted) {
     return (
-      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
-        <BackLink href="/" />
-        <TrialPaywallNotice />
-      </main>
+      <>
+        <AppHeader backHref="/" />
+        <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-6 lg:pb-10">
+          <TrialPaywallNotice />
+        </main>
+        <BottomNav />
+      </>
     );
   }
 
   if (limitNotice) {
     return (
-      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
-        <BackLink href="/" />
-        <GenerationBlockedNotice
-          message={limitNotice}
-          variant="limit"
-          onDismiss={() => setLimitNotice(null)}
-        />
-      </main>
+      <>
+        <AppHeader backHref="/" />
+        <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-6 lg:pb-10">
+          <GenerationBlockedNotice
+            message={limitNotice}
+            variant="limit"
+            onDismiss={() => setLimitNotice(null)}
+          />
+        </main>
+        <BottomNav />
+      </>
     );
   }
 
   if (pendingAula) {
     return (
-      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
-        <BackLink href="/" />
+      <>
+        <AppHeader backHref="/" />
+        <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-6 lg:pb-10">
         <ReadingHeader title={pendingAula.titulo} />
 
         {saveWarning && (
@@ -241,13 +253,16 @@ export function AulaBiblicaForm({ mode, initialRemaining }: AulaBiblicaFormProps
         >
           Gerar outra aula
         </button>
-      </main>
+        </main>
+        <BottomNav />
+      </>
     );
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
-      <BackLink href="/" />
+    <>
+      <AppHeader backHref="/" />
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-6 lg:pb-10">
       <header className="flex items-start justify-between gap-2">
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Criar Aula Bíblica</h1>
@@ -448,6 +463,8 @@ export function AulaBiblicaForm({ mode, initialRemaining }: AulaBiblicaFormProps
           {errorMessage}
         </p>
       )}
-    </main>
+      </main>
+      <BottomNav />
+    </>
   );
 }

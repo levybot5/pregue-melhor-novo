@@ -5,7 +5,8 @@ import { getCourseProgress } from "@/services/academy";
 import { ACADEMY_COURSE, getModule, listModuleLessons } from "@/lib/academy/course-data";
 import { ProgressBar } from "@/components/academy/ProgressBar";
 import { LessonRow } from "@/components/academy/LessonRow";
-import { BackLink } from "@/components/reading";
+import { AppHeader } from "@/components/AppHeader";
+import { BottomNav } from "@/components/home/BottomNav";
 
 export const dynamic = "force-dynamic";
 
@@ -43,9 +44,9 @@ export default async function AcademiaModulePage({
   const percent = mod.lessonCount > 0 ? (completedCount / mod.lessonCount) * 100 : 0;
 
   return (
-    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
-      <BackLink href={`/academia/${curso}`} label="Curso Básico de Teologia" />
-
+    <>
+      <AppHeader backHref={`/academia/${curso}`} />
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-6 lg:pb-10">
       <header className="flex flex-col gap-1">
         <span className="font-mono text-sm font-semibold text-accent">
           {String(mod.id).padStart(2, "0")}
@@ -91,6 +92,8 @@ export default async function AcademiaModulePage({
       <p className="text-center text-xs text-muted">
         Conteúdo original de {ACADEMY_COURSE.channel} no YouTube.
       </p>
-    </main>
+      </main>
+      <BottomNav />
+    </>
   );
 }

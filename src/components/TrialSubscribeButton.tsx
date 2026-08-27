@@ -11,10 +11,10 @@ type TrialSubscribeButtonProps = {
 export function TrialSubscribeButton({ className }: TrialSubscribeButtonProps) {
   return (
     <Link
-      href="/planos/pagar"
+      href="/planos"
       className={
         className ??
-        "shrink-0 whitespace-nowrap rounded-full border border-accent/40 bg-accent-soft px-3 py-1.5 text-xs font-semibold text-accent"
+        "shrink-0 animate-[subscribe-pulse_1.8s_ease-in-out_infinite] whitespace-nowrap rounded-full bg-accent px-3 py-1.5 text-xs font-bold text-primary-foreground"
       }
     >
       Assinar Pregue Melhor

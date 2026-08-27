@@ -7,7 +7,9 @@ import {
 } from "@/services/database";
 import { ReadySermonView } from "@/components/ReadySermonView";
 import { ContentToolbar } from "@/components/ContentToolbar";
-import { BackLink, ReadingHeader } from "@/components/reading";
+import { ReadingHeader } from "@/components/reading";
+import { AppHeader } from "@/components/AppHeader";
+import { BottomNav } from "@/components/home/BottomNav";
 
 export const dynamic = "force-dynamic";
 
@@ -37,27 +39,29 @@ export default async function PregacaoProntaDetailPage({
   const categoryLabel = categories.find((cat) => cat.id === sermon.category_id)?.label;
 
   return (
-    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
-      <BackLink href="/pregacoes-prontas" />
+    <>
+      <AppHeader backHref="/pregacoes-prontas" />
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-6 lg:pb-10">
+        <ReadingHeader
+          title={sermon.title}
+          categoryLabel={categoryLabel}
+          favorited={isFavorited}
+        />
 
-      <ReadingHeader
-        title={sermon.title}
-        categoryLabel={categoryLabel}
-        favorited={isFavorited}
-      />
+        <ReadySermonView sermon={sermon} />
 
-      <ReadySermonView sermon={sermon} />
-
-      <ContentToolbar
-        contentType="pregacao_pronta"
-        content={sermon}
-        title={sermon.title}
-        favorite={{
-          contentType: "pregacao_pronta",
-          contentId: sermon.id,
-          initialFavorited: isFavorited,
-        }}
-      />
-    </main>
+        <ContentToolbar
+          contentType="pregacao_pronta"
+          content={sermon}
+          title={sermon.title}
+          favorite={{
+            contentType: "pregacao_pronta",
+            contentId: sermon.id,
+            initialFavorited: isFavorited,
+          }}
+        />
+      </main>
+      <BottomNav />
+    </>
   );
 }

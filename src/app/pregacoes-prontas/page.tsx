@@ -2,7 +2,8 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/services/auth";
 import { listReadySermons, listCategories, listFavoriteContentIds } from "@/services/database";
 import { ReadyContentList, type ReadyContentCardItem } from "@/components/ReadyContentList";
-import { BackLink } from "@/components/reading";
+import { AppHeader } from "@/components/AppHeader";
+import { BottomNav } from "@/components/home/BottomNav";
 
 // Sempre busca no request: acervo editorial e favoritos podem mudar
 // entre visitas. Nenhuma chamada de IA acontece aqui.
@@ -30,22 +31,24 @@ export default async function PregacoesProntasPage() {
   }));
 
   return (
-    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
-      <BackLink href="/" />
+    <>
+      <AppHeader backHref="/" />
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-6 lg:pb-10">
+        <header className="flex flex-col gap-1">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            Pregações Prontas
+          </h1>
+          <p className="text-muted">Mensagens completas para estudar, adaptar e ministrar.</p>
+        </header>
 
-      <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">
-          Pregações Prontas
-        </h1>
-        <p className="text-muted">Mensagens completas para estudar, adaptar e ministrar.</p>
-      </header>
-
-      <ReadyContentList
-        basePath="/pregacoes-prontas"
-        items={items}
-        categories={categories}
-        favoritedIds={Array.from(favoritedIds)}
-      />
-    </main>
+        <ReadyContentList
+          basePath="/pregacoes-prontas"
+          items={items}
+          categories={categories}
+          favoritedIds={Array.from(favoritedIds)}
+        />
+      </main>
+      <BottomNav />
+    </>
   );
 }

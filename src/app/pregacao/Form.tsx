@@ -5,7 +5,9 @@ import { useEffect, useState, useTransition } from "react";
 import type { SermonContent, SermonInput } from "@/services/ai";
 import { SermonView } from "@/components/SermonView";
 import { ContentToolbar } from "@/components/ContentToolbar";
-import { BackLink, ReadingHeader } from "@/components/reading";
+import { ReadingHeader } from "@/components/reading";
+import { AppHeader } from "@/components/AppHeader";
+import { BottomNav } from "@/components/home/BottomNav";
 import { GenerationCounter } from "@/components/GenerationCounter";
 import { GenerationBlockedNotice } from "@/components/GenerationBlockedNotice";
 import { TrialCounter } from "@/components/TrialCounter";
@@ -53,10 +55,9 @@ const DEPTH_OPTIONS: { value: SermonInput["depth"]; label: string }[] = [
 ];
 
 const DURATION_OPTIONS: { value: SermonInput["duration"]; label: string }[] = [
-  { value: "10", label: "10 min" },
-  { value: "20", label: "20 min" },
+  { value: "15", label: "15 min" },
   { value: "30", label: "30 min" },
-  { value: "40", label: "40 min" },
+  { value: "45", label: "45 min" },
   { value: "60", label: "60 min" },
 ];
 
@@ -84,7 +85,7 @@ export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
   const [theme, setTheme] = useState("");
   const [format, setFormat] = useState<SermonInput["format"]>(null);
   const [audience, setAudience] = useState<SermonInput["audience"]>("geral");
-  const [duration, setDuration] = useState<SermonInput["duration"]>("20");
+  const [duration, setDuration] = useState<SermonInput["duration"]>("30");
   const [style, setStyle] = useState<SermonInput["style"]>("simples");
   const [depth, setDepth] = useState<SermonInput["depth"]>("intermediaria");
   const [bibleVersion, setBibleVersion] = useState<SermonInput["bibleVersion"]>("padrao");
@@ -186,39 +187,49 @@ export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
 
   if (mode === "expired" || subscriptionExpired) {
     return (
-      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
-        <BackLink href="/" />
-        <RenewalNotice />
-      </main>
+      <>
+        <AppHeader backHref="/" />
+        <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-6 lg:pb-10">
+          <RenewalNotice />
+        </main>
+        <BottomNav />
+      </>
     );
   }
 
   if (trialExhausted) {
     return (
-      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
-        <BackLink href="/" />
-        <TrialPaywallNotice />
-      </main>
+      <>
+        <AppHeader backHref="/" />
+        <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-6 lg:pb-10">
+          <TrialPaywallNotice />
+        </main>
+        <BottomNav />
+      </>
     );
   }
 
   if (limitNotice) {
     return (
-      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
-        <BackLink href="/" />
-        <GenerationBlockedNotice
-          message={limitNotice}
-          variant="limit"
-          onDismiss={() => setLimitNotice(null)}
-        />
-      </main>
+      <>
+        <AppHeader backHref="/" />
+        <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-6 lg:pb-10">
+          <GenerationBlockedNotice
+            message={limitNotice}
+            variant="limit"
+            onDismiss={() => setLimitNotice(null)}
+          />
+        </main>
+        <BottomNav />
+      </>
     );
   }
 
   if (pendingSermon) {
     return (
-      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
-        <BackLink href="/" />
+      <>
+        <AppHeader backHref="/" />
+        <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-6 lg:pb-10">
         <ReadingHeader title={pendingSermon.titulo} />
 
         {saveWarning && (
@@ -264,13 +275,16 @@ export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
         >
           Gerar outra pregação
         </button>
-      </main>
+        </main>
+        <BottomNav />
+      </>
     );
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
-      <BackLink href="/" />
+    <>
+      <AppHeader backHref="/" />
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-6 lg:pb-10">
       <header className="flex items-start justify-between gap-2">
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
@@ -316,7 +330,7 @@ export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
 
         <fieldset className="flex flex-col gap-2">
           <legend className="text-sm font-semibold text-foreground">Duração</legend>
-          <div className="grid grid-cols-5 gap-2">
+          <div className="grid grid-cols-4 gap-2">
             {DURATION_OPTIONS.map((option) => (
               <button
                 key={option.value}
@@ -490,6 +504,8 @@ export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
           {errorMessage}
         </p>
       )}
-    </main>
+      </main>
+      <BottomNav />
+    </>
   );
 }

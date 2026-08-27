@@ -39,7 +39,7 @@ export const sermonAudiences = [
 
 // Minutos falados, não mais "curta/média/completa" — mais preciso pro
 // pregador escolher (item 5 do pedido).
-export const sermonDurations = ["10", "20", "30", "40", "60"] as const;
+export const sermonDurations = ["15", "30", "45", "60"] as const;
 
 // "Estilo" — só linguagem/abordagem/tom/aplicação, nunca fidelidade
 // bíblica (item 6). Substitui o antigo sermonStyles
@@ -189,17 +189,11 @@ const DURATION_CONFIG: Record<
   SermonInput["duration"],
   { label: string; maxOutputTokens: number; guidance: string }
 > = {
-  "10": {
-    label: "10 minutos",
-    maxOutputTokens: 1600,
+  "15": {
+    label: "15 minutos",
+    maxOutputTokens: 2200,
     guidance:
-      "Muito compacta (10 minutos falados). Introdução de 1 parágrafo curto, 3 pontos objetivos com aplicação breve, conclusão e apelo diretos. Sem espaço para desenvolvimento extenso — vá direto ao essencial.",
-  },
-  "20": {
-    label: "20 minutos",
-    maxOutputTokens: 2560,
-    guidance:
-      "Compacta (20 minutos falados). Introdução de 1 a 2 parágrafos curtos, 3 pontos com aplicação breve cada, conclusão direta.",
+      "Compacta (15 minutos falados). Introdução de 1 parágrafo curto, 3 pontos objetivos com aplicação breve, conclusão e apelo diretos. Pouco espaço para desenvolvimento extenso — vá direto ao essencial.",
   },
   "30": {
     label: "30 minutos",
@@ -207,11 +201,11 @@ const DURATION_CONFIG: Record<
     guidance:
       "Média (30 minutos falados). Introdução de 2 parágrafos curtos, 3 pontos com um exemplo ou aplicação prática cada, aplicação geral e conclusão bem desenvolvidas.",
   },
-  "40": {
-    label: "40 minutos",
-    maxOutputTokens: 4608,
+  "45": {
+    label: "45 minutos",
+    maxOutputTokens: 5300,
     guidance:
-      "Desenvolvida (40 minutos falados). Introdução de 2 a 3 parágrafos, 3 ou 4 pontos com exemplo e aplicação prática cada, aplicação final e conclusão substanciais.",
+      "Desenvolvida (45 minutos falados). Introdução de 2 a 3 parágrafos, 3 ou 4 pontos com exemplo e aplicação prática cada, aplicação final e conclusão substanciais.",
   },
   "60": {
     label: "60 minutos",
@@ -290,7 +284,7 @@ Regras de estilo:
   - "Estilo": COM QUE TOM a mensagem soa (ex.: simples, impactante, reflexivo) — nunca muda a fidelidade bíblica do conteúdo.
   Exemplo: Formato "expositiva" + Público "jovens" + Estilo "impactante" = uma pregação expositiva, voltada para jovens, com linguagem mais forte e marcante — os três se combinam, nenhum substitui o outro.
 - Se o usuário informar uma situação específica em observações adicionais (ex.: "será para um culto de missões", "é uma reunião de líderes"), use isso para ambientar o tom de abertura/fechamento da mensagem a esse contexto.
-- "Profundidade" controla o NÍVEL DE ANÁLISE (contexto, precisão conceitual, relações do texto) — nunca o tamanho do texto, que é controlado pela Duração. Uma mensagem de 10 minutos com profundidade "profunda" deve ser curta E analiticamente cuidadosa, não uma mensagem longa.
+- "Profundidade" controla o NÍVEL DE ANÁLISE (contexto, precisão conceitual, relações do texto) — nunca o tamanho do texto, que é controlado pela Duração. Uma mensagem de 15 minutos com profundidade "profunda" deve ser curta E analiticamente cuidadosa, não uma mensagem longa.
 - Toda pregação precisa de aplicação prática real em cada ponto — nunca entregue só explicação bíblica.
 - "palavra_original": inclua uma palavra em hebraico (Antigo Testamento) ou grego (Novo Testamento) apenas quando ela realmente ajudar a entender o ponto; use null quando não houver uma palavra relevante. Nunca invente etimologias, transliterações ou significados — se não tiver certeza, use null.
 - Se uma versão da Bíblia for indicada como preferência, use-a como referência de registro/linguagem ao citar ou parafrasear o texto (mais formal ou mais contemporânea, conforme a tradução) — nunca copie um trecho extenso e literal de uma tradução específica; texto_base e qualquer citação devem ser uma citação/paráfrase fiel e concisa, no seu próprio texto, nunca uma reprodução extensa de uma obra com direitos autorais.

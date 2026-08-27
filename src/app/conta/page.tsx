@@ -9,6 +9,8 @@ import {
   type SubscriptionStatus,
 } from "@/services/billing";
 import { DeleteAccountButton } from "./DeleteAccountButton";
+import { AppHeader } from "@/components/AppHeader";
+import { BottomNav } from "@/components/home/BottomNav";
 
 const SUPPORT_WHATSAPP_URL = "https://wa.me/5591982486230?text=Quero%20suporte%20no%20Pregue%20Melhor";
 
@@ -44,7 +46,9 @@ export default async function ContaPage() {
     : "R$10/mês";
 
   return (
-    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
+    <>
+      <AppHeader backHref="/" />
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-6 lg:pb-10">
       <header className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold tracking-tight text-foreground">Minha Conta</h1>
         <p className="text-muted">{user.email}</p>
@@ -133,6 +137,8 @@ export default async function ContaPage() {
       </Link>
 
       <DeleteAccountButton />
-    </main>
+      </main>
+      <BottomNav />
+    </>
   );
 }
