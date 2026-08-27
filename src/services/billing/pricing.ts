@@ -23,7 +23,7 @@ export type Plan = {
 
 export const PLANS: Record<PlanId, Plan> = {
   mensal: { id: "mensal", label: "Mensal", price: 10, days: 30 },
-  trimestral: { id: "trimestral", label: "Trimestral", price: 27, days: 90 },
+  trimestral: { id: "trimestral", label: "Trimestral", price: 22.9, days: 90 },
 };
 
 export const DEFAULT_PLAN_ID: PlanId = "mensal";

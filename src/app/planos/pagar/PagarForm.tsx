@@ -260,7 +260,7 @@ export function PagarForm({ planId }: { planId: PlanId }) {
           Plano {plan.label}
         </span>
         <p className="text-3xl font-bold text-foreground">
-          R${plan.price}
+          R${plan.price.toFixed(2).replace(".", ",")}
           <span className="text-base font-medium text-muted"> / {plan.days} dias</span>
         </p>
         <p className="text-muted">Pagamento único via Pix — {plan.days} dias de acesso.</p>

@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { PLANS } from "@/services/billing/pricing";
 
-const TRIMESTRAL_MONTHLY_EQUIVALENT = (PLANS.trimestral.price / 3).toFixed(2).replace(".", ",");
+function formatPrice(value: number): string {
+  return value.toFixed(2).replace(".", ",");
+}
+
+const TRIMESTRAL_MONTHLY_EQUIVALENT = formatPrice(PLANS.trimestral.price / 3);
 
 export default function PlanosPage() {
   return (
@@ -18,7 +22,7 @@ export default function PlanosPage() {
         </span>
         <div>
           <p className="text-3xl font-bold text-foreground">
-            R${PLANS.trimestral.price}
+            R${formatPrice(PLANS.trimestral.price)}
             <span className="text-base font-medium text-muted"> / {PLANS.trimestral.days} dias</span>
           </p>
           <p className="text-sm text-muted">Equivale a R${TRIMESTRAL_MONTHLY_EQUIVALENT}/mês</p>
@@ -37,7 +41,7 @@ export default function PlanosPage() {
           Valor de lançamento
         </span>
         <p className="text-3xl font-bold text-foreground">
-          R${PLANS.mensal.price}
+          R${formatPrice(PLANS.mensal.price)}
           <span className="text-base font-medium text-muted"> / {PLANS.mensal.days} dias</span>
         </p>
 
