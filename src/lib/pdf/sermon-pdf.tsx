@@ -155,3 +155,33 @@ export function SermonPdfDocument({ data }: { data: SermonPdfData }) {
     </Document>
   );
 }
+
+// Só o "Esboço para Púlpito" embutido na Pregação Completa / Esboço em
+// Pregação, como PDF avulso e compacto — pra levar ao púlpito sem
+// carregar o texto completo junto. Reaproveita os mesmos dados de
+// sermonToPdfData/outlineExpansionToPdfData, nenhuma chamada de IA.
+export function SermonOutlineOnlyPdfDocument({ data }: { data: SermonPdfData }) {
+  return (
+    <Document title={`${data.titulo} - Esboço`} language="pt-BR">
+      <Page size="A4" style={pdfStyles.compactPage} wrap>
+        <Text style={pdfStyles.compactTitle}>{data.titulo}</Text>
+        <Text style={pdfStyles.subtitle}>{data.textoBase}</Text>
+
+        {data.esbocoPulpito.pontos.map((ponto, index) => (
+          <View style={pdfStyles.compactSection} key={index} wrap={false}>
+            <Text style={pdfStyles.compactPointTitle}>
+              {index + 1}. {ponto.titulo}
+            </Text>
+            <PdfBulletList items={ponto.itens} compact />
+          </View>
+        ))}
+
+        <View style={pdfStyles.highlightBox}>
+          <Text style={pdfStyles.compactParagraph}>{data.esbocoPulpito.apelo}</Text>
+        </View>
+
+        <PdfFooter label={`${data.titulo} - Esboço`} />
+      </Page>
+    </Document>
+  );
+}

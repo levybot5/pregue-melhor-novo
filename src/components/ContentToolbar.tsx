@@ -109,6 +109,27 @@ async function buildPdfBlob(props: ContentToolbarProps): Promise<Blob> {
   return pdf(<DevotionalPdfDocument devotional={props.content} />).toBlob();
 }
 
+// "Esboço para Púlpito" embutido na Pregação Completa / Esboço em
+// Pregação, como PDF avulso — só esses dois tipos têm esse campo.
+const OUTLINE_PDF_TYPES = new Set(["pregacao", "esboco_pregacao"]);
+
+async function buildOutlinePdfBlob(props: ContentToolbarProps): Promise<Blob> {
+  const { pdf } = await import("@react-pdf/renderer");
+  const { SermonOutlineOnlyPdfDocument, sermonToPdfData, outlineExpansionToPdfData } = await import(
+    "@/lib/pdf/sermon-pdf"
+  );
+
+  if (props.contentType === "pregacao") {
+    return pdf(<SermonOutlineOnlyPdfDocument data={sermonToPdfData(props.content)} />).toBlob();
+  }
+  if (props.contentType === "esboco_pregacao") {
+    return pdf(
+      <SermonOutlineOnlyPdfDocument data={outlineExpansionToPdfData(props.content)} />,
+    ).toBlob();
+  }
+  throw new Error("PDF de esboço não está disponível para este tipo de conteúdo.");
+}
+
 async function buildCopyText(props: ContentToolbarProps): Promise<string> {
   const {
     formatSermonForCopy,
@@ -153,11 +174,13 @@ export function ContentToolbar(props: ContentToolbarProps) {
   const router = useRouter();
   const [pulpitContent, setPulpitContent] = useState<PulpitModeContent | null>(null);
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [outlinePdfLoading, setOutlinePdfLoading] = useState(false);
   const [copyLabel, setCopyLabel] = useState("Copiar");
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [isDeleting, startDelete] = useTransition();
   const showPulpitMode = !NO_PULPIT_MODE_TYPES.has(props.contentType);
+  const showOutlinePdf = OUTLINE_PDF_TYPES.has(props.contentType);
 
   async function handlePulpitMode() {
     setPulpitContent(await buildPulpitModeContent(props));
@@ -177,6 +200,23 @@ export function ContentToolbar(props: ContentToolbarProps) {
       URL.revokeObjectURL(url);
     } finally {
       setPdfLoading(false);
+    }
+  }
+
+  async function handleDownloadOutlinePdf() {
+    setOutlinePdfLoading(true);
+    try {
+      const blob = await buildOutlinePdfBlob(props);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${sanitizeFileName(props.title)}-esboco.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } finally {
+      setOutlinePdfLoading(false);
     }
   }
 
@@ -229,6 +269,17 @@ export function ContentToolbar(props: ContentToolbarProps) {
           <PdfIcon className="h-4 w-4" />
           {pdfLoading ? "Gerando..." : "PDF"}
         </button>
+        {showOutlinePdf && (
+          <button
+            type="button"
+            onClick={handleDownloadOutlinePdf}
+            disabled={outlinePdfLoading}
+            className={TOOLBAR_BUTTON_CLASS}
+          >
+            <PdfIcon className="h-4 w-4" />
+            {outlinePdfLoading ? "Gerando..." : "Esboço"}
+          </button>
+        )}
         <button type="button" onClick={handleCopy} className={TOOLBAR_BUTTON_CLASS}>
           <CopyIcon className="h-4 w-4" />
           {copyLabel}
