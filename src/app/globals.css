@@ -48,6 +48,36 @@ body {
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
+/* Barra de rolagem discreta, cinza-clara arredondada — a barra do
+   navegador é sempre a do documento inteiro (não dá pra estilizar só
+   uma página), então isso vale pro app todo. Firefox via
+   scrollbar-color, Chrome/Edge/Safari via os pseudo-elementos
+   ::-webkit-scrollbar*. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 116, 139, 0.5) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 116, 139, 0.5);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(100, 116, 139, 0.7);
+}
+
 /* Anel dourado que respira + leve zoom — chama atenção pro CTA de
    assinar durante o trial (TrialSubscribeButton). box-shadow expande
    mais e o botão cresce um pouco, mas volta sempre ao tamanho normal
