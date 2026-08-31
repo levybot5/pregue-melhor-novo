@@ -30,6 +30,9 @@ export type { SermonInput, SermonContent, GenerateSermonResult } from "./sermon"
 export { generateBibleStudy, bibleStudyContentSchema } from "./bible-study";
 export type { BibleStudyInput, BibleStudyContent } from "./bible-study";
 
+export { generateVerseExplanation, bibleVerseExplanationSchema } from "./bible-verse";
+export type { BibleVerseExplanationInput, BibleVerseExplanation } from "./bible-verse";
+
 export {
   generateBibleDictionaryEntry,
   bibleDictionaryEntrySchema,

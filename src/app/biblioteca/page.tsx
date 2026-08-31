@@ -2,21 +2,13 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { listContents } from "@/services/database";
 import { getCurrentUser } from "@/services/auth";
-import { getContentTypeLabel } from "@/lib/content-types";
 import { AppHeader } from "@/components/AppHeader";
 import { BottomNav } from "@/components/home/BottomNav";
+import { BibliotecaListItem } from "./BibliotecaListItem";
 
 // Sempre busca no request: a biblioteca não pode ficar "congelada"
 // com os dados que existiam no momento do build.
 export const dynamic = "force-dynamic";
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
-}
 
 export default async function BibliotecaPage() {
   // O proxy já bloqueia esta rota sem sessão; reverificamos aqui porque
@@ -59,22 +51,7 @@ export default async function BibliotecaPage() {
 
       <div className="flex flex-col gap-3">
         {contents.map((item) => (
-          <Link
-            key={item.id}
-            href={`/biblioteca/${item.id}`}
-            className="flex flex-col gap-1 rounded-2xl border border-card-border bg-card p-4 shadow-sm transition-colors active:bg-card-active"
-          >
-            <span className="text-base font-semibold text-foreground">
-              {item.title}
-            </span>
-            <span className="text-sm text-muted">
-              {getContentTypeLabel(item.type)}
-              {item.base_text ? ` · ${item.base_text}` : ""}
-            </span>
-            <span className="text-xs text-muted">
-              {formatDate(item.created_at)}
-            </span>
-          </Link>
+          <BibliotecaListItem key={item.id} item={item} />
         ))}
       </div>
 

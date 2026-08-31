@@ -74,14 +74,24 @@ const BIBLE_VERSION_OPTIONS: { value: SermonInput["bibleVersion"]; label: string
 type PregacaoFormProps = {
   mode: "subscriber" | "trial" | "expired";
   initialRemaining: number;
+  // Só vêm preenchidos ao chegar aqui a partir de "Usar este estudo em
+  // uma pregação" na Bíblia Guiada (ver VerseReader.tsx) — ausentes,
+  // o formulário se comporta exatamente como sempre se comportou.
+  initialPassage?: string;
+  initialNotes?: string;
 };
 
-export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
+export function PregacaoForm({
+  mode,
+  initialRemaining,
+  initialPassage,
+  initialNotes,
+}: PregacaoFormProps) {
   const isTrial = mode === "trial";
   const [isGenerating, startGenerating] = useTransition();
   const [isSaving, startSaving] = useTransition();
 
-  const [passage, setPassage] = useState("");
+  const [passage, setPassage] = useState(initialPassage ?? "");
   const [theme, setTheme] = useState("");
   const [format, setFormat] = useState<SermonInput["format"]>(null);
   const [audience, setAudience] = useState<SermonInput["audience"]>("geral");
@@ -89,8 +99,9 @@ export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
   const [style, setStyle] = useState<SermonInput["style"]>("simples");
   const [depth, setDepth] = useState<SermonInput["depth"]>("intermediaria");
   const [bibleVersion, setBibleVersion] = useState<SermonInput["bibleVersion"]>("padrao");
-  const [notes, setNotes] = useState("");
-  const [showMoreOptions, setShowMoreOptions] = useState(false);
+  const [notes, setNotes] = useState((initialNotes ?? "").slice(0, NOTES_MAX_LENGTH));
+  const [showMoreOptions, setShowMoreOptions] = useState(Boolean(initialNotes));
+  const [showPrefillNotice, setShowPrefillNotice] = useState(Boolean(initialPassage || initialNotes));
 
   const [remaining, setRemaining] = useState(initialRemaining);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -284,19 +295,36 @@ export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
   return (
     <>
       <AppHeader backHref="/" />
-      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-6 lg:pb-10">
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-4 lg:pb-10">
       <header className="flex flex-wrap items-start justify-between gap-2">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+        <div className="flex flex-col gap-0.5">
+          <h1 className="text-xl font-bold tracking-tight text-foreground">
             Pregação Completa
           </h1>
-          <p className="text-muted">Crie uma mensagem estruturada do início ao fim.</p>
+          <p className="text-sm text-muted">Crie uma mensagem estruturada do início ao fim.</p>
         </div>
         {isTrial && <TrialSubscribeButton />}
       </header>
 
-      <div className="flex flex-col gap-5">
-        <label className="flex flex-col gap-2">
+      {showPrefillNotice && (
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-card-border bg-card-active px-3 py-2 text-xs text-foreground">
+          <span>
+            Preenchido a partir do seu estudo
+            {initialPassage ? ` em ${initialPassage}` : ""}.
+          </span>
+          <button
+            type="button"
+            onClick={() => setShowPrefillNotice(false)}
+            aria-label="Dispensar aviso"
+            className="shrink-0 text-muted"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      <div className="flex flex-col gap-3">
+        <label className="flex flex-col gap-1.5">
           <span className="text-sm font-semibold text-foreground">
             Texto bíblico ou passagem
           </span>
@@ -307,14 +335,14 @@ export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
             placeholder="Ex: Salmo 23, João 3:16, fé em tempos difíceis..."
             minLength={PASSAGE_MIN_LENGTH}
             maxLength={PASSAGE_MAX_LENGTH}
-            className="min-h-[52px] rounded-2xl border border-card-border bg-card px-4 text-base text-foreground outline-none focus:border-primary"
+            className="min-h-[44px] rounded-xl border border-card-border bg-card px-3.5 text-sm text-foreground outline-none focus:border-primary"
           />
           <span className="text-right text-xs text-muted">
             {passage.length}/{PASSAGE_MAX_LENGTH}
           </span>
         </label>
 
-        <label className="flex flex-col gap-2">
+        <label className="flex flex-col gap-1.5">
           <span className="text-sm font-semibold text-foreground">
             Tema <span className="font-normal text-muted">(opcional)</span>
           </span>
@@ -324,19 +352,19 @@ export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
             onChange={(e) => setTheme(e.target.value)}
             placeholder="Ex: perdão, esperança, família..."
             maxLength={THEME_MAX_LENGTH}
-            className="min-h-[52px] rounded-2xl border border-card-border bg-card px-4 text-base text-foreground outline-none focus:border-primary"
+            className="min-h-[44px] rounded-xl border border-card-border bg-card px-3.5 text-sm text-foreground outline-none focus:border-primary"
           />
         </label>
 
-        <fieldset className="flex flex-col gap-2">
+        <fieldset className="flex flex-col gap-1.5">
           <legend className="text-sm font-semibold text-foreground">Duração</legend>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-4 gap-1.5">
             {DURATION_OPTIONS.map((option) => (
               <button
                 key={option.value}
                 type="button"
                 onClick={() => setDuration(option.value)}
-                className={`min-h-[48px] rounded-2xl border px-1 text-sm font-medium ${
+                className={`min-h-[40px] rounded-xl border px-1 text-sm font-medium ${
                   duration === option.value
                     ? "border-primary bg-primary-soft text-primary"
                     : "border-card-border bg-card text-foreground"
@@ -352,7 +380,7 @@ export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
           type="button"
           onClick={() => setShowMoreOptions((current) => !current)}
           aria-expanded={showMoreOptions}
-          className="flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-2xl border border-card-border bg-card text-sm font-semibold text-primary"
+          className="flex min-h-[38px] w-full items-center justify-center gap-1.5 rounded-xl border border-card-border bg-card text-sm font-semibold text-primary"
         >
           Mais opções
           <ChevronDownIcon
@@ -361,16 +389,16 @@ export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
         </button>
 
         {showMoreOptions && (
-          <div className="flex flex-col gap-5 rounded-2xl border border-card-border bg-card-active p-4">
-            <fieldset className="flex flex-col gap-2">
+          <div className="flex flex-col gap-3 rounded-xl border border-card-border bg-card-active p-3">
+            <fieldset className="flex flex-col gap-1.5">
               <legend className="text-sm font-semibold text-foreground">Estilo</legend>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-1.5">
                 {STYLE_OPTIONS.map((option) => (
                   <button
                     key={option.value}
                     type="button"
                     onClick={() => setStyle(option.value)}
-                    className={`min-h-[48px] rounded-2xl border px-2 text-sm font-medium ${
+                    className={`min-h-[40px] rounded-xl border px-1.5 text-xs font-medium ${
                       style === option.value
                         ? "border-primary bg-primary-soft text-primary"
                         : "border-card-border bg-card text-foreground"
@@ -382,11 +410,11 @@ export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
               </div>
             </fieldset>
 
-            <fieldset className="flex flex-col gap-2">
+            <fieldset className="flex flex-col gap-1.5">
               <legend className="text-sm font-semibold text-foreground">
                 Formato da mensagem <span className="font-normal text-muted">(opcional)</span>
               </legend>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-1.5">
                 {FORMAT_OPTIONS.map((option) => (
                   <button
                     key={option.value}
@@ -394,7 +422,7 @@ export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
                     onClick={() =>
                       setFormat((current) => (current === option.value ? null : option.value))
                     }
-                    className={`min-h-[48px] rounded-2xl border px-3 text-sm font-medium ${
+                    className={`min-h-[40px] rounded-xl border px-2 text-xs font-medium ${
                       format === option.value
                         ? "border-primary bg-primary-soft text-primary"
                         : "border-card-border bg-card text-foreground"
@@ -406,15 +434,15 @@ export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
               </div>
             </fieldset>
 
-            <fieldset className="flex flex-col gap-2">
+            <fieldset className="flex flex-col gap-1.5">
               <legend className="text-sm font-semibold text-foreground">Público</legend>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-1.5">
                 {AUDIENCE_OPTIONS.map((option) => (
                   <button
                     key={option.value}
                     type="button"
                     onClick={() => setAudience(option.value)}
-                    className={`min-h-[48px] rounded-2xl border px-3 text-sm font-medium ${
+                    className={`min-h-[40px] rounded-xl border px-2 text-xs font-medium ${
                       audience === option.value
                         ? "border-primary bg-primary-soft text-primary"
                         : "border-card-border bg-card text-foreground"
@@ -426,15 +454,15 @@ export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
               </div>
             </fieldset>
 
-            <fieldset className="flex flex-col gap-2">
+            <fieldset className="flex flex-col gap-1.5">
               <legend className="text-sm font-semibold text-foreground">Profundidade</legend>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-1.5">
                 {DEPTH_OPTIONS.map((option) => (
                   <button
                     key={option.value}
                     type="button"
                     onClick={() => setDepth(option.value)}
-                    className={`min-h-[48px] rounded-2xl border px-3 text-sm font-medium ${
+                    className={`min-h-[40px] rounded-xl border px-2 text-xs font-medium ${
                       depth === option.value
                         ? "border-primary bg-primary-soft text-primary"
                         : "border-card-border bg-card text-foreground"
@@ -446,12 +474,12 @@ export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
               </div>
             </fieldset>
 
-            <label className="flex flex-col gap-2">
+            <label className="flex flex-col gap-1.5">
               <span className="text-sm font-semibold text-foreground">Versão da Bíblia</span>
               <select
                 value={bibleVersion}
                 onChange={(e) => setBibleVersion(e.target.value as SermonInput["bibleVersion"])}
-                className="min-h-[48px] rounded-2xl border border-card-border bg-card px-4 text-sm text-foreground outline-none focus:border-primary"
+                className="min-h-[40px] rounded-xl border border-card-border bg-card px-3.5 text-sm text-foreground outline-none focus:border-primary"
               >
                 {BIBLE_VERSION_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -461,7 +489,7 @@ export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
               </select>
             </label>
 
-            <label className="flex flex-col gap-2">
+            <label className="flex flex-col gap-1.5">
               <span className="text-sm font-semibold text-foreground">
                 Observações adicionais <span className="font-normal text-muted">(opcional)</span>
               </span>
@@ -470,8 +498,8 @@ export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Ex.: quero abordar perdão, incluir uma aplicação para famílias..."
                 maxLength={NOTES_MAX_LENGTH}
-                rows={3}
-                className="min-h-[80px] rounded-2xl border border-card-border bg-card px-4 py-3 text-base text-foreground outline-none focus:border-primary"
+                rows={2}
+                className="min-h-[64px] rounded-xl border border-card-border bg-card px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-primary"
               />
               <span className="text-right text-xs text-muted">
                 {notes.length}/{NOTES_MAX_LENGTH}
@@ -486,7 +514,7 @@ export function PregacaoForm({ mode, initialRemaining }: PregacaoFormProps) {
           type="button"
           onClick={handleGenerate}
           disabled={isGenerating || remaining <= 0 || passage.trim().length < PASSAGE_MIN_LENGTH}
-          className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl bg-primary px-5 font-semibold text-primary-foreground transition-opacity disabled:opacity-60"
+          className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 font-semibold text-primary-foreground transition-opacity disabled:opacity-60"
         >
           {isGenerating && <SpinnerIcon className="h-5 w-5 animate-spin" />}
           {isGenerating ? "Gerando..." : "Gerar Pregação"}

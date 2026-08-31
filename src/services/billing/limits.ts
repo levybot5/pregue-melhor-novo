@@ -28,6 +28,7 @@ export const USAGE_TOOLS = [
   "devocional",
   "dicionario_biblico",
   "aula_biblica",
+  "biblia_versiculo",
 ] as const;
 
 export type UsageTool = (typeof USAGE_TOOLS)[number];

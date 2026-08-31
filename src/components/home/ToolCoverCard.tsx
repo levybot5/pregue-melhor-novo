@@ -46,7 +46,7 @@ export function ToolCoverCard({
     >
       <div
         className={`relative w-full shrink-0 overflow-hidden ${
-          featured ? "aspect-[2/1] lg:aspect-auto lg:w-[60%]" : "aspect-[4/3] lg:aspect-[3/2]"
+          featured ? "aspect-[4.5/1] lg:aspect-auto lg:w-[60%]" : "aspect-[4/3] lg:aspect-[3/2]"
         }`}
       >
         {coverImage ? (
@@ -90,18 +90,20 @@ export function ToolCoverCard({
       </div>
 
       <div
-        className={`flex flex-1 flex-col gap-1.5 ${
-          featured ? "p-5 lg:flex-none lg:w-[40%] lg:justify-center lg:gap-2 lg:p-6" : "px-2.5 py-2 lg:p-3"
+        className={`flex flex-1 flex-col ${
+          featured
+            ? "gap-0.5 p-2.5 lg:flex-none lg:w-[40%] lg:justify-center lg:gap-2 lg:p-6"
+            : "gap-1.5 px-2.5 py-2 lg:p-3"
         }`}
       >
-        <div className="flex items-center gap-2">
+        <div className={`flex items-center ${featured ? "gap-1.5" : "gap-2"}`}>
           <span
-            className={`flex shrink-0 items-center justify-center rounded-full bg-white/10 text-slate-300 [&>svg]:h-3.5 [&>svg]:w-3.5 ${featured ? "h-7 w-7" : "h-6 w-6"}`}
+            className={`flex shrink-0 items-center justify-center rounded-full bg-white/10 text-slate-300 [&>svg]:h-3.5 [&>svg]:w-3.5 ${featured ? "h-5 w-5 lg:h-7 lg:w-7" : "h-6 w-6"}`}
           >
             {icon}
           </span>
           <h3
-            className={`line-clamp-2 font-bold tracking-tight text-white ${featured ? "text-xl" : "text-sm leading-snug"}`}
+            className={`line-clamp-2 font-bold tracking-tight text-white ${featured ? "text-sm lg:text-xl" : "text-sm leading-snug"}`}
           >
             {title}
           </h3>
@@ -111,14 +113,14 @@ export function ToolCoverCard({
             sem descrição, pra caber mais ferramentas na tela. */}
         <p
           className={`text-slate-400 line-clamp-2 ${
-            featured ? "text-sm" : "hidden text-xs leading-snug lg:block"
+            featured ? "hidden text-sm lg:block" : "hidden text-xs leading-snug lg:block"
           }`}
         >
           {description}
         </p>
 
         {featured && (
-          <span className="mt-2 flex w-fit items-center gap-1 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-primary-foreground">
+          <span className="mt-0.5 flex w-fit items-center gap-1 rounded-full bg-accent px-3 py-1 text-xs font-semibold text-primary-foreground lg:mt-2 lg:py-2 lg:text-sm">
             {ctaLabel}
             <svg
               aria-hidden="true"

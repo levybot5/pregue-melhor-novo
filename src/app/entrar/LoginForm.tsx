@@ -13,6 +13,11 @@ export function LoginForm() {
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirectTo") ?? "";
 
+  // Controlados os dois — sem isso, o e-mail (ao contrário da senha)
+  // ficava em branco depois de um erro de login, porque o <form
+  // action={...}> do React reseta campos não controlados quando a
+  // Server Action termina, mesmo em caso de erro.
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   return (
@@ -27,6 +32,8 @@ export function LoginForm() {
             name="email"
             required
             autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className="min-h-[52px] rounded-2xl border border-card-border bg-card px-4 text-base text-foreground outline-none focus:border-primary"
           />
         </label>

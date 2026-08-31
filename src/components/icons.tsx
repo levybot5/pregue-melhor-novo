@@ -245,3 +245,53 @@ export function EyeOffIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+// Grifar versículo — usado nos controles do leitor da Bíblia Guiada.
+export function HighlighterIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M9 11 13 15 M14.5 4.5 20 10 11 19H5v-6L14.5 4.5Z" />
+      <path d="M3 21h6" />
+    </svg>
+  );
+}
+
+// Anotar versículo.
+export function PencilIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M14.5 4.5 20 10 9 21H4v-5L14.5 4.5Z" />
+      <path d="M13 6 18 11" />
+    </svg>
+  );
+}
+
+// "Explicar com IA" — ação principal por versículo.
+export function SparkleIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1" />
+      <path d="M12 8.5 13.2 11.3 16 12.5 13.2 13.7 12 16.5 10.8 13.7 8 12.5 10.8 11.3 12 8.5Z" />
+    </svg>
+  );
+}
+
+// Cabeçalho do cartão "Leitura de hoje" (plano de leitura anual).
+export function CalendarIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <rect x="4" y="5" width="16" height="15" rx="2" />
+      <path d="M4 9h16M8 3v3M16 3v3" />
+      <path d="M8 13h2M14 13h2M8 16.5h2M14 16.5h2" />
+    </svg>
+  );
+}
+
+// Sequência de dias lendo (streak) — cartão "Leitura de hoje".
+export function FlameIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M12 22c-3.6 0-6.5-2.5-6.5-6.2 0-2.6 1.5-4.2 2.3-5.9.5 1 1.4 1.7 2.2 1.4-.4-2.6.6-5.3 3-6.8-.6 2 .1 3.6 1.4 4.9 1.6 1.6 3.6 3 3.6 6.4C18.5 19.5 15.6 22 12 22Z" />
+    </svg>
+  );
+}

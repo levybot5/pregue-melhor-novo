@@ -15,6 +15,7 @@ import {
   GraduationCapIcon,
   SearchIcon,
   ChalkboardIcon,
+  PencilIcon,
 } from "@/components/icons";
 import { getCurrentUser } from "@/services/auth";
 import { getProfile } from "@/services/database";
@@ -26,13 +27,16 @@ import {
 } from "@/services/billing";
 import { TrialSubscribeButton } from "@/components/TrialSubscribeButton";
 import { InstallPwaBanner } from "@/components/InstallPwaBanner";
+import { ContinueReadingCard } from "@/components/home/ContinueReadingCard";
 import { signOutAction } from "./actions";
+import { getContinueReading } from "@/services/database";
 
 export default async function Home() {
   const user = await getCurrentUser();
   // Uma única consulta extra, só quando logado — nada de polling nem
   // de repetir isso em outras páginas.
   const profile = user ? await getProfile(user.id) : null;
+  const continueReading = user ? await getContinueReading(user.id) : null;
   const firstName = profile?.name?.trim().split(/\s+/)[0];
   const greeting = firstName || user?.email;
   const avatarInitial = (greeting ?? "?").charAt(0).toUpperCase();
@@ -59,7 +63,7 @@ export default async function Home() {
     // claro do <body> (ver src/app/globals.css, não editado).
     <div className="min-h-dvh bg-[#07101F]">
       <header className="bg-[#07101F]">
-        <div className="mx-auto flex w-full max-w-xl items-center justify-between px-4 py-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] lg:max-w-[1100px] lg:px-8">
+        <div className="mx-auto flex w-full max-w-xl items-center justify-between px-4 py-2 pt-[calc(env(safe-area-inset-top)+0.5rem)] lg:max-w-[1100px] lg:px-8 lg:py-3 lg:pt-[calc(env(safe-area-inset-top)+0.75rem)]">
           <span className="flex items-center gap-2">
             <Image
               src="/brand/icon-source.png"
@@ -96,13 +100,13 @@ export default async function Home() {
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-2 lg:max-w-[1100px] lg:gap-6 lg:px-8 lg:pb-10 lg:pt-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-start lg:justify-between lg:gap-x-8 lg:gap-y-4">
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-3 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-1.5 lg:max-w-[1100px] lg:gap-6 lg:px-8 lg:pb-10 lg:pt-6">
+        <div className="flex flex-col gap-2 lg:flex-row lg:flex-wrap lg:items-start lg:justify-between lg:gap-x-8 lg:gap-y-4">
           <div className="flex flex-col gap-0.5 lg:order-1">
-            <h1 className="text-xl font-bold tracking-tight text-white lg:text-3xl">
+            <h1 className="text-base font-bold tracking-tight text-white lg:text-3xl">
               Prepare-se melhor para pregar.
             </h1>
-            <p className="text-sm text-slate-400 lg:text-base">Do estudo da Palavra ao púlpito.</p>
+            <p className="text-xs text-slate-400 lg:text-base">Do estudo da Palavra ao púlpito.</p>
           </div>
 
           <div className="empty:hidden lg:order-3 lg:basis-full">
@@ -142,6 +146,8 @@ export default async function Home() {
           ctaLabel="Começar agora"
         />
 
+        {continueReading && <ContinueReadingCard continueReading={continueReading} />}
+
         <section className="flex flex-col gap-3">
           <SectionHeader title="Ferramentas" />
 
@@ -163,10 +169,10 @@ export default async function Home() {
             />
             <ToolCoverCard
               href="/biblia"
-              title="Bíblia Explicada"
+              title="Comentário Bíblico"
               description="Entenda uma passagem bíblica com clareza."
               icon={<OpenBookIcon />}
-              coverImage="/home/biblia-explicada.png"
+              coverImage="/home/biblia-explicada-v2.jpg"
             />
             <ToolCoverCard
               href="/dicionario"
@@ -188,7 +194,7 @@ export default async function Home() {
               title="Devocional"
               description="Reflexão para vida e ministério."
               icon={<HeartIcon />}
-              coverImage="/home/devocional.jpg"
+              coverImage="/home/devocional-v2.jpg"
             />
             <ToolCoverCard
               href="/esbocos-prontos"
@@ -202,7 +208,7 @@ export default async function Home() {
               title="Pregações Prontas"
               description="Mensagens completas para estudar, adaptar e ministrar."
               icon={<StarIcon />}
-              coverImage="/home/pregacoes-prontas.jpg"
+              coverImage="/home/pregacoes-prontas-v2.jpg"
             />
             <ToolCoverCard
               href="/academia"
@@ -216,7 +222,21 @@ export default async function Home() {
               title="Minha Biblioteca"
               description="Suas mensagens salvas."
               icon={<LibraryIcon />}
-              coverImage="/home/biblioteca.jpg"
+              coverImage="/home/biblioteca-v2.jpg"
+            />
+            <ToolCoverCard
+              href="/biblia-completa"
+              title="Bíblia Guiada"
+              description="Leia a Bíblia inteira, com explicação por versículo."
+              icon={<OpenBookIcon />}
+              coverImage="/home/biblia-guiada.jpg"
+            />
+            <ToolCoverCard
+              href="/anotacoes"
+              title="Bloco de Anotações"
+              description="Guarde ideias, versículos e insights para suas próximas mensagens."
+              icon={<PencilIcon />}
+              coverImage="/home/anotacoes.jpg"
             />
           </div>
         </section>

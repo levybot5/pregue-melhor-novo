@@ -10,13 +10,30 @@ export const maxDuration = 60;
 // Cadastro é obrigatório antes de chegar aqui (ver proxy.ts) — quem
 // nunca assinou cai no trial de 3 gerações grátis por CONTA (ver
 // services/billing/trial.ts), não mais por dispositivo.
-export default async function PregacaoPage() {
+//
+// ?passagem=&notas= são opcionais — só existem quando se chega aqui a
+// partir de "Usar este estudo em uma pregação" na Bíblia Guiada (ver
+// VerseReader.tsx). Sem eles, o comportamento é idêntico ao de sempre
+// (PregacaoForm cai nos próprios valores padrão).
+export default async function PregacaoPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ passagem?: string; notas?: string }>;
+}) {
+  const { passagem, notas } = await searchParams;
   const user = await getCurrentUser();
 
   if (user) {
     const status = await getGenerationStatus(user.id);
     if (status.subscriptionActive) {
-      return <PregacaoForm mode="subscriber" initialRemaining={status.dailyRemaining} />;
+      return (
+        <PregacaoForm
+          mode="subscriber"
+          initialRemaining={status.dailyRemaining}
+          initialPassage={passagem}
+          initialNotes={notas}
+        />
+      );
     }
     const subscription = await getCurrentSubscription(user.id);
     if (subscription) {
@@ -25,5 +42,12 @@ export default async function PregacaoPage() {
   }
 
   const trialRemaining = await getTrialRemaining();
-  return <PregacaoForm mode="trial" initialRemaining={trialRemaining} />;
+  return (
+    <PregacaoForm
+      mode="trial"
+      initialRemaining={trialRemaining}
+      initialPassage={passagem}
+      initialNotes={notas}
+    />
+  );
 }

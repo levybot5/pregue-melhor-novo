@@ -221,7 +221,7 @@ export function BibliaForm({ mode, initialRemaining }: BibliaFormProps) {
       <header className="flex flex-wrap items-start justify-between gap-2">
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            Bíblia Explicada
+            Comentário Bíblico
           </h1>
           <p className="text-muted">Entenda uma passagem bíblica com clareza.</p>
         </div>
