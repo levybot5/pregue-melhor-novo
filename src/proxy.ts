@@ -14,6 +14,9 @@ const PUBLIC_PATHS = [
   "/esqueci-senha",
   "/redefinir-senha",
   "/privacidade",
+  // Página de oferta (landing de anúncio) — movida do Artifact avulso pra
+  // dentro do app, precisa ficar acessível sem login.
+  "/oferta",
   // Reconciliação de compras Pix antigas pagas mas nunca vinculadas a
   // uma conta (de antes desta mudança) — ver AsaasSignupForm.tsx e o
   // branch anônimo de planos/retorno/page.tsx. Não é mais alcançável

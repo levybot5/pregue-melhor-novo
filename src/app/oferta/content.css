@@ -1,0 +1,470 @@
+  :root {
+    --navy: #07101f;
+    --navy-2: #101b2d;
+    --ink-on-navy: #f5f3ec;
+    --ink-on-navy-muted: #9aa7bb;
+    --paper: #f7f6f2;
+    --card: #ffffff;
+    --card-border: #e5e7ee;
+    --ink: #16284f;
+    --ink-muted: #5c6472;
+    --gold: #c9962f;
+    --gold-bright: #e0b355;
+    --gold-soft: #f6ead0;
+    --gold-ink: #241a05;
+    --green: #1f9d55;
+    --shadow-card: 0 16px 40px -20px rgba(22, 40, 79, 0.22);
+    --shadow-gold: 0 18px 40px -14px rgba(201, 150, 47, 0.55);
+    --logo-url: url("/brand/icon-source.png");
+    --logo-url-topbar: url("/brand/oferta-icon-topbar.png");
+  }
+
+  /* Este design é intencionalmente "claro no corpo / navy nas seções
+     de destaque", igual ao original que inspirou — então não muda com
+     o tema do sistema; mantemos as mesmas cores em qualquer viewer. */
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Poppins", ui-sans-serif, system-ui, sans-serif;
+    font-size: 17px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: "Poppins", sans-serif;
+    font-weight: 800;
+    line-height: 1.15;
+    text-wrap: balance;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  a { color: inherit; text-decoration: none; }
+  img, svg { display: block; }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+  .narrow { max-width: 640px; margin: 0 auto; }
+
+  section { padding: 84px 0; }
+  .on-navy { background: var(--navy); color: var(--ink-on-navy); }
+  .on-navy h1, .on-navy h2, .on-navy h3, .on-navy h4 { color: var(--ink-on-navy); }
+  .on-navy-2 { background: var(--navy-2); color: var(--ink-on-navy); }
+  .on-paper { background: var(--paper); }
+
+  .center { text-align: center; }
+
+  /* ---------- pill badge ---------- */
+  .pill-badge {
+    display: inline-block;
+    padding: 10px 22px;
+    border-radius: 999px;
+    background: var(--gold-soft);
+    color: var(--ink);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+  }
+  .on-navy .pill-badge, .on-navy-2 .pill-badge {
+    background: rgba(245, 243, 236, 0.08);
+    color: var(--gold-bright);
+    border: 1px solid rgba(201, 150, 47, 0.4);
+  }
+
+  /* ---------- buttons ---------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 17px 34px;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-gold {
+    background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+    color: var(--gold-ink);
+    box-shadow: var(--shadow-gold);
+  }
+  .btn-sm { padding: 11px 22px; font-size: 14px; }
+  .btn-block { width: 100%; }
+
+  /* Pulso no CTA principal — mesmo efeito do botão "Assinar Pregue
+     Melhor" do app de verdade, só num CTA por seção pra não competir
+     com os outros. */
+  @keyframes cta-pulse {
+    0%, 100% { transform: scale(1); box-shadow: var(--shadow-gold), 0 0 0 0 rgba(201, 150, 47, 0.55); }
+    50% { transform: scale(1.045); box-shadow: var(--shadow-gold), 0 0 0 16px rgba(201, 150, 47, 0); }
+  }
+  .btn-gold.pulse { animation: cta-pulse 2.2s ease-in-out infinite; }
+  @media (prefers-reduced-motion: reduce) {
+    .btn-gold.pulse { animation: none; }
+  }
+
+  /* ---------- top bar ---------- */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: var(--navy);
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(245, 243, 236, 0.08);
+  }
+  .topbar .wrap { display: flex; align-items: center; justify-content: space-between; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 19px; color: var(--ink-on-navy); }
+  .brand-mark {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: var(--logo-url) center / cover no-repeat;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--gold-ink); flex-shrink: 0;
+  }
+  .brand-mark svg { display: none; }
+  .topbar .brand-mark { background-image: var(--logo-url-topbar); }
+
+  /* ---------- hero ---------- */
+  .hero { padding: 72px 0 96px; text-align: center; }
+  .hero .brand-mark { width: 76px; height: 76px; border-radius: 22px; margin: 0 auto 28px; }
+  .hero .brand-mark svg { width: 38px; height: 38px; }
+  .hero .pill-badge { margin-bottom: 26px; }
+  .hero h1 {
+    font-size: clamp(34px, 6vw, 54px);
+    max-width: 15ch;
+    margin: 0 auto;
+  }
+  .hero h1 .hl { color: var(--gold-bright); }
+  .hero p.sub {
+    margin: 22px auto 0;
+    max-width: 46ch;
+    color: var(--ink-on-navy-muted);
+    font-size: 17.5px;
+  }
+  .hero .hero-actions { margin-top: 38px; }
+  .hero .statement {
+    margin-top: 46px;
+    font-weight: 700;
+    font-size: 19px;
+    color: var(--ink-on-navy);
+  }
+  .badge-row {
+    margin-top: 26px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+  }
+  .check-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(245, 243, 236, 0.06);
+    border: 1px solid rgba(245, 243, 236, 0.14);
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 14.5px;
+  }
+  .check-badge .dot {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: rgba(31, 157, 85, 0.18);
+    color: var(--green);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .check-badge .dot svg { width: 12px; height: 12px; }
+
+  /* ---------- hero video (mini VSL, formato vertical de Shorts) ---------- */
+  /* A política de segurança do Artifact bloqueia iframe de outros sites
+     (aviso confirmado ao publicar) — então isto é um card clicável que ABRE
+     o Shorts numa aba nova, não um player embutido. Se esta página um dia
+     for hospedada fora do Artifact (domínio próprio, sem essa restrição),
+     dá pra trocar por um <iframe src="https://www.youtube.com/embed/3QbS8h_RsMk">. */
+  .hero-video { margin: 48px auto 0; max-width: 300px; }
+  .hero-video-frame {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 9 / 16;
+    border-radius: 20px;
+    background: linear-gradient(135deg, var(--navy-2), #0c1a30);
+    border: 1px solid rgba(245, 243, 236, 0.14);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+    text-decoration: none;
+    transition: transform 0.2s ease;
+  }
+  .hero-video-frame:hover { transform: scale(1.015); }
+  .hero-video-play {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+    color: var(--navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-gold);
+  }
+  .hero-video-play svg { width: 26px; height: 26px; margin-left: 3px; }
+  .hero-video-caption {
+    margin-top: 14px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--ink-on-navy-muted);
+  }
+  @media (max-width: 560px) { .hero-video { margin-top: 36px; } }
+
+  /* ---------- hero tools (5 ferramentas em destaque, abaixo da VSL) ---------- */
+  .hero-tools {
+    margin: 40px auto 0;
+    max-width: 760px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+  }
+  .hero-tool {
+    flex: 0 1 130px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 10px;
+    background: rgba(245, 243, 236, 0.04);
+    border: 1px solid rgba(245, 243, 236, 0.1);
+    border-radius: 16px;
+  }
+  .hero-tool .icon-chip {
+    width: 40px; height: 40px; border-radius: 12px;
+    background: rgba(201, 150, 47, 0.16);
+    color: var(--gold-bright);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .hero-tool .icon-chip svg { width: 19px; height: 19px; }
+  .hero-tool span.label { font-size: 12.5px; font-weight: 700; color: var(--ink-on-navy); text-align: center; line-height: 1.3; }
+  @media (max-width: 560px) { .hero-tools { gap: 8px; } .hero-tool { flex-basis: 96px; padding: 14px 6px; } }
+
+  /* ---------- section heading ---------- */
+  .section-head { text-align: center; max-width: 640px; margin: 0 auto 52px; }
+  .section-head .pill-badge { margin-bottom: 20px; }
+  .section-head h2 { font-size: clamp(26px, 4vw, 38px); }
+  .section-head p { margin-top: 16px; color: var(--ink-muted); font-size: 16.5px; }
+  .on-navy .section-head p, .on-navy-2 .section-head p { color: var(--ink-on-navy-muted); }
+
+  /* ---------- pain cards ---------- */
+  .pain-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+  .pain-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 34px 28px;
+    text-align: center;
+    box-shadow: var(--shadow-card);
+  }
+  .pain-card .emoji { font-size: 40px; margin-bottom: 18px; }
+  .pain-card h3 { font-size: 19px; }
+  .pain-card p { margin-top: 10px; color: var(--ink-muted); font-size: 14.5px; }
+
+  /* ---------- feature showcase ---------- */
+  .feature-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: center;
+  }
+  .feature-row + .feature-row { margin-top: 90px; }
+  .feature-row.reverse .mock-slot { order: 2; }
+  .feature-copy .pill-badge { margin-bottom: 18px; }
+  .feature-copy h3 { font-size: clamp(24px, 3vw, 30px); }
+  .feature-copy p { margin-top: 14px; color: var(--ink-muted); font-size: 16px; }
+  .feature-copy ul { list-style: none; margin: 20px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .feature-copy li { display: flex; gap: 10px; font-size: 14.5px; color: var(--ink); }
+  .feature-copy li .tick { color: var(--gold); font-weight: 800; flex-shrink: 0; }
+
+  /* mock app card (recreated UI, not a real screenshot) */
+  .mock-slot { display: flex; justify-content: center; }
+  .mock-phone {
+    width: 100%;
+    max-width: 340px;
+    background: var(--navy);
+    border-radius: 28px;
+    padding: 10px;
+    box-shadow: var(--shadow-card);
+  }
+  .mock-screen { background: var(--navy-2); border-radius: 20px; overflow: hidden; }
+  .mock-bar { display: flex; align-items: center; gap: 8px; padding: 14px 16px; background: var(--navy); }
+  .mock-bar img { width: 20px; height: 20px; border-radius: 6px; }
+  .mock-bar span { color: var(--ink-on-navy); font-size: 13px; font-weight: 700; }
+  .mock-body { padding: 20px; }
+  .mock-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-on-navy-muted); margin-bottom: 8px; }
+  .mock-field { background: rgba(245,243,236,0.06); border: 1px solid rgba(245,243,236,0.12); border-radius: 12px; padding: 13px 15px; font-size: 13.5px; color: var(--ink-on-navy-muted); margin-bottom: 16px; }
+  .mock-cta { background: linear-gradient(180deg, var(--gold-bright), var(--gold)); color: var(--gold-ink); text-align: center; padding: 13px; border-radius: 12px; font-weight: 700; font-size: 13.5px; margin-bottom: 18px; }
+  .mock-result { border-top: 1px dashed rgba(245,243,236,0.18); padding-top: 16px; }
+  .mock-result h4 { color: var(--ink-on-navy); font-size: 15px; margin-bottom: 8px; }
+  .mock-chip-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  .mock-chip { background: rgba(201,150,47,0.16); color: var(--gold-bright); font-size: 11px; font-weight: 600; padding: 5px 10px; border-radius: 999px; }
+
+  /* vídeo curto de cada ferramenta, no lugar do mockup — mesmo card do
+     hero (sem link ainda; ver comentário junto ao HTML de cada bloco). */
+  .feature-video {
+    position: relative;
+    width: 100%;
+    max-width: 300px;
+    aspect-ratio: 9 / 16;
+    border-radius: 20px;
+    background: linear-gradient(135deg, var(--navy-2), #0c1a30);
+    border: 1px solid rgba(245, 243, 236, 0.14);
+    box-shadow: var(--shadow-card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .feature-video-play {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+    color: var(--navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-gold);
+  }
+  .feature-video-play svg { width: 22px; height: 22px; margin-left: 2px; }
+
+  /* verse reader mock */
+  .mock-verse { display: flex; gap: 8px; padding: 5px 0; font-size: 13px; line-height: 1.5; color: var(--ink-on-navy-muted); }
+  .mock-verse .n { color: var(--gold-bright); font-weight: 700; font-size: 10.5px; flex-shrink: 0; }
+  .mock-verse.hl { background: rgba(201, 150, 47, 0.14); border-radius: 6px; color: var(--ink-on-navy); }
+  .mock-explain-panel { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: rgba(201, 150, 47, 0.1); font-size: 12px; line-height: 1.5; color: var(--ink-on-navy); }
+  .mock-explain-panel b { color: var(--gold-bright); }
+
+  /* dictionary mock */
+  .mock-dict-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(245,243,236,0.1); font-size: 13px; color: var(--ink-on-navy); }
+  .mock-dict-row:last-child { border-bottom: none; }
+  .mock-dict-row span.t { color: var(--ink-on-navy-muted); font-size: 11.5px; }
+
+  /* ---------- "e mais" grid on navy ---------- */
+  .more-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .more-card {
+    background: rgba(245, 243, 236, 0.04);
+    border: 1px solid rgba(245, 243, 236, 0.1);
+    border-radius: 18px;
+    padding: 26px;
+  }
+  .more-card .icon-chip {
+    width: 42px; height: 42px; border-radius: 12px;
+    background: rgba(201, 150, 47, 0.16);
+    color: var(--gold-bright);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 16px;
+  }
+  .more-card .icon-chip svg { width: 20px; height: 20px; }
+  .more-card h3 { font-size: 16.5px; font-weight: 700; }
+  .more-card p { margin-top: 8px; font-size: 13.5px; color: var(--ink-on-navy-muted); }
+
+  /* ---------- benefits ---------- */
+  .benefit-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .benefit-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 30px 26px;
+    text-align: center;
+    box-shadow: var(--shadow-card);
+  }
+  .benefit-card .emoji { font-size: 34px; margin-bottom: 14px; }
+  .benefit-card h3 { font-size: 16.5px; }
+  .benefit-card p { margin-top: 8px; color: var(--ink-muted); font-size: 14px; }
+
+  /* ---------- objection card ---------- */
+  .objection-card {
+    background: var(--card);
+    border-left: 4px solid var(--gold);
+    border-radius: 4px 18px 18px 4px;
+    box-shadow: var(--shadow-card);
+    padding: 40px 44px;
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 24px;
+    align-items: flex-start;
+  }
+  .objection-card .emoji { font-size: 42px; }
+  .objection-card h3 { font-size: 21px; }
+  .objection-card p { margin-top: 10px; color: var(--ink-muted); font-size: 15px; }
+
+  /* ---------- pricing ---------- */
+  .price-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 26px; }
+  .price-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 24px;
+    padding: 40px 34px;
+    text-align: center;
+    box-shadow: var(--shadow-card);
+    display: flex;
+    flex-direction: column;
+  }
+  .price-card.featured { border: 2px solid var(--gold); }
+  .price-card .plan-name { font-size: 24px; margin-top: 16px; }
+  .price-card .plan-sub { color: var(--ink-muted); font-size: 14.5px; margin-top: 6px; }
+  .price-card .amount { margin-top: 22px; font-size: 44px; font-weight: 900; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .price-card .per { margin-top: 4px; color: var(--ink-muted); font-size: 14px; }
+  .price-card .equiv { margin-top: 2px; color: var(--ink-muted); font-size: 14px; font-weight: 600; }
+  .price-card ul { list-style: none; margin: 28px 0; padding: 0; text-align: left; display: flex; flex-direction: column; gap: 13px; flex: 1; }
+  .price-card li { display: flex; gap: 10px; font-size: 14.5px; }
+  .price-card li .check { flex-shrink: 0; }
+  .price-card li b { font-weight: 700; }
+  .price-card .btn { margin-top: auto; }
+
+  .price-note { text-align: center; margin-top: 40px; color: var(--ink-muted); font-size: 14px; }
+  .price-note strong { display: block; color: var(--ink); font-size: 15px; margin-bottom: 4px; }
+
+  /* ---------- faq ---------- */
+  .faq-list { max-width: 720px; margin: 0 auto; }
+  .faq-item { border-top: 1px solid var(--card-border); padding: 24px 0; }
+  .faq-item:last-child { border-bottom: 1px solid var(--card-border); }
+  .faq-item h3 { font-size: 17px; font-weight: 700; }
+  .faq-item p { margin-top: 8px; color: var(--ink-muted); font-size: 15px; }
+
+  /* ---------- final cta ---------- */
+  .final-cta { text-align: center; }
+  .final-cta h2 { font-size: clamp(28px, 4.4vw, 42px); max-width: 18ch; margin: 0 auto; }
+  .final-cta p { margin: 18px auto 0; color: var(--ink-on-navy-muted); max-width: 44ch; }
+  .final-cta .hero-actions { margin-top: 34px; }
+
+  /* ---------- footer ---------- */
+  footer { background: var(--navy); padding: 40px 0; }
+  .foot-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+  .foot-links { display: flex; gap: 22px; font-size: 13.5px; color: var(--ink-on-navy-muted); }
+  .foot-links a { text-decoration: underline; text-underline-offset: 3px; }
+  .foot-disclaimer { margin-top: 22px; font-size: 12.5px; color: var(--ink-on-navy-muted); opacity: 0.8; max-width: 68ch; }
+
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 880px) {
+    section { padding: 60px 0; }
+    .pain-grid, .benefit-grid, .more-grid { grid-template-columns: 1fr; }
+    .feature-row, .feature-row.reverse { grid-template-columns: 1fr; gap: 32px; }
+    .feature-row.reverse .mock-slot { order: 0; }
+    .feature-row + .feature-row { margin-top: 56px; }
+    .price-grid { grid-template-columns: 1fr; }
+    .objection-card { grid-template-columns: 1fr; text-align: center; padding: 32px 26px; }
+    .objection-card .emoji { margin: 0 auto; }
+    .hero { padding: 56px 0 72px; }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .reveal.in { opacity: 1; transform: none; }
+  }
