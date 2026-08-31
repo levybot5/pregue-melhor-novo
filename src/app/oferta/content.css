@@ -52,6 +52,10 @@
   .narrow { max-width: 640px; margin: 0 auto; }
 
   section { padding: 84px 0; }
+  /* Logo após o hero (que já tem padding-bottom grande) o espaço dobrava
+     e o cabeçalho "Por que ter o Pregue Melhor" ficava largado, sem
+     conexão com nada acima — reduz só esse encontro específico. */
+  #ferramentas { padding-top: 48px; }
   .on-navy { background: var(--navy); color: var(--ink-on-navy); }
   .on-navy h1, .on-navy h2, .on-navy h3, .on-navy h4 { color: var(--ink-on-navy); }
   .on-navy-2 { background: var(--navy-2); color: var(--ink-on-navy); }
