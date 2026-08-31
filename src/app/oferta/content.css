@@ -454,7 +454,33 @@
   .objection-card p { margin-top: 10px; color: var(--ink-muted); font-size: 15px; }
 
   /* ---------- depoimentos (carrossel) ---------- */
-  .testimonial-carousel { max-width: 900px; margin: 0 auto; }
+  .testimonial-carousel { position: relative; max-width: 900px; margin: 0 auto; }
+  .testimonial-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1px solid rgba(245, 243, 236, 0.18);
+    background: rgba(7, 16, 31, 0.85);
+    color: var(--ink-on-navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-card);
+    transition: background 0.2s ease;
+  }
+  .testimonial-arrow:hover { background: var(--navy-2); }
+  .testimonial-arrow svg { width: 18px; height: 18px; }
+  .testimonial-arrow-prev { left: -8px; }
+  .testimonial-arrow-next { right: -8px; }
+  @media (max-width: 640px) {
+    .testimonial-arrow-prev { left: 4px; }
+    .testimonial-arrow-next { right: 4px; }
+  }
   .testimonial-track {
     display: flex;
     gap: 20px;
