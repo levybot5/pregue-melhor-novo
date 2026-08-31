@@ -133,6 +133,8 @@ export const config = {
     // sem essa exceção, o <video> pedia o arquivo e caía no gate de auth
     // (a tag recebia o HTML do redirect pro /cadastrar em vez do vídeo,
     // e por isso nunca tocava — nem manualmente, nem em autoplay).
-    "/((?!_next/static|_next/image|favicon.ico|icon$|icon-192|icon-512|apple-icon|manifest.webmanifest|sw.js|brand/|home/|videos/).*)",
+    // "images/" pelo mesmo motivo: imagens promocionais da página de
+    // oferta (public/images/).
+    "/((?!_next/static|_next/image|favicon.ico|icon$|icon-192|icon-512|apple-icon|manifest.webmanifest|sw.js|brand/|home/|videos/|images/).*)",
   ],
 };

@@ -300,6 +300,25 @@
   .mock-chip-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
   .mock-chip { background: rgba(201,150,47,0.16); color: var(--gold-bright); font-size: 11px; font-weight: 600; padding: 5px 10px; border-radius: 999px; }
 
+  /* Bloco "Criar Pregação": vídeo + imagem extra lado a lado no desktop,
+     empilhados (vídeo em cima) no mobile — só este bloco tem os dois. */
+  .criar-pregacao-showcase {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  .criar-pregacao-extra {
+    width: 100%;
+    max-width: 320px;
+    border-radius: 16px;
+  }
+  @media (min-width: 861px) {
+    .criar-pregacao-showcase { flex-direction: row; align-items: flex-start; max-width: none; }
+    .criar-pregacao-showcase .feature-video { max-width: 220px; }
+    .criar-pregacao-extra { max-width: 220px; }
+  }
+
   /* vídeo curto de cada ferramenta, com moldura de celular — sem isso o
      vídeo ficava "solto" na página, sem contexto de app. */
   .feature-video {
