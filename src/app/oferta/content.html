@@ -20,13 +20,19 @@
       <h1>Prepare a sua pregação completa em <span class="hl">minutos</span>, não em madrugadas.</h1>
       <p class="sub">Tenha tudo que precisa para preparar sua mensagem em um só lugar.</p>
 
-      <!-- Mini VSL (YouTube Shorts) — abre em aba nova, ver comentário no CSS -->
+      <!-- Mini VSL (YouTube Shorts), embutido direto — agora que a página
+           está no app de verdade (fora do Artifact), não tem mais o
+           bloqueio de iframe de antes. -->
       <div class="hero-video">
-        <a class="hero-video-frame" href="https://youtube.com/shorts/3QbS8h_RsMk" aria-label="Assistir ao vídeo no YouTube">
-          <span class="hero-video-play">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-          </span>
-        </a>
+        <div class="hero-video-frame">
+          <iframe
+            src="https://www.youtube.com/embed/3QbS8h_RsMk"
+            title="Pregue Melhor em poucos minutos"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen
+            loading="lazy"
+          ></iframe>
+        </div>
         <p class="hero-video-caption">Assista o vídeo e entenda o Pregue Melhor em poucos minutos.</p>
       </div>
 
