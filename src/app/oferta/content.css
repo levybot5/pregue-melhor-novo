@@ -670,6 +670,8 @@
   /* ---------- footer ---------- */
   footer { background: var(--navy); padding: 40px 0; }
   .foot-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+  .foot-row .brand { align-items: center; }
+  .foot-row .brand-mark { background-size: contain; background-position: center; }
   .foot-links { display: flex; gap: 22px; font-size: 13.5px; color: var(--ink-on-navy-muted); }
   .foot-links a { text-decoration: underline; text-underline-offset: 3px; }
   .foot-disclaimer { margin-top: 22px; font-size: 12.5px; color: var(--ink-on-navy-muted); opacity: 0.8; max-width: 68ch; }
