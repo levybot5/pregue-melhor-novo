@@ -306,23 +306,34 @@
 
   /* Bloco "Criar Pregação": vídeo + imagem extra lado a lado no desktop,
      empilhados (vídeo em cima) no mobile — só este bloco tem os dois. */
-  .criar-pregacao-showcase {
+  /* Demonstração imediata: vídeo + imagem, cada um dentro de um card
+     claro com borda — mesma moldura pros dois, lado a lado no desktop
+     e empilhados no mobile. */
+  .demo-showcase {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 20px;
+    max-width: 340px;
+    margin: 0 auto;
   }
+  .demo-showcase-card {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    box-shadow: var(--shadow-card);
+    padding: 18px;
+    display: flex;
+    justify-content: center;
+  }
+  .demo-showcase-card .feature-video { max-width: 100%; }
   .criar-pregacao-extra {
     width: 100%;
-    max-width: 320px;
-    border-radius: 16px;
-    border: 1px solid var(--card-border);
-    box-shadow: var(--shadow-card);
+    border-radius: 12px;
   }
   @media (min-width: 861px) {
-    .criar-pregacao-showcase { flex-direction: row; align-items: flex-start; max-width: none; }
-    .criar-pregacao-showcase .feature-video { max-width: 220px; }
-    .criar-pregacao-extra { max-width: 220px; }
+    .demo-showcase { flex-direction: row; align-items: stretch; max-width: 640px; }
   }
 
   /* vídeo curto de cada ferramenta, com moldura de celular — sem isso o
