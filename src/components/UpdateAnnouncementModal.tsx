@@ -5,7 +5,7 @@ import { useState, useSyncExternalStore } from "react";
 // Bumpar essa string a cada atualização que mereça avisar de novo —
 // só isso já faz o popup voltar a aparecer pra quem já viu a anterior
 // (guardado por chave, não por "já viu algum popup alguma vez").
-const UPDATE_KEY = "update-seen-2026-08-31-biblia-guiada";
+const UPDATE_KEY = "update-seen-2026-08-31-biblia-guiada-v2";
 
 // Mesmo padrão de InstallPwaBanner: leitura de localStorage via
 // useSyncExternalStore, não setState em efeito — servidor sempre
@@ -74,13 +74,6 @@ export function UpdateAnnouncementModal() {
             <span>
               <strong>Bloco de Anotações</strong> — guarde ideias, versículos e insights antes
               mesmo de começar a preparar uma pregação.
-            </span>
-          </li>
-          <li className="flex items-start gap-2.5">
-            <span className="mt-0.5">✨</span>
-            <span>
-              Uma anotação de estudo pode virar o ponto de partida de uma pregação com um
-              toque.
             </span>
           </li>
         </ul>
