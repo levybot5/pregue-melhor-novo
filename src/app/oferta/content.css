@@ -354,24 +354,41 @@
   .mock-dict-row:last-child { border-bottom: none; }
   .mock-dict-row span.t { color: var(--ink-on-navy-muted); font-size: 11.5px; }
 
-  /* ---------- "e mais" grid on navy ---------- */
-  .more-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  /* ---------- "e mais" — card único com grid de ferramentas ---------- */
+  .more-card-wrap {
+    background: linear-gradient(160deg, var(--navy-2), var(--navy));
+    border: 1px solid rgba(201, 150, 47, 0.3);
+    border-radius: 28px;
+    padding: 44px 40px;
+    box-shadow: var(--shadow-card);
+  }
+  .more-card-wrap .section-head { margin-bottom: 36px; }
+  .more-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  @media (max-width: 860px) {
+    .more-grid { grid-template-columns: repeat(2, 1fr); }
+  }
   .more-card {
     background: rgba(245, 243, 236, 0.04);
     border: 1px solid rgba(245, 243, 236, 0.1);
     border-radius: 18px;
-    padding: 26px;
+    padding: 22px;
   }
   .more-card .icon-chip {
-    width: 42px; height: 42px; border-radius: 12px;
+    width: 40px; height: 40px; border-radius: 12px;
     background: rgba(201, 150, 47, 0.16);
     color: var(--gold-bright);
     display: flex; align-items: center; justify-content: center;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
   }
-  .more-card .icon-chip svg { width: 20px; height: 20px; }
-  .more-card h3 { font-size: 16.5px; font-weight: 700; }
-  .more-card p { margin-top: 8px; font-size: 13.5px; color: var(--ink-on-navy-muted); }
+  .more-card .icon-chip svg { width: 19px; height: 19px; }
+  .more-card h3 { font-size: 15.5px; font-weight: 700; }
+  .more-card p { margin-top: 7px; font-size: 13px; color: var(--ink-on-navy-muted); }
+  .more-card-note {
+    margin-top: 30px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--ink-on-navy-muted);
+  }
 
   /* ---------- benefits ---------- */
   .benefit-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
@@ -422,8 +439,8 @@
   .price-card .per { margin-top: 4px; color: var(--ink-muted); font-size: 14px; }
   .price-card .equiv { margin-top: 2px; color: var(--ink-muted); font-size: 14px; font-weight: 600; }
   .price-card ul { list-style: none; margin: 28px 0; padding: 0; text-align: left; display: flex; flex-direction: column; gap: 13px; flex: 1; }
-  .price-card li { display: flex; gap: 10px; font-size: 14.5px; }
-  .price-card li .check { flex-shrink: 0; }
+  .price-card li { position: relative; padding-left: 26px; font-size: 14.5px; }
+  .price-card li .check { position: absolute; left: 0; top: 0.05em; }
   .price-card li b { font-weight: 700; }
   .price-card .btn { margin-top: auto; }
 
