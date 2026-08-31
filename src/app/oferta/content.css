@@ -453,22 +453,27 @@
   .objection-card h3 { font-size: 21px; }
   .objection-card p { margin-top: 10px; color: var(--ink-muted); font-size: 15px; }
 
-  /* ---------- depoimentos ---------- */
-  .testimonial-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+  /* ---------- depoimentos (carrossel) ---------- */
+  .testimonial-carousel { max-width: 900px; margin: 0 auto; }
+  .testimonial-track {
+    display: flex;
     gap: 20px;
-    max-width: 900px;
-    margin: 0 auto;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 4px 4px 8px;
+    scrollbar-width: none;
   }
+  .testimonial-track::-webkit-scrollbar { display: none; }
   .testimonial-video {
     position: relative;
+    flex: 0 0 260px;
     aspect-ratio: 9 / 16;
     border-radius: 20px;
     background: linear-gradient(135deg, var(--navy-2), #0c1a30);
     border: 1px solid rgba(245, 243, 236, 0.14);
     box-shadow: var(--shadow-card);
     overflow: hidden;
+    scroll-snap-align: center;
   }
   .testimonial-video iframe {
     position: absolute;
@@ -477,8 +482,17 @@
     height: 100%;
     border: 0;
   }
-  @media (max-width: 768px) {
-    .testimonial-grid { grid-template-columns: 1fr; max-width: 300px; }
+  .testimonial-dots { display: flex; justify-content: center; gap: 8px; margin-top: 20px; }
+  .testimonial-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(245, 243, 236, 0.22);
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .testimonial-dot.active { background: var(--gold-bright); transform: scale(1.3); }
+  @media (min-width: 769px) {
+    .testimonial-track { justify-content: center; }
   }
 
   /* ---------- transparência + missão (antes dos planos) ---------- */

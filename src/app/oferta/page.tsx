@@ -3,6 +3,7 @@ import { join } from "path";
 import type { Metadata } from "next";
 import { RevealOnScroll } from "./RevealOnScroll";
 import { AutoplayVideos } from "./AutoplayVideos";
+import { TestimonialDots } from "./TestimonialDots";
 
 // Página de oferta pública, movida do Artifact avulso pra dentro do app —
 // mesma origem do checkout, sem as limitações de CSP do Artifact (bloqueio
@@ -32,6 +33,7 @@ export default function OfertaPage() {
       <div dangerouslySetInnerHTML={{ __html: body }} />
       <RevealOnScroll />
       <AutoplayVideos />
+      <TestimonialDots />
     </>
   );
 }
