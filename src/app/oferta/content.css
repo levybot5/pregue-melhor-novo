@@ -356,23 +356,39 @@
 
   /* ---------- "e mais" — card único com grid de ferramentas ---------- */
   .more-card-wrap {
+    position: relative;
     background: linear-gradient(160deg, var(--navy-2), var(--navy));
     border: 1px solid rgba(201, 150, 47, 0.3);
     border-radius: 28px;
-    padding: 44px 40px;
+    padding: 48px 40px 40px;
     box-shadow: var(--shadow-card);
   }
-  .more-card-wrap .section-head { margin-bottom: 36px; }
+  .more-card-wrap .section-head {
+    text-align: left;
+    max-width: 640px;
+    margin: 0 0 36px;
+  }
+  .more-card-wrap .pill-badge {
+    position: absolute;
+    top: 0;
+    left: 40px;
+    transform: translateY(-50%);
+    background: var(--navy);
+  }
+  .more-card-wrap .section-head p { margin-top: 12px; font-size: 15.5px; }
   .more-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
   @media (max-width: 860px) {
     .more-grid { grid-template-columns: repeat(2, 1fr); }
+    .more-card-wrap { padding: 44px 24px 32px; }
   }
   .more-card {
     background: rgba(245, 243, 236, 0.04);
     border: 1px solid rgba(245, 243, 236, 0.1);
     border-radius: 18px;
     padding: 22px;
+    transition: border-color 0.2s ease, transform 0.2s ease;
   }
+  .more-card:hover { border-color: rgba(245, 243, 236, 0.24); transform: translateY(-2px); }
   .more-card .icon-chip {
     width: 40px; height: 40px; border-radius: 12px;
     background: rgba(201, 150, 47, 0.16);
@@ -380,6 +396,16 @@
     display: flex; align-items: center; justify-content: center;
     margin-bottom: 14px;
   }
+  /* Uma cor de destaque por card — mesma ideia do mbiblia (cada função
+     com sua própria cor), mantendo o tom pastel/soft já usado no resto
+     da página (--gold-soft etc.), só variando o matiz. */
+  .more-grid .more-card:nth-child(1) .icon-chip { background: rgba(201, 150, 47, 0.16); color: #e0b355; }
+  .more-grid .more-card:nth-child(2) .icon-chip { background: rgba(66, 133, 244, 0.16); color: #7fabf7; }
+  .more-grid .more-card:nth-child(3) .icon-chip { background: rgba(219, 68, 107, 0.16); color: #f2789e; }
+  .more-grid .more-card:nth-child(4) .icon-chip { background: rgba(45, 166, 153, 0.18); color: #56d6c4; }
+  .more-grid .more-card:nth-child(5) .icon-chip { background: rgba(217, 119, 6, 0.18); color: #f0a94e; }
+  .more-grid .more-card:nth-child(6) .icon-chip { background: rgba(139, 92, 246, 0.18); color: #b79bfa; }
+  .more-grid .more-card:nth-child(7) .icon-chip { background: rgba(6, 182, 212, 0.18); color: #6fe0f2; }
   .more-card .icon-chip svg { width: 19px; height: 19px; }
   .more-card h3 { font-size: 15.5px; font-weight: 700; }
   .more-card p { margin-top: 7px; font-size: 13px; color: var(--ink-on-navy-muted); }
@@ -419,6 +445,39 @@
   .objection-card .emoji { font-size: 42px; }
   .objection-card h3 { font-size: 21px; }
   .objection-card p { margin-top: 10px; color: var(--ink-muted); font-size: 15px; }
+
+  /* ---------- transparência + missão (antes dos planos) ---------- */
+  .trust-split { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .trust-card { border-radius: 24px; padding: 38px 34px; }
+  .trust-card .pill-badge { margin-bottom: 18px; }
+  .trust-dark {
+    background: var(--navy);
+    color: var(--ink-on-navy);
+    box-shadow: var(--shadow-card);
+  }
+  .trust-dark h3 { color: var(--ink-on-navy); font-size: 22px; }
+  .trust-dark ul { list-style: none; margin: 20px 0 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+  .trust-dark li { display: flex; gap: 10px; font-size: 14.5px; color: var(--ink-on-navy-muted); }
+  .trust-dark li .tick { color: var(--gold-bright); font-weight: 800; flex-shrink: 0; }
+  .trust-light {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+  }
+  .trust-light p { font-size: 15px; color: var(--ink-muted); }
+  .trust-light p + p { margin-top: 16px; }
+  .trust-highlight {
+    margin: 18px 0;
+    padding: 16px 18px;
+    background: rgba(31, 157, 85, 0.08);
+    border: 1px solid rgba(31, 157, 85, 0.25);
+    border-radius: 14px;
+    color: var(--ink);
+    font-size: 14.5px;
+    font-weight: 600;
+  }
+  @media (max-width: 860px) {
+    .trust-split { grid-template-columns: 1fr; }
+  }
 
   /* ---------- pricing ---------- */
   .price-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 26px; }
