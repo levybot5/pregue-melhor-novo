@@ -453,6 +453,34 @@
   .objection-card h3 { font-size: 21px; }
   .objection-card p { margin-top: 10px; color: var(--ink-muted); font-size: 15px; }
 
+  /* ---------- depoimentos ---------- */
+  .testimonial-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .testimonial-video {
+    position: relative;
+    aspect-ratio: 9 / 16;
+    border-radius: 20px;
+    background: linear-gradient(135deg, var(--navy-2), #0c1a30);
+    border: 1px solid rgba(245, 243, 236, 0.14);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+  }
+  .testimonial-video iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  @media (max-width: 768px) {
+    .testimonial-grid { grid-template-columns: 1fr; max-width: 300px; }
+  }
+
   /* ---------- transparência + missão (antes dos planos) ---------- */
   .trust-split { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
   .trust-card { border-radius: 24px; padding: 38px 34px; }
