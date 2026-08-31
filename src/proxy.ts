@@ -128,6 +128,11 @@ export const config = {
     // /brand/... e /home/... por baixo dos panos — sem essa exceção,
     // esse fetch interno caía no gate de auth (AuthLogo quebrou antes
     // por isso; agora as capas dos cards da home fariam o mesmo).
-    "/((?!_next/static|_next/image|favicon.ico|icon$|icon-192|icon-512|apple-icon|manifest.webmanifest|sw.js|brand/|home/).*)",
+    // "videos/" excluído pelo mesmo motivo: os vídeos de demonstração da
+    // página de oferta (pública, sem login) ficam em public/videos/ —
+    // sem essa exceção, o <video> pedia o arquivo e caía no gate de auth
+    // (a tag recebia o HTML do redirect pro /cadastrar em vez do vídeo,
+    // e por isso nunca tocava — nem manualmente, nem em autoplay).
+    "/((?!_next/static|_next/image|favicon.ico|icon$|icon-192|icon-512|apple-icon|manifest.webmanifest|sw.js|brand/|home/|videos/).*)",
   ],
 };
