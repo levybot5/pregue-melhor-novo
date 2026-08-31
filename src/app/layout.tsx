@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { PwaRegister } from "@/components/PwaRegister";
 import { StaleBuildRecovery } from "@/components/StaleBuildRecovery";
+import { MetaPixel } from "@/components/MetaPixel";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -42,6 +43,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {children}
         <PwaRegister />
         <StaleBuildRecovery />
+        <MetaPixel />
       </body>
     </html>
   );

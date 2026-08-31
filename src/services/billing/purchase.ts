@@ -37,6 +37,8 @@ export type PendingPurchaseRow = {
   claimed_by_user_id: string | null;
   claimed_at: string | null;
   created_at: string;
+  fbc: string | null;
+  fbp: string | null;
 };
 
 async function insertPendingPurchase(
@@ -48,6 +50,8 @@ async function insertPendingPurchase(
     planId?: PlanId;
     durationDays?: number;
     includesKit?: boolean;
+    fbc?: string;
+    fbp?: string;
   },
 ): Promise<PendingPurchaseRow> {
   const admin = getSupabaseAdminClient();
@@ -61,6 +65,8 @@ async function insertPendingPurchase(
       duration_days: options?.durationDays ?? null,
       includes_kit: options?.includesKit ?? false,
       claimed_by_user_id: claimedByUserId,
+      fbc: options?.fbc ?? null,
+      fbp: options?.fbp ?? null,
     })
     .select()
     .single();
@@ -75,6 +81,12 @@ export type PixPurchaseInput = {
   email?: string;
   planId: PlanId;
   includeKit: boolean;
+  // Cookies do Facebook Pixel (_fbc/_fbp), lidos no navegador na hora
+  // do checkout — ver PagarForm.tsx. Guardados na compra pra o webhook
+  // conseguir mandar pra Conversions API depois, quando o PIX
+  // confirmar (a pessoa já pode ter saído do site nesse momento).
+  fbc?: string;
+  fbp?: string;
 };
 
 export type PixPurchaseResult = {
@@ -133,6 +145,8 @@ export async function createPixPurchase(input: PixPurchaseInput): Promise<PixPur
     planId: plan.id,
     durationDays: plan.days,
     includesKit: input.includeKit,
+    fbc: input.fbc,
+    fbp: input.fbp,
   });
 
   const customer = await createAsaasCustomer({

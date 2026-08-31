@@ -15,6 +15,15 @@ type Step = "form" | "qr";
 
 const POLL_INTERVAL_MS = 4000;
 
+// _fbc/_fbp são gravados pelo pixel do Facebook (ver
+// components/MetaPixel.tsx) — lidos aqui só na hora de gerar o PIX e
+// mandados junto pra guardar na compra, pra Conversions API usar
+// depois quando o pagamento confirmar (ver services/marketing/meta-capi.ts).
+function readCookie(name: string): string | undefined {
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : undefined;
+}
+
 // Sobrevive a uma recarga da página: no Android é comum o navegador
 // ser encerrado pelo sistema (memória) quando o usuário sai pra pagar
 // no app do banco — sem isso, ao voltar o React perde o purchaseId e o
@@ -168,6 +177,8 @@ export function PagarForm({ planId }: { planId: PlanId }) {
         cpfCnpj,
         planId,
         includeKit,
+        fbc: readCookie("_fbc"),
+        fbp: readCookie("_fbp"),
       });
       if (!result.success) {
         setErrorMessage(result.message);

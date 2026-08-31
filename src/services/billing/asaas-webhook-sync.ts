@@ -4,6 +4,19 @@ import { getPayment, getSubscription, AsaasApiError } from "./providers/asaas";
 import { activateSubscriptionFromPurchase, type PendingPurchaseRow } from "./purchase";
 import { recordSubscriptionEvent, type SubscriptionStatusValue } from "./subscription-events";
 import { grantKitAccess, revokeKitAccess } from "./kit";
+import { sendPurchaseEvent } from "@/services/marketing/meta-capi";
+
+// E-mail só existe pra quem já tinha conta no momento da compra
+// (claimed_by_user_id) — PIX anônimo não coleta e-mail no formulário
+// hoje. Sem e-mail o evento ainda vai, só com match mais fraco
+// (fbc/fbp), então nunca é motivo pra não mandar.
+async function getPurchaserEmail(userId: string | null): Promise<string | null> {
+  if (!userId) return null;
+  const admin = getSupabaseAdminClient();
+  const { data, error } = await admin.auth.admin.getUserById(userId);
+  if (error || !data.user?.email) return null;
+  return data.user.email;
+}
 
 // Único lugar do app que ESCREVE em pending_purchases/subscriptions a
 // partir de um evento Asaas — só chamado pelo webhook, com o client
@@ -68,6 +81,19 @@ export async function syncPixPaymentReceived(paymentId: string): Promise<void> {
   if (error) throw error;
 
   await activateSubscriptionFromPurchase({ ...purchase, status: "paid", paid_at: paidAt });
+
+  // Só na primeira confirmação (não no reprocessamento acima) — evento
+  // Purchase pra Meta Ads, com o e-mail (se a compra já tinha dono),
+  // fbc/fbp salvos no checkout. Nunca bloqueia a liberação de acesso:
+  // sendPurchaseEvent nunca lança.
+  const email = await getPurchaserEmail(purchase.claimed_by_user_id);
+  await sendPurchaseEvent({
+    value: purchase.amount,
+    eventId: purchase.id,
+    email,
+    fbc: purchase.fbc,
+    fbp: purchase.fbp,
+  });
 }
 
 // Cartão: PAYMENT_CONFIRMED libera/renova. Cobre tanto a primeira

@@ -99,6 +99,14 @@ export async function proxy(request: NextRequest) {
     // visitante novo. A tela de cadastro já linka pra "Já possui uma
     // conta? Entrar" pra quem precisar.
     const redirectUrl = new URL("/cadastrar", request.url);
+    // Repassa fbclid/utm_* (e qualquer outro parâmetro) da URL
+    // original — sem isso, quem clica num anúncio e cai aqui pela
+    // primeira vez (o caso mais comum: visitante novo, sem cookie
+    // ainda) perdia o fbclid neste redirect antes do pixel do
+    // Facebook (MetaPixel.tsx) ter a chance de gravar o cookie _fbc.
+    request.nextUrl.searchParams.forEach((value, key) => {
+      redirectUrl.searchParams.set(key, value);
+    });
     redirectUrl.searchParams.set("redirectTo", pathname);
     return finishWithDeviceCookie(NextResponse.redirect(redirectUrl));
   }
