@@ -16,6 +16,7 @@ export async function signUpAction(
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const confirmPassword = String(formData.get("confirmPassword") ?? "");
+  const redirectTo = String(formData.get("redirectTo") ?? "").trim();
 
   if (!email || !isValidEmail(email)) {
     return { error: "Digite um e-mail válido.", checkEmail: false };
@@ -37,5 +38,5 @@ export async function signUpAction(
     return { error: null, checkEmail: true };
   }
 
-  redirect("/");
+  redirect(redirectTo.startsWith("/") ? redirectTo : "/");
 }

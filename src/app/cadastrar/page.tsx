@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useActionState, useState, type FormEvent } from "react";
 import { AuthLogo } from "@/components/AuthLogo";
 import { PasswordInput } from "@/components/PasswordInput";
@@ -15,6 +16,18 @@ function isValidEmail(email: string): boolean {
 
 export default function CadastrarPage() {
   const [state, formAction, isPending] = useActionState(signUpAction, initialState);
+  const searchParams = useSearchParams();
+
+  // proxy.ts manda pra cá com "redirectTo" (o caminho, ex.: /planos/pagar)
+  // e os demais parâmetros originais soltos ao lado (ex.: plan=anual) —
+  // sem reconstruir os dois juntos aqui, quem clicava num plano da oferta
+  // sem estar logado criava a conta e caía na Home, perdendo a intenção
+  // de compra (o próprio /entrar já faz essa reconstrução corretamente).
+  const redirectPath = searchParams.get("redirectTo") || "/";
+  const extraParams = new URLSearchParams(searchParams);
+  extraParams.delete("redirectTo");
+  const redirectTo = extraParams.size > 0 ? `${redirectPath}?${extraParams.toString()}` : redirectPath;
+  const entrarHref = `/entrar?${new URLSearchParams({ redirectTo }).toString()}`;
 
   const [email, setEmail] = useState("");
   const [emailTouched, setEmailTouched] = useState(false);
@@ -74,6 +87,8 @@ export default function CadastrarPage() {
       ) : (
         <>
           <form action={formAction} onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <input type="hidden" name="redirectTo" value={redirectTo} />
+
             <label className="flex flex-col gap-2">
               <span className="text-sm font-semibold text-foreground">E-mail</span>
               <input
@@ -124,7 +139,7 @@ export default function CadastrarPage() {
           </form>
 
           <Link
-            href="/entrar"
+            href={entrarHref}
             className="flex min-h-[52px] items-center justify-center rounded-2xl border border-card-border bg-card px-5 font-semibold text-primary"
           >
             Já possui uma conta? Entrar
