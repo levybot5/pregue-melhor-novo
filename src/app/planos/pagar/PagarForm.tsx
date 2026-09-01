@@ -230,13 +230,6 @@ export function PagarForm({ planId }: { planId: PlanId }) {
           <p className="text-sm font-semibold text-foreground">
             Não consegue escanear? Use o Pix Copia e Cola
           </p>
-          {/* Sem instrução, quem não conhece o Pix Copia e Cola tenta colar
-              o código num lugar errado (chave Pix, "novo Pix" etc.) e o
-              banco acusa código inválido — não é o código que está errado. */}
-          <p className="text-left text-xs text-muted">
-            1. Copie o código abaixo. 2. No app do banco, abra Pix → Pix Copia e Cola.
-            3. Cole o código e confirme.
-          </p>
           <div className="rounded-2xl border border-card-border bg-card px-4 py-3 text-left text-xs break-all text-muted">
             {copyPaste}
           </div>
