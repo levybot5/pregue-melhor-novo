@@ -28,6 +28,10 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  // Trava o zoom (pinch/duplo toque não amplia mais) — sem isso um zoom
+  // acidental encolhia o app visualmente ao gravar tela para criativos.
+  maximumScale: 1,
+  userScalable: false,
   viewportFit: "cover",
   colorScheme: "light",
   themeColor: "#16284f",

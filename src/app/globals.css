@@ -48,6 +48,30 @@ body {
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
+/* Em telas largas (desktop/navegador), as páginas ficam centralizadas
+   numa coluna estreita (até max-w-4xl = 896px, a mais larga que existe
+   fora da Home). Sem isso, a faixa fora dessa coluna herdava o mesmo
+   fundo claro do conteúdo e parecia uma borda branca "sem estilo". Aqui
+   ela vira a mesma cor escura já usada nas barras da Home/AppHeader
+   (--header-bg), sem tocar em nenhuma página — só um degradê no fundo
+   do body, a coluna central continua exatamente como sempre foi. A
+   Home tem fundo próprio de borda a borda e cobre isso por cima. */
+@media (min-width: 1024px) {
+  body {
+    /* attachment: fixed ancora no viewport (100vh real), não na altura
+       calculada do elemento — com "100% 100%" a faixa parava de pintar
+       antes do fim da página em algumas telas. */
+    background-color: var(--background);
+    background-image:
+      linear-gradient(var(--header-bg), var(--header-bg)),
+      linear-gradient(var(--header-bg), var(--header-bg));
+    background-repeat: no-repeat, no-repeat;
+    background-position: left top, right top;
+    background-size: calc(50% - 448px) 100vh, calc(50% - 448px) 100vh;
+    background-attachment: fixed, fixed;
+  }
+}
+
 /* Barra de rolagem discreta, cinza-clara arredondada — a barra do
    navegador é sempre a do documento inteiro (não dá pra estilizar só
    uma página), então isso vale pro app todo. Firefox via
