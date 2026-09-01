@@ -215,9 +215,9 @@ export function PagarForm({ planId }: { planId: PlanId }) {
         <main className="mx-auto flex w-full max-w-xl flex-1 flex-col items-center gap-5 px-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-6 text-center lg:pb-10">
         <header className="flex flex-col gap-1">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            Escaneie o QR Code
+            Pague com Pix
           </h1>
-          <p className="text-muted">Pague com o app do seu banco para liberar o acesso.</p>
+          <p className="text-muted">Abra o app do seu banco e escaneie o QR Code abaixo.</p>
         </header>
 
         <img
@@ -227,7 +227,16 @@ export function PagarForm({ planId }: { planId: PlanId }) {
         />
 
         <div className="flex w-full flex-col gap-2">
-          <p className="text-sm font-semibold text-foreground">Pix Copia e Cola</p>
+          <p className="text-sm font-semibold text-foreground">
+            Não consegue escanear? Use o Pix Copia e Cola
+          </p>
+          {/* Sem instrução, quem não conhece o Pix Copia e Cola tenta colar
+              o código num lugar errado (chave Pix, "novo Pix" etc.) e o
+              banco acusa código inválido — não é o código que está errado. */}
+          <p className="text-left text-xs text-muted">
+            1. Copie o código abaixo. 2. No app do banco, abra Pix → Pix Copia e Cola.
+            3. Cole o código e confirme.
+          </p>
           <div className="rounded-2xl border border-card-border bg-card px-4 py-3 text-left text-xs break-all text-muted">
             {copyPaste}
           </div>
