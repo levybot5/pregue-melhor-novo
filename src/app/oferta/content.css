@@ -15,8 +15,12 @@
     --green: #1f9d55;
     --shadow-card: 0 16px 40px -20px rgba(22, 40, 79, 0.22);
     --shadow-gold: 0 18px 40px -14px rgba(201, 150, 47, 0.55);
-    --logo-url: url("/brand/icon-source.png");
-    --logo-url-topbar: url("/brand/oferta-icon-topbar.png");
+    /* Versões pequenas/comprimidas — os arquivos-fonte em /brand são
+       1254x1254 (~2MB cada), exibidos aqui a 76px/40px no máximo; sem
+       isso o navegador baixava o PNG gigante só pra mostrar um ícone
+       pequeno (achado do PageSpeed: maior consumo de banda da página). */
+    --logo-url: url("/brand/icon-source-oferta.png");
+    --logo-url-topbar: url("/brand/oferta-icon-topbar-sm.png");
   }
 
   /* Este design é intencionalmente "claro no corpo / navy nas seções
