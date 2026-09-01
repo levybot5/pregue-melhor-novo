@@ -12,7 +12,12 @@
 // sempre pagarão o mesmo valor"). Esta constante só decide quanto
 // cobrar em uma cobrança NOVA.
 
-export type PlanId = "mensal" | "trimestral";
+// "mensal" continua aqui só por compatibilidade com assinaturas antigas
+// já gravadas (subscriptions.plan) — não é mais oferecido na tela pra
+// assinante novo (ver /planos e a página de oferta: só Trimestral e
+// Anual). Removê-lo do tipo quebraria a leitura do plano de quem já
+// pagou mensal antes.
+export type PlanId = "mensal" | "trimestral" | "anual";
 
 export type Plan = {
   id: PlanId;
@@ -24,12 +29,13 @@ export type Plan = {
 export const PLANS: Record<PlanId, Plan> = {
   mensal: { id: "mensal", label: "Mensal", price: 10, days: 30 },
   trimestral: { id: "trimestral", label: "Trimestral", price: 22.9, days: 90 },
+  anual: { id: "anual", label: "Anual", price: 59.9, days: 365 },
 };
 
-export const DEFAULT_PLAN_ID: PlanId = "mensal";
+export const DEFAULT_PLAN_ID: PlanId = "trimestral";
 
 export function isPlanId(value: string | null | undefined): value is PlanId {
-  return value === "mensal" || value === "trimestral";
+  return value === "mensal" || value === "trimestral" || value === "anual";
 }
 
 export const KIT_PRICE = 9.9;
