@@ -22,7 +22,7 @@ export function LoginForm() {
 
   return (
     <>
-      <form action={formAction} className="flex flex-col gap-4">
+      <form action={formAction} className="flex flex-col gap-3">
         <input type="hidden" name="redirectTo" value={redirectTo} />
 
         <label className="flex flex-col gap-2">
