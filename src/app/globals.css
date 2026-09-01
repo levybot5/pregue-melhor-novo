@@ -39,6 +39,12 @@
 
 html {
   height: 100%;
+  /* Alguns navegadores mobile "engordam" o texto automaticamente em
+     colunas de leitura (font boosting) — deixa a página com aparência
+     de estar num zoom gigante, sem ligação com o zoom do próprio
+     usuário. Trava o tamanho real do texto na tela. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
