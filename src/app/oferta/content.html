@@ -20,18 +20,16 @@
       <h1>Prepare a sua pregação completa em <span class="hl">minutos</span>, não em madrugadas.</h1>
       <p class="sub">Tenha tudo que precisa para preparar sua mensagem em um só lugar.</p>
 
-      <!-- Mini VSL (YouTube Shorts), embutido direto — agora que a página
-           está no app de verdade (fora do Artifact), não tem mais o
-           bloqueio de iframe de antes. -->
+      <!-- Mini VSL (YouTube Shorts). Facade clicável em vez de iframe
+           direto — o player do YouTube sozinho já pesa muito no
+           carregamento inicial (Performance 36 / LCP 42s no PageSpeed),
+           então só carrega de verdade quando a pessoa toca em play. -->
       <div class="hero-video">
         <div class="hero-video-frame">
-          <iframe
-            src="https://www.youtube.com/embed/3QbS8h_RsMk"
-            title="Pregue Melhor em poucos minutos"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowfullscreen
-            loading="lazy"
-          ></iframe>
+          <div class="yt-facade" data-yt-id="3QbS8h_RsMk" role="button" tabindex="0" aria-label="Assistir: Pregue Melhor em poucos minutos">
+            <img src="https://i.ytimg.com/vi/3QbS8h_RsMk/hqdefault.jpg" alt="" loading="eager" />
+            <span class="yt-play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+          </div>
         </div>
         <p class="hero-video-caption">Assista o vídeo e entenda o Pregue Melhor em poucos minutos.</p>
       </div>
@@ -272,31 +270,22 @@
         </button>
         <div class="testimonial-track">
           <div class="testimonial-video reveal">
-            <iframe
-              src="https://www.youtube.com/embed/uV1YeQ_L1oE"
-              title="Depoimento sobre o Pregue Melhor"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowfullscreen
-              loading="lazy"
-            ></iframe>
+            <div class="yt-facade" data-yt-id="uV1YeQ_L1oE" role="button" tabindex="0" aria-label="Assistir depoimento">
+              <img src="https://i.ytimg.com/vi/uV1YeQ_L1oE/hqdefault.jpg" alt="" loading="lazy" />
+              <span class="yt-play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+            </div>
           </div>
           <div class="testimonial-video reveal">
-            <iframe
-              src="https://www.youtube.com/embed/J9oTIud-mQE"
-              title="Depoimento sobre o Pregue Melhor"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowfullscreen
-              loading="lazy"
-            ></iframe>
+            <div class="yt-facade" data-yt-id="J9oTIud-mQE" role="button" tabindex="0" aria-label="Assistir depoimento">
+              <img src="https://i.ytimg.com/vi/J9oTIud-mQE/hqdefault.jpg" alt="" loading="lazy" />
+              <span class="yt-play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+            </div>
           </div>
           <div class="testimonial-video reveal">
-            <iframe
-              src="https://www.youtube.com/embed/gDloO-2xGBI"
-              title="Depoimento sobre o Pregue Melhor"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowfullscreen
-              loading="lazy"
-            ></iframe>
+            <div class="yt-facade" data-yt-id="gDloO-2xGBI" role="button" tabindex="0" aria-label="Assistir depoimento">
+              <img src="https://i.ytimg.com/vi/gDloO-2xGBI/hqdefault.jpg" alt="" loading="lazy" />
+              <span class="yt-play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+            </div>
           </div>
         </div>
         <div class="testimonial-dots">

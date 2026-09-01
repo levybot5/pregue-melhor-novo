@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { RevealOnScroll } from "./RevealOnScroll";
 import { AutoplayVideos } from "./AutoplayVideos";
 import { TestimonialDots } from "./TestimonialDots";
+import { YoutubeFacade } from "./YoutubeFacade";
 
 // Página de oferta pública, movida do Artifact avulso pra dentro do app —
 // mesma origem do checkout, sem as limitações de CSP do Artifact (bloqueio
@@ -34,6 +35,7 @@ export default function OfertaPage() {
       <RevealOnScroll />
       <AutoplayVideos />
       <TestimonialDots />
+      <YoutubeFacade />
     </>
   );
 }
