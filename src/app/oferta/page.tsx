@@ -1,10 +1,20 @@
 import { readFileSync } from "fs";
 import { join } from "path";
+import dynamic from "next/dynamic";
 import type { Metadata } from "next";
-import { RevealOnScroll } from "./RevealOnScroll";
-import { AutoplayVideos } from "./AutoplayVideos";
-import { TestimonialDots } from "./TestimonialDots";
-import { YoutubeFacade } from "./YoutubeFacade";
+
+// Os 4 componentes abaixo não renderizam nada (só ligam comportamento:
+// animação de entrada, autoplay, carrossel, facade do YouTube) — carregar
+// o JS deles em separado do bundle principal tira trabalho do main
+// thread bem na janela crítica do LCP (PageSpeed apontava 2,1s de
+// "atraso na renderização" do elemento LCP, a miniatura do hero — nada
+// de rede, era o thread ocupado). Sem "ssr: false" (não é permitido em
+// next/dynamic dentro de Server Component) — como os 4 só usam
+// useEffect, não roda nada no server de qualquer forma.
+const RevealOnScroll = dynamic(() => import("./RevealOnScroll").then((m) => m.RevealOnScroll));
+const AutoplayVideos = dynamic(() => import("./AutoplayVideos").then((m) => m.AutoplayVideos));
+const TestimonialDots = dynamic(() => import("./TestimonialDots").then((m) => m.TestimonialDots));
+const YoutubeFacade = dynamic(() => import("./YoutubeFacade").then((m) => m.YoutubeFacade));
 
 // Página de oferta pública, movida do Artifact avulso pra dentro do app —
 // mesma origem do checkout, sem as limitações de CSP do Artifact (bloqueio
@@ -27,7 +37,7 @@ export default function OfertaPage() {
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap"
         rel="stylesheet"
       />
       <style>{css}</style>
