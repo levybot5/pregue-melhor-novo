@@ -1,7 +1,20 @@
 import { readFileSync } from "fs";
 import { join } from "path";
 import dynamic from "next/dynamic";
+import { Poppins } from "next/font/google";
 import type { Metadata } from "next";
+
+// Hospedada localmente (mesmo padrão do Geist em layout.tsx) em vez do
+// <link> pro Google Fonts — tira uma requisição que bloqueava a
+// renderização (~190ms apontados pelo PageSpeed) e um round-trip a mais
+// pra fonts.googleapis.com/fonts.gstatic.com. Só os pesos usados de
+// verdade no content.css (400/600/700/800/900, sem 500 nem itálico).
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "600", "700", "800", "900"],
+  variable: "--font-poppins",
+  display: "swap",
+});
 
 // Os 4 componentes abaixo não renderizam nada (só ligam comportamento:
 // animação de entrada, autoplay, carrossel, facade do YouTube) — carregar
@@ -33,19 +46,13 @@ export default function OfertaPage() {
   const body = readFileSync(join(process.cwd(), "src/app/oferta/content.html"), "utf8");
 
   return (
-    <>
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap"
-        rel="stylesheet"
-      />
+    <div className={`oferta-page ${poppins.variable}`}>
       <style>{css}</style>
       <div dangerouslySetInnerHTML={{ __html: body }} />
       <RevealOnScroll />
       <AutoplayVideos />
       <TestimonialDots />
       <YoutubeFacade />
-    </>
+    </div>
   );
 }

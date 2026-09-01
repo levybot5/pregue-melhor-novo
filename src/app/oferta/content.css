@@ -29,19 +29,28 @@
 
   * { box-sizing: border-box; }
 
-  body {
+  /* overflow-x aqui (não em .oferta-page, abaixo): position: sticky (a
+     topbar) gruda no ancestral com scroll mais próximo — um "overflow"
+     diferente de visible em QUALQUER ancestral vira esse ancestral, e a
+     topbar parava de grudar na tela, só acompanhava o scroll normal. */
+  body { overflow-x: hidden; }
+
+  /* Era "body" direto — mas a variável --font-poppins (next/font) só
+     existe a partir da div raiz da página (className={poppins.variable}
+     em page.tsx), e variável CSS não "sobe" pra um ancestral (o <body>
+     real, fora dessa div). Selector próprio resolve isso. */
+  .oferta-page {
     margin: 0;
     background: var(--paper);
     color: var(--ink);
-    font-family: "Poppins", ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
     font-size: 17px;
     line-height: 1.55;
     -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
   }
 
   h1, h2, h3, h4 {
-    font-family: "Poppins", sans-serif;
+    font-family: var(--font-poppins), sans-serif;
     font-weight: 800;
     line-height: 1.15;
     text-wrap: balance;
