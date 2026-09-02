@@ -24,7 +24,7 @@ export { getTrialRemaining } from "./trial";
 
 export {
   createPixPurchase,
-  createCardCheckout,
+  createHostedCheckout,
   getPurchaseStatus,
   claimPendingPurchase,
   InvalidPixPurchaseInputError,
@@ -33,7 +33,8 @@ export type {
   PaymentMethod,
   PixPurchaseInput,
   PixPurchaseResult,
-  CardCheckoutResult,
+  HostedCheckoutInput,
+  HostedCheckoutResult,
   PurchaseStatusResult,
   ClaimPurchaseResult,
 } from "./purchase";

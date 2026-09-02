@@ -6,6 +6,7 @@ import {
 } from "@/services/billing/providers/asaas";
 import {
   syncPixPaymentReceived,
+  syncHostedCheckoutPaymentReceived,
   syncCardPaymentConfirmed,
   syncSubscriptionCancelled,
   syncCardPaymentOverdue,
@@ -43,10 +44,21 @@ export async function POST(request: NextRequest) {
   try {
     switch (body.event) {
       case "PAYMENT_RECEIVED":
-        if (body.payment?.id) await syncPixPaymentReceived(body.payment.id);
+        // Pix direto (nosso formulário) e Pix do checkout hospedado
+        // chegam pelo mesmo evento — cada handler só age se o próprio
+        // critério de casamento bater (ver comentário em cada um).
+        if (body.payment?.id) {
+          await syncPixPaymentReceived(body.payment.id);
+          await syncHostedCheckoutPaymentReceived(body.payment.id);
+        }
         break;
       case "PAYMENT_CONFIRMED":
-        if (body.payment?.id) await syncCardPaymentConfirmed(body.payment.id);
+        // Idem, mas cartão: assinatura recorrente antiga (sem uso hoje)
+        // e cartão do checkout hospedado (cobrança única).
+        if (body.payment?.id) {
+          await syncCardPaymentConfirmed(body.payment.id);
+          await syncHostedCheckoutPaymentReceived(body.payment.id);
+        }
         break;
       case "PAYMENT_OVERDUE":
         if (body.payment?.id) await syncCardPaymentOverdue(body.payment.id);

@@ -2,9 +2,11 @@
 
 import {
   createPixPurchase,
+  createHostedCheckout,
   getPurchaseStatus,
   InvalidPixPurchaseInputError,
   type PixPurchaseInput,
+  type HostedCheckoutInput,
 } from "@/services/billing";
 
 export type PixPurchaseActionResult =
@@ -29,10 +31,30 @@ export async function createPixPurchaseAction(
   }
 }
 
-// createCardCheckoutAction removido daqui (item: cartão fora deste
-// lançamento) — o serviço createCardCheckout() em services/billing
-// continua existindo, pronto pra reativar sem precisar reescrever
-// nada, só falta um botão chamando de novo.
+export type HostedCheckoutActionResult =
+  | { success: true; checkoutUrl: string }
+  | { success: false; message: string };
+
+// Checkout hospedado da Asaas (Pix + Cartão na página deles) — não
+// exige login: quem chama pode estar anônimo, a compra nasce vinculada
+// só ao device_id (ver createHostedCheckout em services/billing).
+export async function createHostedCheckoutAction(
+  input: HostedCheckoutInput,
+): Promise<HostedCheckoutActionResult> {
+  try {
+    const result = await createHostedCheckout(input);
+    return { success: true, checkoutUrl: result.checkoutUrl };
+  } catch (error) {
+    if (error instanceof InvalidPixPurchaseInputError) {
+      return { success: false, message: error.message };
+    }
+    console.error("Falha ao criar checkout hospedado:", error);
+    return {
+      success: false,
+      message: "Não foi possível abrir o pagamento agora. Tente novamente em instantes.",
+    };
+  }
+}
 
 export async function getPurchaseStatusAction(purchaseId: string) {
   return getPurchaseStatus(purchaseId);

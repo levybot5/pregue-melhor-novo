@@ -96,6 +96,67 @@ export async function syncPixPaymentReceived(paymentId: string): Promise<void> {
   });
 }
 
+// Checkout hospedado (Pix OU Cartão, cobrança única — ver
+// createHostedCheckout): a linha nasce com payment_method NULO porque
+// só a Asaas sabe qual forma a pessoa vai escolher. Casada só por
+// externalReference (nunca tínhamos um provider_payment_id de
+// antemão, diferente do Pix direto). Só age se ainda não foi
+// resolvida (payment_method null + provider_checkout_id preenchido) —
+// assim nunca pisa nos outros dois handlers, que casam por
+// provider_payment_id/provider_subscription_id.
+export async function syncHostedCheckoutPaymentReceived(paymentId: string): Promise<void> {
+  const payment = await getPayment(paymentId);
+  const isPix = payment.billingType === "PIX" && payment.status === "RECEIVED";
+  const isCard = payment.billingType === "CREDIT_CARD" && payment.status === "CONFIRMED";
+  if (!isPix && !isCard) return;
+  if (!payment.externalReference) return;
+
+  const purchase = await findPurchase("id", payment.externalReference);
+  if (!purchase || !purchase.provider_checkout_id) return;
+
+  const resolvedMethod = isPix ? "pix" : "credit_card";
+
+  if (purchase.status === "paid") {
+    // Idempotência (mesma lógica do Pix direto) — reprocessar não pode
+    // duplicar acesso, só garantir que o Kit (se houver) foi mesmo
+    // concedido numa tentativa anterior que tenha falhado no meio.
+    if (purchase.includes_kit && purchase.claimed_by_user_id) {
+      await grantKitAccess(getSupabaseAdminClient(), purchase.claimed_by_user_id);
+    }
+    return;
+  }
+  if (purchase.payment_method !== null) return; // já resolvida por outro evento
+
+  const admin = getSupabaseAdminClient();
+  const paidAt = new Date().toISOString();
+  const { error } = await admin
+    .from("pending_purchases")
+    .update({
+      status: "paid",
+      paid_at: paidAt,
+      payment_method: resolvedMethod,
+      provider_payment_id: paymentId,
+    })
+    .eq("id", purchase.id);
+  if (error) throw error;
+
+  await activateSubscriptionFromPurchase({
+    ...purchase,
+    status: "paid",
+    paid_at: paidAt,
+    payment_method: resolvedMethod,
+  });
+
+  const email = await getPurchaserEmail(purchase.claimed_by_user_id);
+  await sendPurchaseEvent({
+    value: purchase.amount,
+    eventId: purchase.id,
+    email,
+    fbc: purchase.fbc,
+    fbp: purchase.fbp,
+  });
+}
+
 // Cartão: PAYMENT_CONFIRMED libera/renova. Cobre tanto a primeira
 // cobrança da assinatura (achada pelo externalReference do checkout)
 // quanto renovações mensais (achadas pelo id da assinatura, já

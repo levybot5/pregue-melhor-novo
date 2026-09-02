@@ -8,8 +8,8 @@ export type { CreateAsaasCustomerInput, AsaasCustomer } from "./customers";
 export { createPixPayment, getPixQrCode, getPayment } from "./payments";
 export type { CreatePixPaymentInput, AsaasPayment, AsaasPixQrCode } from "./payments";
 
-export { createCardCheckout } from "./checkouts";
-export type { CreateCardCheckoutInput, AsaasCheckout } from "./checkouts";
+export { createHostedCheckout } from "./checkouts";
+export type { CreateHostedCheckoutInput, AsaasCheckout } from "./checkouts";
 
 export { getSubscription } from "./subscriptions";
 export type { AsaasSubscription } from "./subscriptions";

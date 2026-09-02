@@ -17,11 +17,13 @@ const PUBLIC_PATHS = [
   // Página de oferta (landing de anúncio) — movida do Artifact avulso pra
   // dentro do app, precisa ficar acessível sem login.
   "/oferta",
-  // Reconciliação de compras Pix antigas pagas mas nunca vinculadas a
-  // uma conta (de antes desta mudança) — ver AsaasSignupForm.tsx e o
-  // branch anônimo de planos/retorno/page.tsx. Não é mais alcançável
-  // por compras novas (checkout agora só existe logado), mas precisa
-  // continuar público pra quem ainda tiver um link antigo.
+  // Checkout direto, sem exigir cadastro antes (a compra nasce presa
+  // ao device_id e vira dono de conta só depois de pagar — ver
+  // createHostedCheckout/createPixPurchase em services/billing).
+  "/planos",
+  "/planos/pagar",
+  // Volta do pagamento (Pix direto antigo ou checkout hospedado) —
+  // é aqui que quem pagou sem conta cria o acesso (AsaasSignupForm.tsx).
   "/planos/retorno",
 ];
 

@@ -1,19 +1,16 @@
 import "server-only";
 import { asaasRequest } from "./client";
-import { PRO_PRICE } from "../../pricing";
 
 // https://docs.asaas.com/reference/create-new-checkout — checkout
-// HOSPEDADO da Asaas, só para cartão. Nosso servidor nunca vê número
-// de cartão, CVV nem dados sensíveis — o cliente digita tudo na
-// página da própria Asaas. chargeTypes: ["RECURRENT"] faz a Asaas
-// criar uma assinatura mensal de verdade (recorrência oficial, nunca
-// uma cobrança avulsa disfarçada).
-//
-// PIX NÃO usa mais este checkout — pede endereço/celular além de
-// nome/CPF, fricção demais para uma cobrança de R$10 (decisão do
-// produto). PIX usa cobrança direta (ver ./payments.ts), que só exige
-// nome + CPF.
-export type CreateCardCheckoutInput = {
+// HOSPEDADO da Asaas: a pessoa sai do nosso site, escolhe Pix ou
+// Cartão e paga numa página da própria Asaas (nosso servidor nunca vê
+// número de cartão). chargeTypes ["DETACHED"] = cobrança ÚNICA, nunca
+// assinatura recorrente — nosso modelo é sempre "paga uma vez, libera
+// N dias" (Trimestral/Anual), igual ao Pix direto (./payments.ts), só
+// que aqui a Asaas escolhe/coleta os dados em vez do nosso formulário.
+export type CreateHostedCheckoutInput = {
+  value: number;
+  description: string;
   externalReference: string;
   successUrl: string;
   cancelUrl: string;
@@ -26,16 +23,12 @@ export type AsaasCheckout = {
   status: string;
 };
 
-function todayIsoDate(): string {
-  return new Date().toISOString().slice(0, 10);
-}
-
-export async function createCardCheckout(
-  input: CreateCardCheckoutInput,
+export async function createHostedCheckout(
+  input: CreateHostedCheckoutInput,
 ): Promise<AsaasCheckout> {
   return asaasRequest<AsaasCheckout>("POST", "/checkouts", {
-    billingTypes: ["CREDIT_CARD"],
-    chargeTypes: ["RECURRENT"],
+    billingTypes: ["PIX", "CREDIT_CARD"],
+    chargeTypes: ["DETACHED"],
     minutesToExpire: 60,
     externalReference: input.externalReference,
     callback: {
@@ -46,16 +39,10 @@ export async function createCardCheckout(
     items: [
       {
         name: "Pregue Melhor Pro",
-        description: "Assinatura mensal",
+        description: input.description,
         quantity: 1,
-        value: PRO_PRICE,
+        value: input.value,
       },
     ],
-    subscription: {
-      cycle: "MONTHLY",
-      // Obrigatório pra Asaas ("O campo nextDueDate deve ser
-      // informado") — primeira cobrança já no dia da assinatura.
-      nextDueDate: todayIsoDate(),
-    },
   });
 }

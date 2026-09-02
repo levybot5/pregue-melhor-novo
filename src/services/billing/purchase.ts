@@ -6,7 +6,7 @@ import {
   createAsaasCustomer,
   createPixPayment,
   getPixQrCode,
-  createCardCheckout as createAsaasCardCheckout,
+  createHostedCheckout as createAsaasHostedCheckout,
 } from "./providers/asaas";
 import { recordSubscriptionEvent, type SubscriptionStatusValue } from "./subscription-events";
 import { grantKitAccess } from "./kit";
@@ -22,7 +22,10 @@ export type PaymentMethod = "pix" | "credit_card";
 export type PendingPurchaseRow = {
   id: string;
   device_id: string;
-  payment_method: PaymentMethod;
+  // null = checkout hospedado ainda sem pagamento confirmado (só
+  // sabemos Pix ou Cartão quando o webhook conta, ver
+  // createHostedCheckout/asaas-webhook-sync.ts).
+  payment_method: PaymentMethod | null;
   provider_customer_id: string | null;
   provider_payment_id: string | null;
   provider_subscription_id: string | null;
@@ -42,7 +45,7 @@ export type PendingPurchaseRow = {
 };
 
 async function insertPendingPurchase(
-  paymentMethod: PaymentMethod,
+  paymentMethod: PaymentMethod | null,
   deviceId: string,
   claimedByUserId: string | null,
   options?: {
@@ -180,30 +183,62 @@ export async function createPixPurchase(input: PixPurchaseInput): Promise<PixPur
   };
 }
 
-export type CardCheckoutResult = {
+export type HostedCheckoutInput = {
+  planId: PlanId;
+  includeKit: boolean;
+  fbc?: string;
+  fbp?: string;
+};
+
+export type HostedCheckoutResult = {
   purchaseId: string;
   checkoutUrl: string;
 };
 
-// Assinatura mensal recorrente via checkout HOSPEDADO da Asaas — nosso
-// servidor nunca recebe dado de cartão (item 2/9 do pedido). Este sim
-// deixa a Asaas coletar tudo (nome, CPF, endereço, celular) na página
-// dela, porque não tem como fugir disso com cartão.
-export async function createCardCheckout(): Promise<CardCheckoutResult> {
-  const deviceId = await getOrCreateDeviceId();
-  const user = await getCurrentUser();
+// Checkout HOSPEDADO da Asaas (Pix + Cartão, cobrança única — ver
+// providers/asaas/checkouts.ts): a pessoa nem precisa estar logada
+// (item "direto pro checkout"), a compra nasce vinculada ao
+// device_id e só é reivindicada por uma conta depois que o pagamento
+// confirma, mesmo mecanismo que o Pix direto já usa (claimPendingPurchase).
+// payment_method nasce nulo aqui de propósito — só a Asaas sabe qual
+// forma a pessoa escolheu, e só depois que ela realmente pagar.
+export async function createHostedCheckout(
+  input: HostedCheckoutInput,
+): Promise<HostedCheckoutResult> {
+  if (!isPlanId(input.planId)) {
+    throw new InvalidPixPurchaseInputError("Plano inválido.");
+  }
+
+  const plan = PLANS[input.planId];
+  const amount = Math.round((plan.price + (input.includeKit ? KIT_PRICE : 0)) * 100) / 100;
+  const description = input.includeKit
+    ? `Pregue Melhor Pro ${plan.label} + ${KIT_LABEL} — ${plan.days} dias de acesso`
+    : `Pregue Melhor Pro ${plan.label} — ${plan.days} dias de acesso`;
+
   const appUrl = process.env.APP_URL;
   if (!appUrl) {
     throw new Error("Asaas não configurado: defina APP_URL em .env.local");
   }
 
-  const purchase = await insertPendingPurchase("credit_card", deviceId, user?.id ?? null);
+  const deviceId = await getOrCreateDeviceId();
+  const user = await getCurrentUser();
 
-  const checkout = await createAsaasCardCheckout({
+  const purchase = await insertPendingPurchase(null, deviceId, user?.id ?? null, {
+    amount,
+    planId: plan.id,
+    durationDays: plan.days,
+    includesKit: input.includeKit,
+    fbc: input.fbc,
+    fbp: input.fbp,
+  });
+
+  const checkout = await createAsaasHostedCheckout({
+    value: amount,
+    description,
     externalReference: purchase.id,
     successUrl: `${appUrl}/planos/retorno?purchase=${purchase.id}`,
-    cancelUrl: `${appUrl}/planos/pagar`,
-    expiredUrl: `${appUrl}/planos/pagar`,
+    cancelUrl: `${appUrl}/planos/pagar?plan=${plan.id}`,
+    expiredUrl: `${appUrl}/planos/pagar?plan=${plan.id}`,
   });
 
   const admin = getSupabaseAdminClient();
@@ -359,7 +394,13 @@ export async function activateSubscriptionFromPurchase(
     .maybeSingle();
 
   let currentPeriodEnd: string;
-  if (purchase.payment_method === "pix") {
+  if (purchase.duration_days != null) {
+    // Compra de duração fixa (Trimestral/Anual) — Pix direto ou
+    // checkout hospedado (Pix OU Cartão ali, tanto faz: nenhum dos
+    // dois é assinatura recorrente de verdade, então os dois somam
+    // dias fixos). Só o ramo "else" abaixo (cardCurrentPeriodEnd) é
+    // pra assinatura recorrente de cartão de verdade — hoje sem uso.
+    //
     // Renovar antes de vencer nunca faz perder os dias que sobravam
     // (item 8 do pedido): a base é o maior entre "agora" e o
     // vencimento atual, e só depois somamos os dias da compra —
