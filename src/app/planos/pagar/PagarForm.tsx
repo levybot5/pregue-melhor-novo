@@ -24,6 +24,27 @@ function readCookie(name: string): string | undefined {
   return match ? decodeURIComponent(match[1]) : undefined;
 }
 
+// InitiateCheckout só existe no navegador (evento padrão da Meta, sem
+// duplicar via Conversions API) — ao contrário do Purchase, a pessoa
+// ainda está no site nesse momento, então o pixel sozinho já é
+// confiável. Dá à Meta um sinal de funil antes da compra confirmar,
+// útil mesmo quando o _fbc se perde depois (Safari/iOS derruba esse
+// cookie rápido — foi isso que fez uma venda real não aparecer
+// atribuída no Gerenciador de Anúncios).
+declare global {
+  interface Window {
+    fbq?: (...args: unknown[]) => void;
+  }
+}
+function trackInitiateCheckout(value: number, planId: PlanId) {
+  window.fbq?.("track", "InitiateCheckout", {
+    value,
+    currency: "BRL",
+    content_ids: [planId],
+    content_type: "product",
+  });
+}
+
 // Sobrevive a uma recarga da página: no Android é comum o navegador
 // ser encerrado pelo sistema (memória) quando o usuário sai pra pagar
 // no app do banco — sem isso, ao voltar o React perde o purchaseId e o
@@ -184,6 +205,7 @@ export function PagarForm({ planId }: { planId: PlanId }) {
         setErrorMessage(result.message);
         return;
       }
+      trackInitiateCheckout(total, planId);
       setPurchaseId(result.purchaseId);
       setQrCodeBase64(result.qrCodeBase64);
       setCopyPaste(result.copyPaste);
