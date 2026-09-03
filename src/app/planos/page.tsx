@@ -8,7 +8,6 @@ function formatPrice(value: number): string {
 }
 
 const TRIMESTRAL_MONTHLY_EQUIVALENT = formatPrice(PLANS.trimestral.price / 3);
-const ANUAL_MONTHLY_EQUIVALENT = formatPrice(PLANS.anual.price / 12);
 
 export default function PlanosPage() {
   return (
@@ -44,17 +43,17 @@ export default function PlanosPage() {
       <div className="flex flex-col gap-4 rounded-2xl border border-card-border bg-card p-6 shadow-sm">
         <div>
           <p className="text-3xl font-bold text-foreground">
-            R${formatPrice(PLANS.anual.price)}
-            <span className="text-base font-medium text-muted"> / {PLANS.anual.days} dias</span>
+            R${formatPrice(PLANS.mensal.price)}
+            <span className="text-base font-medium text-muted"> / {PLANS.mensal.days} dias</span>
           </p>
-          <p className="text-sm text-muted">Equivale a R${ANUAL_MONTHLY_EQUIVALENT}/mês</p>
+          <p className="text-sm text-muted">Sem compromisso, cancele quando quiser</p>
         </div>
 
         <Link
-          href="/planos/pagar?plan=anual"
+          href="/planos/pagar?plan=mensal"
           className="flex min-h-[52px] items-center justify-center rounded-2xl border border-card-border px-5 font-semibold text-foreground"
         >
-          ASSINAR 1 ANO
+          ASSINAR MENSAL
         </Link>
       </div>
 

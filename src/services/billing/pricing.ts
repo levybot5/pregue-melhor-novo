@@ -12,11 +12,12 @@
 // sempre pagarão o mesmo valor"). Esta constante só decide quanto
 // cobrar em uma cobrança NOVA.
 
-// "mensal" continua aqui só por compatibilidade com assinaturas antigas
-// já gravadas (subscriptions.plan) — não é mais oferecido na tela pra
-// assinante novo (ver /planos e a página de oferta: só Trimestral e
-// Anual). Removê-lo do tipo quebraria a leitura do plano de quem já
-// pagou mensal antes.
+// "anual" continua aqui só por compatibilidade com assinaturas antigas
+// já gravadas (subscriptions.plan) — zero vendas reais em todo o
+// histórico (Anual nunca converteu, mesmo ao vivo lado a lado com o
+// Trimestral), então saiu de circulação: /planos e a oferta voltam a
+// vender Mensal + Trimestral. Removê-lo do tipo quebraria a leitura de
+// quem porventura já tenha essa assinatura.
 export type PlanId = "mensal" | "trimestral" | "anual";
 
 export type Plan = {
