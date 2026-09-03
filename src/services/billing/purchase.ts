@@ -1,4 +1,5 @@
 import "server-only";
+import { headers } from "next/headers";
 import { getSupabaseAdminClient } from "@/services/database/admin-client";
 import { getCurrentUser } from "@/services/auth";
 import { getOrCreateDeviceId } from "./device";
@@ -42,7 +43,29 @@ export type PendingPurchaseRow = {
   created_at: string;
   fbc: string | null;
   fbp: string | null;
+  // Capturados na hora da compra (navegador de quem está comprando) —
+  // o webhook (Asaas chamando a gente) não tem acesso a isso, então
+  // precisam vir gravados de antes pra Conversions API usar depois
+  // (ver services/marketing/meta-capi.ts e o achado de qualidade de
+  // correspondência 4.6/10 no Gerenciador de Eventos da Meta).
+  client_ip: string | null;
+  client_user_agent: string | null;
 };
+
+// x-forwarded-for pode vir "ip1, ip2, ip3" (proxies encadeados) — o
+// primeiro é sempre o cliente real. Nunca lança: telemetria não pode
+// derrubar uma compra.
+async function getRequestMeta(): Promise<{ ip: string | null; userAgent: string | null }> {
+  try {
+    const store = await headers();
+    const forwardedFor = store.get("x-forwarded-for");
+    const ip = forwardedFor ? forwardedFor.split(",")[0].trim() : null;
+    const userAgent = store.get("user-agent");
+    return { ip: ip || null, userAgent: userAgent || null };
+  } catch {
+    return { ip: null, userAgent: null };
+  }
+}
 
 async function insertPendingPurchase(
   paymentMethod: PaymentMethod | null,
@@ -57,6 +80,7 @@ async function insertPendingPurchase(
     fbp?: string;
   },
 ): Promise<PendingPurchaseRow> {
+  const { ip, userAgent } = await getRequestMeta();
   const admin = getSupabaseAdminClient();
   const { data, error } = await admin
     .from("pending_purchases")
@@ -70,6 +94,8 @@ async function insertPendingPurchase(
       claimed_by_user_id: claimedByUserId,
       fbc: options?.fbc ?? null,
       fbp: options?.fbp ?? null,
+      client_ip: ip,
+      client_user_agent: userAgent,
     })
     .select()
     .single();

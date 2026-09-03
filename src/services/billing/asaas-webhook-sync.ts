@@ -93,6 +93,8 @@ export async function syncPixPaymentReceived(paymentId: string): Promise<void> {
     email,
     fbc: purchase.fbc,
     fbp: purchase.fbp,
+    clientIp: purchase.client_ip,
+    clientUserAgent: purchase.client_user_agent,
   });
 }
 
@@ -154,6 +156,8 @@ export async function syncHostedCheckoutPaymentReceived(paymentId: string): Prom
     email,
     fbc: purchase.fbc,
     fbp: purchase.fbp,
+    clientIp: purchase.client_ip,
+    clientUserAgent: purchase.client_user_agent,
   });
 }
 
