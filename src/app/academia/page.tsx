@@ -9,12 +9,13 @@ import {
 } from "@/lib/academy/course-data";
 import { PSE_COURSE, getPseLesson } from "@/lib/academy/pse-course-data";
 import { KIT_MATERIALS, KIT_SECTION_ANCHOR } from "@/lib/academy/kit-materials";
-import { hasKitAccess, KIT_LABEL, KIT_PRICE } from "@/services/billing";
+import { hasKitAccess, KIT_LABEL, KIT_PRICE, hasEbookAccess, EBOOK_LABEL } from "@/services/billing";
 import { GraduationCapIcon, LockIcon } from "@/components/icons";
 import { AppHeader } from "@/components/AppHeader";
 import { BottomNav } from "@/components/home/BottomNav";
 import { ContinueCard } from "@/components/academy/ContinueCard";
 import { ExternalLinkCard } from "@/components/academy/ExternalLinkCard";
+import { EbookPurchaseCard } from "@/components/academy/EbookPurchaseCard";
 
 export const dynamic = "force-dynamic";
 
@@ -63,11 +64,12 @@ export default async function AcademiaPage() {
     redirect("/entrar?redirectTo=/academia");
   }
 
-  const [teologiaProgress, pseProgress, continueLesson, ownsKit] = await Promise.all([
+  const [teologiaProgress, pseProgress, continueLesson, ownsKit, ownsEbook] = await Promise.all([
     getCourseProgress(user.id, ACADEMY_COURSE.id),
     getCourseProgress(user.id, PSE_COURSE.id),
     getContinueLesson(user.id),
     hasKitAccess(user.id),
+    hasEbookAccess(user.id),
   ]);
 
   const teologiaCompletedCount = teologiaProgress.filter((p) => p.completedAt).length;
@@ -190,6 +192,30 @@ export default async function AcademiaPage() {
             </>
           )}
         </div>
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-lg font-bold text-foreground">{EBOOK_LABEL}</h2>
+          {ownsEbook && (
+            <span className="w-fit shrink-0 rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold uppercase tracking-wide text-accent">
+              Acesso permanente
+            </span>
+          )}
+        </div>
+        <p className="text-sm text-muted">
+          Ebook com revelações do livro de Apocalipse explicadas de forma simples.
+        </p>
+
+        {ownsEbook ? (
+          <ExternalLinkCard
+            title={`${EBOOK_LABEL} (PDF)`}
+            url="/ebooks/apocalipse-simplificado.pdf"
+            cta="Abrir PDF"
+          />
+        ) : (
+          <EbookPurchaseCard />
+        )}
       </section>
       </main>
       <BottomNav />

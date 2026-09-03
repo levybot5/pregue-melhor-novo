@@ -5,7 +5,14 @@ import { useCallback, useEffect, useState, useTransition } from "react";
 import { CheckIcon, SpinnerIcon } from "@/components/icons";
 import { AppHeader } from "@/components/AppHeader";
 import { BottomNav } from "@/components/home/BottomNav";
-import { PLANS, KIT_PRICE, KIT_LABEL, type PlanId } from "@/services/billing/pricing";
+import {
+  PLANS,
+  KIT_PRICE,
+  KIT_LABEL,
+  EBOOK_PRICE,
+  EBOOK_LABEL,
+  type PlanId,
+} from "@/services/billing/pricing";
 import { createPixPurchaseAction, getPurchaseStatusAction } from "./actions";
 
 // Voltou a ser Pix direto (nome+CPF só) em vez do checkout hospedado
@@ -102,9 +109,12 @@ export function PagarForm({ planId }: { planId: PlanId }) {
   const [name, setName] = useState("");
   const [cpfCnpj, setCpfCnpj] = useState("");
   const [includeKit, setIncludeKit] = useState(false);
+  const [includeEbook, setIncludeEbook] = useState(false);
 
   const plan = PLANS[planId];
-  const total = Math.round((plan.price + (includeKit ? KIT_PRICE : 0)) * 100) / 100;
+  const total =
+    Math.round((plan.price + (includeKit ? KIT_PRICE : 0) + (includeEbook ? EBOOK_PRICE : 0)) * 100) /
+    100;
 
   const [purchaseId, setPurchaseId] = useState<string | null>(null);
   const [qrCodeBase64, setQrCodeBase64] = useState<string | null>(null);
@@ -203,6 +213,7 @@ export function PagarForm({ planId }: { planId: PlanId }) {
         cpfCnpj,
         planId,
         includeKit,
+        includeEbook,
         fbc: readCookie("_fbc"),
         fbp: readCookie("_fbp"),
       });
@@ -325,6 +336,24 @@ export function PagarForm({ planId }: { planId: PlanId }) {
           <span className="text-xs text-muted">
             Tenha um apoio prático para se preparar melhor e pregar com mais segurança, mesmo
             quando bater o nervosismo.
+          </span>
+        </span>
+      </label>
+
+      <label className="flex items-start gap-3 rounded-2xl border border-card-border bg-card p-4">
+        <input
+          type="checkbox"
+          checked={includeEbook}
+          onChange={(e) => setIncludeEbook(e.target.checked)}
+          className="mt-1 h-5 w-5 shrink-0 accent-primary"
+        />
+        <span className="flex flex-col gap-0.5">
+          <span className="text-sm font-semibold text-foreground">
+            Adicionar {EBOOK_LABEL} (PDF) — +R${EBOOK_PRICE.toFixed(2).replace(".", ",")}
+          </span>
+          <span className="text-xs text-muted">
+            Ebook com revelações do livro de Apocalipse explicadas de forma simples, acesso
+            permanente na Academia.
           </span>
         </span>
       </label>

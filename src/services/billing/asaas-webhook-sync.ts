@@ -4,6 +4,7 @@ import { getPayment, getSubscription, AsaasApiError } from "./providers/asaas";
 import { activateSubscriptionFromPurchase, type PendingPurchaseRow } from "./purchase";
 import { recordSubscriptionEvent, type SubscriptionStatusValue } from "./subscription-events";
 import { grantKitAccess, revokeKitAccess } from "./kit";
+import { grantEbookAccess, revokeEbookAccess } from "./ebook";
 import { sendPurchaseEvent } from "@/services/marketing/meta-capi";
 
 // E-mail só existe pra quem já tinha conta no momento da compra
@@ -69,6 +70,9 @@ export async function syncPixPaymentReceived(paymentId: string): Promise<void> {
     if (purchase.includes_kit && purchase.claimed_by_user_id) {
       await grantKitAccess(getSupabaseAdminClient(), purchase.claimed_by_user_id);
     }
+    if (purchase.includes_ebook && purchase.claimed_by_user_id) {
+      await grantEbookAccess(getSupabaseAdminClient(), purchase.claimed_by_user_id);
+    }
     return;
   }
 
@@ -124,6 +128,9 @@ export async function syncHostedCheckoutPaymentReceived(paymentId: string): Prom
     // concedido numa tentativa anterior que tenha falhado no meio.
     if (purchase.includes_kit && purchase.claimed_by_user_id) {
       await grantKitAccess(getSupabaseAdminClient(), purchase.claimed_by_user_id);
+    }
+    if (purchase.includes_ebook && purchase.claimed_by_user_id) {
+      await grantEbookAccess(getSupabaseAdminClient(), purchase.claimed_by_user_id);
     }
     return;
   }
@@ -334,6 +341,11 @@ export async function syncPaymentRefunded(paymentId: string): Promise<void> {
     // desfeito.
     if (purchase.includes_kit) {
       await revokeKitAccess(admin, purchase.claimed_by_user_id);
+    }
+    // Mesma lógica pro ebook — inclusive quando a compra é avulsa
+    // (is_ebook_only), sem assinatura nenhuma envolvida.
+    if (purchase.includes_ebook) {
+      await revokeEbookAccess(admin, purchase.claimed_by_user_id);
     }
   }
 

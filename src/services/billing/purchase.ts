@@ -11,7 +11,17 @@ import {
 } from "./providers/asaas";
 import { recordSubscriptionEvent, type SubscriptionStatusValue } from "./subscription-events";
 import { grantKitAccess } from "./kit";
-import { PLANS, KIT_PRICE, KIT_LABEL, PRO_PRICE, isPlanId, type PlanId } from "./pricing";
+import { grantEbookAccess } from "./ebook";
+import {
+  PLANS,
+  KIT_PRICE,
+  KIT_LABEL,
+  EBOOK_PRICE,
+  EBOOK_LABEL,
+  PRO_PRICE,
+  isPlanId,
+  type PlanId,
+} from "./pricing";
 
 // Ponto único que a UI chama para iniciar um pagamento ou reivindicar
 // uma compra já paga. Nada fora de src/services/billing deve importar
@@ -36,6 +46,12 @@ export type PendingPurchaseRow = {
   plan_id: PlanId | null;
   duration_days: number | null;
   includes_kit: boolean;
+  // includes_ebook: comprado junto (order bump, com ou sem plano).
+  // is_ebook_only: compra avulsa dentro da Academia, sem plano nenhum
+  // — activateSubscriptionFromPurchase nunca deve tocar em
+  // subscriptions pra essas (ver comentário lá).
+  includes_ebook: boolean;
+  is_ebook_only: boolean;
   paid_at: string | null;
   access_expires_at: string | null;
   claimed_by_user_id: string | null;
@@ -76,6 +92,8 @@ async function insertPendingPurchase(
     planId?: PlanId;
     durationDays?: number;
     includesKit?: boolean;
+    includesEbook?: boolean;
+    isEbookOnly?: boolean;
     fbc?: string;
     fbp?: string;
   },
@@ -91,6 +109,8 @@ async function insertPendingPurchase(
       plan_id: options?.planId ?? null,
       duration_days: options?.durationDays ?? null,
       includes_kit: options?.includesKit ?? false,
+      includes_ebook: options?.includesEbook ?? false,
+      is_ebook_only: options?.isEbookOnly ?? false,
       claimed_by_user_id: claimedByUserId,
       fbc: options?.fbc ?? null,
       fbp: options?.fbp ?? null,
@@ -110,6 +130,7 @@ export type PixPurchaseInput = {
   email?: string;
   planId: PlanId;
   includeKit: boolean;
+  includeEbook?: boolean;
   // Cookies do Facebook Pixel (_fbc/_fbp), lidos no navegador na hora
   // do checkout — ver PagarForm.tsx. Guardados na compra pra o webhook
   // conseguir mandar pra Conversions API depois, quando o PIX
@@ -134,7 +155,7 @@ export class InvalidPixPurchaseInputError extends Error {}
 
 const PIX_NAME_MAX_LENGTH = 100;
 
-function validatePixPurchaseInput(input: PixPurchaseInput): void {
+function validatePixPurchaseInput(input: { name: string; cpfCnpj: string }): void {
   const name = input.name.trim();
   if (name.length < 3) {
     throw new InvalidPixPurchaseInputError("Digite seu nome completo.");
@@ -161,10 +182,17 @@ export async function createPixPurchase(input: PixPurchaseInput): Promise<PixPur
   }
 
   const plan = PLANS[input.planId];
-  const amount = Math.round((plan.price + (input.includeKit ? KIT_PRICE : 0)) * 100) / 100;
-  const description = input.includeKit
-    ? `Pregue Melhor Pro ${plan.label} + ${KIT_LABEL} — ${plan.days} dias de acesso`
-    : `Pregue Melhor Pro ${plan.label} — ${plan.days} dias de acesso`;
+  const extras =
+    (input.includeKit ? KIT_PRICE : 0) + (input.includeEbook ? EBOOK_PRICE : 0);
+  const amount = Math.round((plan.price + extras) * 100) / 100;
+  const extraLabels = [
+    input.includeKit ? KIT_LABEL : null,
+    input.includeEbook ? EBOOK_LABEL : null,
+  ].filter(Boolean);
+  const description =
+    extraLabels.length > 0
+      ? `Pregue Melhor Pro ${plan.label} + ${extraLabels.join(" + ")} — ${plan.days} dias de acesso`
+      : `Pregue Melhor Pro ${plan.label} — ${plan.days} dias de acesso`;
 
   const deviceId = await getOrCreateDeviceId();
   const user = await getCurrentUser();
@@ -174,6 +202,7 @@ export async function createPixPurchase(input: PixPurchaseInput): Promise<PixPur
     planId: plan.id,
     durationDays: plan.days,
     includesKit: input.includeKit,
+    includesEbook: input.includeEbook,
     fbc: input.fbc,
     fbp: input.fbp,
   });
@@ -212,6 +241,7 @@ export async function createPixPurchase(input: PixPurchaseInput): Promise<PixPur
 export type HostedCheckoutInput = {
   planId: PlanId;
   includeKit: boolean;
+  includeEbook?: boolean;
   fbc?: string;
   fbp?: string;
 };
@@ -236,10 +266,17 @@ export async function createHostedCheckout(
   }
 
   const plan = PLANS[input.planId];
-  const amount = Math.round((plan.price + (input.includeKit ? KIT_PRICE : 0)) * 100) / 100;
-  const description = input.includeKit
-    ? `Pregue Melhor Pro ${plan.label} + ${KIT_LABEL} — ${plan.days} dias de acesso`
-    : `Pregue Melhor Pro ${plan.label} — ${plan.days} dias de acesso`;
+  const extras =
+    (input.includeKit ? KIT_PRICE : 0) + (input.includeEbook ? EBOOK_PRICE : 0);
+  const amount = Math.round((plan.price + extras) * 100) / 100;
+  const extraLabels = [
+    input.includeKit ? KIT_LABEL : null,
+    input.includeEbook ? EBOOK_LABEL : null,
+  ].filter(Boolean);
+  const description =
+    extraLabels.length > 0
+      ? `Pregue Melhor Pro ${plan.label} + ${extraLabels.join(" + ")} — ${plan.days} dias de acesso`
+      : `Pregue Melhor Pro ${plan.label} — ${plan.days} dias de acesso`;
 
   const appUrl = process.env.APP_URL;
   if (!appUrl) {
@@ -254,6 +291,7 @@ export async function createHostedCheckout(
     planId: plan.id,
     durationDays: plan.days,
     includesKit: input.includeKit,
+    includesEbook: input.includeEbook,
     fbc: input.fbc,
     fbp: input.fbp,
   });
@@ -275,6 +313,64 @@ export async function createHostedCheckout(
   if (error) throw error;
 
   return { purchaseId: purchase.id, checkoutUrl: checkout.link };
+}
+
+export type EbookPurchaseInput = {
+  name: string;
+  cpfCnpj: string;
+  email?: string;
+  fbc?: string;
+  fbp?: string;
+};
+
+// Ebook AVULSO, sem plano nenhum — comprado de dentro da Academia por
+// quem já é assinante (ou não). is_ebook_only=true é o que impede
+// activateSubscriptionFromPurchase de mexer em subscriptions pra essa
+// compra (ver comentário lá). Mesmo padrão de cobrança do Pix direto
+// (nome+CPF só).
+export async function createEbookOnlyPurchase(input: EbookPurchaseInput): Promise<PixPurchaseResult> {
+  validatePixPurchaseInput(input);
+
+  const deviceId = await getOrCreateDeviceId();
+  const user = await getCurrentUser();
+
+  const purchase = await insertPendingPurchase("pix", deviceId, user?.id ?? null, {
+    amount: EBOOK_PRICE,
+    includesEbook: true,
+    isEbookOnly: true,
+    fbc: input.fbc,
+    fbp: input.fbp,
+  });
+
+  const customer = await createAsaasCustomer({
+    name: input.name,
+    cpfCnpj: input.cpfCnpj,
+    email: input.email,
+    externalReference: purchase.id,
+  });
+
+  const payment = await createPixPayment({
+    customerId: customer.id,
+    value: EBOOK_PRICE,
+    externalReference: purchase.id,
+    description: `${EBOOK_LABEL} (PDF) — acesso permanente`,
+  });
+
+  const admin = getSupabaseAdminClient();
+  const { error: updateError } = await admin
+    .from("pending_purchases")
+    .update({ provider_customer_id: customer.id, provider_payment_id: payment.id })
+    .eq("id", purchase.id);
+  if (updateError) throw updateError;
+
+  const qrCode = await getPixQrCode(payment.id);
+
+  return {
+    purchaseId: purchase.id,
+    qrCodeBase64: qrCode.encodedImage,
+    copyPaste: qrCode.payload,
+    expirationDate: qrCode.expirationDate,
+  };
 }
 
 export type PurchaseStatusResult = {
@@ -356,12 +452,16 @@ export async function claimPendingPurchase(purchaseId: string): Promise<ClaimPur
     // compra "vinculada" mas sem Pro. Detecta esse caso e tenta ativar
     // de novo; só pula quando já existe uma assinatura ativa de
     // verdade, pra nunca somar 30 dias duas vezes na mesma compra.
+    // Exceção: compra com ebook sempre tenta de novo mesmo já ativa —
+    // é assinante comprando o ebook à parte, sem isso o grant nunca
+    // rodaria (activateSubscriptionFromPurchase é idempotente pro
+    // grant, e não mexe em subscriptions quando is_ebook_only).
     const { data: existingSub } = await admin
       .from("subscriptions")
       .select("status")
       .eq("user_id", user.id)
       .maybeSingle();
-    if (existingSub?.status !== "active") {
+    if (existingSub?.status !== "active" || purchase.includes_ebook) {
       await activateSubscriptionFromPurchase(purchase);
     }
     return { success: true };
@@ -404,6 +504,19 @@ export async function activateSubscriptionFromPurchase(
   const admin = getSupabaseAdminClient();
   const now = new Date();
   const userId = purchase.claimed_by_user_id;
+
+  // Ebook é independente do plano — concedido antes de qualquer coisa,
+  // pra rodar mesmo nas compras avulsas (is_ebook_only) que não têm
+  // plano nenhum. Idempotente (upsert com ignoreDuplicates).
+  if (purchase.includes_ebook) {
+    await grantEbookAccess(admin, userId);
+  }
+
+  // Compra avulsa do ebook, sem plano — nunca mexe em subscriptions
+  // (senão criaria/sobrescreveria uma assinatura "pro" pra quem só
+  // quis o ebook). Nada mais a fazer aqui.
+  if (purchase.is_ebook_only) return;
+
   // Linhas antigas (antes da migration de Trimestral) e compras de
   // cartão sempre têm duration_days null — 30 reproduz exatamente o
   // comportamento de antes.

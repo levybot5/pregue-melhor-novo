@@ -25,6 +25,7 @@ export { getTrialRemaining } from "./trial";
 export {
   createPixPurchase,
   createHostedCheckout,
+  createEbookOnlyPurchase,
   getPurchaseStatus,
   claimPendingPurchase,
   InvalidPixPurchaseInputError,
@@ -35,10 +36,22 @@ export type {
   PixPurchaseResult,
   HostedCheckoutInput,
   HostedCheckoutResult,
+  EbookPurchaseInput,
   PurchaseStatusResult,
   ClaimPurchaseResult,
 } from "./purchase";
 
-export { PLANS, KIT_PRICE, KIT_LABEL, DEFAULT_PLAN_ID, isPlanId, PRO_PRICE } from "./pricing";
+export {
+  PLANS,
+  KIT_PRICE,
+  KIT_LABEL,
+  EBOOK_PRICE,
+  EBOOK_LABEL,
+  EBOOK_PRODUCT_ID,
+  DEFAULT_PLAN_ID,
+  isPlanId,
+  PRO_PRICE,
+} from "./pricing";
 export type { PlanId, Plan } from "./pricing";
 export { hasKitAccess } from "./kit";
+export { hasEbookAccess } from "./ebook";

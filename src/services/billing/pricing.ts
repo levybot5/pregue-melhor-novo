@@ -42,6 +42,13 @@ export function isPlanId(value: string | null | undefined): value is PlanId {
 export const KIT_PRICE = 9.9;
 export const KIT_LABEL = "Kit Pregue com Segurança";
 
+// Ebook avulso "Apocalipse Simplificado" — order bump em /planos/pagar
+// e compra independente dentro da Academia (ver services/billing/ebook.ts
+// pro grant/revoke de acesso, que É server-only, diferente daqui).
+export const EBOOK_PRODUCT_ID = "apocalipse-simplificado";
+export const EBOOK_PRICE = 12.9;
+export const EBOOK_LABEL = "Apocalipse Simplificado";
+
 // Mantido por compatibilidade — providers/asaas/checkouts.ts (cartão,
 // fluxo dormant, fora deste lançamento) e qualquer código legado que
 // ainda importe PRO_PRICE direto continuam funcionando sem alteração
