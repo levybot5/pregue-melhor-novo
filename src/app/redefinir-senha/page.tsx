@@ -11,7 +11,7 @@ export default async function RedefinirSenhaPage() {
   const user = await getCurrentUser();
 
   return (
-    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)]">
+    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)] lg:max-w-md lg:justify-center lg:rounded-3xl lg:border lg:border-card-border lg:bg-card lg:p-10 lg:pt-10 lg:shadow-xl">
       <AuthLogo />
 
       <header className="flex flex-col items-center gap-1 text-center">
