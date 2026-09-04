@@ -32,7 +32,6 @@ export default function CadastrarPage() {
   const [email, setEmail] = useState("");
   const [emailTouched, setEmailTouched] = useState(false);
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
 
   const emailError =
@@ -42,10 +41,6 @@ export default function CadastrarPage() {
   const passwordError =
     password.length > 0 && password.length < 6
       ? "A senha precisa ter pelo menos 6 caracteres."
-      : null;
-  const confirmError =
-    confirmPassword.length > 0 && confirmPassword !== password
-      ? "As senhas não coincidem."
       : null;
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -60,11 +55,6 @@ export default function CadastrarPage() {
     if (password.length < 6) {
       event.preventDefault();
       setFormError("A senha precisa ter pelo menos 6 caracteres.");
-      return;
-    }
-    if (password !== confirmPassword) {
-      event.preventDefault();
-      setFormError("As senhas não coincidem.");
     }
   }
 
@@ -113,16 +103,6 @@ export default function CadastrarPage() {
               onChange={setPassword}
               error={passwordError}
               defaultVisible
-            />
-
-            <PasswordInput
-              name="confirmPassword"
-              label="Confirmar senha"
-              autoComplete="new-password"
-              defaultVisible
-              value={confirmPassword}
-              onChange={setConfirmPassword}
-              error={confirmError}
             />
 
             {(formError || state.error) && (

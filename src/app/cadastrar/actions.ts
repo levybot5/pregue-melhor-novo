@@ -15,7 +15,6 @@ export async function signUpAction(
 ): Promise<CadastrarState> {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
-  const confirmPassword = String(formData.get("confirmPassword") ?? "");
   const redirectTo = String(formData.get("redirectTo") ?? "").trim();
 
   if (!email || !isValidEmail(email)) {
@@ -23,9 +22,6 @@ export async function signUpAction(
   }
   if (password.length < 6) {
     return { error: "A senha precisa ter pelo menos 6 caracteres.", checkEmail: false };
-  }
-  if (password !== confirmPassword) {
-    return { error: "As senhas não coincidem.", checkEmail: false };
   }
 
   const result = await signUp(email, password);
