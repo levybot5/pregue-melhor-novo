@@ -10,6 +10,13 @@ import { signUpAction, type CadastrarState } from "./actions";
 
 const initialState: CadastrarState = { error: null, checkEmail: false };
 
+// Precisa bater exatamente com translateAuthError() em services/auth —
+// esse erro específico ganha um aviso mais visível (achado real: gente
+// que já assina tentava cadastrar de novo com o mesmo e-mail, via
+// anúncio, e não percebia que precisava clicar em "Entrar" mais abaixo
+// — ficava travada olhando só a mensagem de erro em texto).
+const ALREADY_EXISTS_ERROR = "Já existe uma conta com este e-mail.";
+
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
@@ -33,6 +40,11 @@ export default function CadastrarPage() {
   const [emailTouched, setEmailTouched] = useState(false);
   const [password, setPassword] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
+
+  // Mesmo link do "Entrar" acima, mas levando o e-mail já digitado —
+  // usado só no aviso de "já existe conta" (ALREADY_EXISTS_ERROR
+  // abaixo), pra quem já é assinante não precisar redigitar o e-mail.
+  const entrarComEmailHref = `/entrar?${new URLSearchParams({ redirectTo, email }).toString()}`;
 
   const emailError =
     emailTouched && email.length > 0 && !isValidEmail(email)
@@ -105,8 +117,22 @@ export default function CadastrarPage() {
               defaultVisible
             />
 
-            {(formError || state.error) && (
-              <p className="text-sm text-red-600">{formError ?? state.error}</p>
+            {state.error === ALREADY_EXISTS_ERROR ? (
+              <div className="flex flex-col gap-3 rounded-2xl border border-accent bg-accent-soft p-4">
+                <p className="text-sm font-semibold text-foreground">
+                  Você já tem uma conta com esse e-mail — é só entrar, não precisa criar de novo.
+                </p>
+                <Link
+                  href={entrarComEmailHref}
+                  className="flex min-h-[48px] items-center justify-center rounded-2xl bg-primary px-5 font-semibold text-primary-foreground"
+                >
+                  Entrar com esse e-mail
+                </Link>
+              </div>
+            ) : (
+              (formError || state.error) && (
+                <p className="text-sm text-red-600">{formError ?? state.error}</p>
+              )
             )}
 
             <button

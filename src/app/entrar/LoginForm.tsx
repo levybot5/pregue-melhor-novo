@@ -16,8 +16,10 @@ export function LoginForm() {
   // Controlados os dois — sem isso, o e-mail (ao contrário da senha)
   // ficava em branco depois de um erro de login, porque o <form
   // action={...}> do React reseta campos não controlados quando a
-  // Server Action termina, mesmo em caso de erro.
-  const [email, setEmail] = useState("");
+  // Server Action termina, mesmo em caso de erro. E-mail pode chegar
+  // pré-preenchido via query (?email=...) — usado pelo aviso de "já
+  // existe conta" em /cadastrar, pra quem já assina não redigitar.
+  const [email, setEmail] = useState(() => searchParams.get("email") ?? "");
   const [password, setPassword] = useState("");
 
   return (
