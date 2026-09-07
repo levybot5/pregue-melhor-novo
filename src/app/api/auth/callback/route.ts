@@ -29,15 +29,11 @@ export async function GET(request: NextRequest) {
     if (!error) {
       return NextResponse.redirect(`${origin}${next}`);
     }
-    console.error("[auth/callback] verifyOtp falhou:", error.message);
   } else if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
       return NextResponse.redirect(`${origin}${next}`);
     }
-    console.error("[auth/callback] exchangeCodeForSession falhou:", error.message, error.status);
-  } else {
-    console.error("[auth/callback] sem code nem token_hash. params:", searchParams.toString());
   }
 
   return NextResponse.redirect(`${origin}/entrar`);
