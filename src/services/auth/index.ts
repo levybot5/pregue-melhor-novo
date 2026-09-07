@@ -69,39 +69,6 @@ export async function signIn(
   return { status: "ok" };
 }
 
-export type OAuthUrlResult = { status: "ok"; url: string } | { status: "error"; message: string };
-
-// Google (sem senha nenhuma — item "facilitar a entrada dos leads").
-// Só CALCULA a URL de consentimento do Google aqui no servidor; quem
-// redireciona de verdade é a Server Action que chama isto (redirect()
-// do Next.js aceita URL externa). Serve tanto pra quem já tem conta
-// quanto pra quem nunca cadastrou — o Supabase cria a conta sozinho no
-// primeiro login com um e-mail novo, sem tela de cadastro separada.
-// /api/auth/callback (já existe, usado por confirmação de e-mail/
-// redefinição de senha) já sabe trocar esse "code" pela sessão real —
-// nada novo precisou ser criado lá.
-export async function getGoogleSignInUrl(redirectTo: string): Promise<OAuthUrlResult> {
-  const appUrl = process.env.APP_URL;
-  if (!appUrl) {
-    return { status: "error", message: "Login com Google não configurado (APP_URL ausente)." };
-  }
-
-  const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: `${appUrl}/api/auth/callback?next=${encodeURIComponent(redirectTo)}`,
-    },
-  });
-
-  if (error || !data.url) {
-    console.error("Falha ao iniciar login com Google:", error?.status, error?.message);
-    return { status: "error", message: "Não foi possível abrir o login com Google agora." };
-  }
-
-  return { status: "ok", url: data.url };
-}
-
 export async function signOut(): Promise<void> {
   const supabase = await getSupabaseServerClient();
   await supabase.auth.signOut();

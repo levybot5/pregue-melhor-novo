@@ -4,8 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useActionState, useState } from "react";
 import { PasswordInput } from "@/components/PasswordInput";
-import { GoogleIcon } from "@/components/GoogleIcon";
-import { signInAction, signInWithGoogleAction, type EntrarState } from "./actions";
+import { signInAction, type EntrarState } from "./actions";
 
 const initialState: EntrarState = { error: null };
 
@@ -25,28 +24,6 @@ export function LoginForm() {
 
   return (
     <>
-      <form action={signInWithGoogleAction.bind(null, redirectTo)}>
-        <button
-          type="submit"
-          className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl border border-card-border bg-card px-5 font-semibold text-foreground"
-        >
-          <GoogleIcon />
-          Continuar com Google
-        </button>
-      </form>
-
-      {searchParams.get("googleError") && (
-        <p className="text-center text-sm text-red-600">
-          Não foi possível entrar com Google agora. Tente de novo ou use e-mail e senha.
-        </p>
-      )}
-
-      <div className="flex items-center gap-3 text-xs font-medium uppercase tracking-wide text-muted">
-        <span className="h-px flex-1 bg-card-border" />
-        ou
-        <span className="h-px flex-1 bg-card-border" />
-      </div>
-
       <form action={formAction} className="flex flex-col gap-3">
         <input type="hidden" name="redirectTo" value={redirectTo} />
 
