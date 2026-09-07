@@ -7,6 +7,18 @@
       "runtimeArgs": ["run", "dev"],
       "port": 3000,
       "autoPort": true
+    },
+    {
+      "name": "oferta-preview",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "--yes",
+        "serve",
+        "-l",
+        "4173",
+        "C:\\Users\\santo\\AppData\\Local\\Temp\\claude\\C--Users-santo-Downloads-pregue-melhor\\f7d613f6-c542-4a75-b7b7-73a5e022755c\\scratchpad"
+      ],
+      "port": 4173
     }
   ]
 }
