@@ -100,7 +100,7 @@ export function InstallPwaBanner() {
   if (!visible) return null;
 
   return (
-    <div className="flex items-start justify-between gap-3 rounded-2xl border border-accent/40 bg-accent-soft/40 px-4 py-3">
+    <div className="flex items-start justify-between gap-3 rounded-2xl border border-accent bg-accent-soft px-4 py-3">
       <div className="flex flex-col gap-1">
         <span className="text-sm font-semibold text-primary">Instale o Pregue Melhor</span>
         {showIosHint ? (
