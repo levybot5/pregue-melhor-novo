@@ -5,8 +5,10 @@ import { useSearchParams } from "next/navigation";
 import { useActionState, useState, type FormEvent } from "react";
 import { AuthLogo } from "@/components/AuthLogo";
 import { PasswordInput } from "@/components/PasswordInput";
+import { GoogleIcon } from "@/components/GoogleIcon";
 import { BackLink } from "@/components/reading";
 import { signUpAction, type CadastrarState } from "./actions";
+import { signInWithGoogleAction } from "@/app/entrar/actions";
 
 const initialState: CadastrarState = { error: null, checkEmail: false };
 
@@ -88,6 +90,22 @@ export default function CadastrarPage() {
         </div>
       ) : (
         <>
+          <form action={signInWithGoogleAction.bind(null, redirectTo)}>
+            <button
+              type="submit"
+              className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl border border-card-border bg-card px-5 font-semibold text-foreground"
+            >
+              <GoogleIcon />
+              Continuar com Google
+            </button>
+          </form>
+
+          <div className="flex items-center gap-3 text-xs font-medium uppercase tracking-wide text-muted">
+            <span className="h-px flex-1 bg-card-border" />
+            ou
+            <span className="h-px flex-1 bg-card-border" />
+          </div>
+
           <form action={formAction} onSubmit={handleSubmit} className="flex flex-col gap-4">
             <input type="hidden" name="redirectTo" value={redirectTo} />
 
