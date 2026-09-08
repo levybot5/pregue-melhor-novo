@@ -74,8 +74,11 @@ export function SermonView({ sermon }: SermonViewProps) {
                       <span className="text-sm font-normal text-muted">
                         ({ponto.palavra_original.transliteracao})
                       </span>
+                      <span className="text-muted"> — </span>
+                      <span className="text-sm font-normal text-foreground">
+                        {ponto.palavra_original.significado}
+                      </span>
                     </p>
-                    <p>{ponto.palavra_original.significado}</p>
                     <p className="italic">{ponto.palavra_original.aplicacao}</p>
                   </div>
                 </ExpandableSection>

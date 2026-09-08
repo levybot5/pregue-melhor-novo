@@ -31,12 +31,11 @@ export function BibleStudyView({ study }: BibleStudyViewProps) {
                 ({study.palavra_original.transliteracao})
               </span>
             )}
+            <span className="text-muted"> — </span>
+            {study.palavra_original.significado}
           </p>
           <p className="text-xs font-medium uppercase tracking-wide text-muted">
             {study.palavra_original.idioma}
-          </p>
-          <p className="text-[16px] leading-[1.7] text-foreground">
-            {study.palavra_original.significado}
           </p>
           <p className="text-[16px] leading-[1.7] text-foreground">
             {study.palavra_original.explicacao}

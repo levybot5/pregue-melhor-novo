@@ -116,9 +116,8 @@ export function SermonPdfDocument({ data }: { data: SermonPdfData }) {
               <View style={pdfStyles.highlightBox}>
                 <Text style={{ ...pdfStyles.paragraph, fontFamily: "Helvetica-Bold" }}>
                   Palavra no Original ({ponto.palavraOriginal.idioma}): {ponto.palavraOriginal.palavra}{" "}
-                  ({ponto.palavraOriginal.transliteracao})
+                  ({ponto.palavraOriginal.transliteracao}) — {ponto.palavraOriginal.significado}
                 </Text>
-                <Text style={pdfStyles.paragraph}>{ponto.palavraOriginal.significado}</Text>
                 <Text style={pdfStyles.paragraph}>{ponto.palavraOriginal.aplicacao}</Text>
               </View>
             )}

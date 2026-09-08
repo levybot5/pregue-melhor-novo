@@ -22,8 +22,9 @@ export function BibleStudyPdfDocument({ study }: { study: BibleStudyContent }) {
               {study.palavra_original.transliteracao
                 ? ` (${study.palavra_original.transliteracao})`
                 : ""}
+              {" — "}
+              {study.palavra_original.significado}
             </Text>
-            <Text style={pdfStyles.paragraph}>{study.palavra_original.significado}</Text>
             <Text style={pdfStyles.paragraph}>{study.palavra_original.explicacao}</Text>
           </View>
         )}
