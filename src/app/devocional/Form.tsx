@@ -22,6 +22,8 @@ const MOMENT_OPTIONS: { value: DevotionalMoment; label: string }[] = [
   { value: "qualquer", label: "Qualquer momento" },
 ];
 
+const PASSAGE_MAX_LENGTH = 150;
+
 type DevocionalFormProps = {
   mode: "subscriber" | "trial" | "expired";
   initialRemaining: number;
@@ -32,6 +34,7 @@ export function DevocionalForm({ mode, initialRemaining }: DevocionalFormProps) 
   const [isGenerating, startGenerating] = useTransition();
 
   const [moment, setMoment] = useState<DevotionalMoment>("qualquer");
+  const [passage, setPassage] = useState("");
   const [remaining, setRemaining] = useState(initialRemaining);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [limitNotice, setLimitNotice] = useState<string | null>(null);
@@ -42,7 +45,10 @@ export function DevocionalForm({ mode, initialRemaining }: DevocionalFormProps) 
   function handleGenerate() {
     setErrorMessage(null);
     startGenerating(async () => {
-      const result = await generateDevotionalAction({ moment });
+      const result = await generateDevotionalAction({
+        moment,
+        passage: passage.trim() || undefined,
+      });
 
       if (result.status === "blocked") {
         if (isSubscriptionExpiredReason(result.reason)) {
@@ -159,6 +165,23 @@ export function DevocionalForm({ mode, initialRemaining }: DevocionalFormProps) 
           ))}
         </div>
       </fieldset>
+
+      <label className="flex flex-col gap-1.5">
+        <span className="text-sm font-semibold text-foreground">
+          Passagem bíblica <span className="font-normal text-muted">(opcional)</span>
+        </span>
+        <input
+          type="text"
+          value={passage}
+          onChange={(e) => setPassage(e.target.value)}
+          placeholder="Ex: Salmo 23, João 3:16..."
+          maxLength={PASSAGE_MAX_LENGTH}
+          className="min-h-[44px] rounded-xl border border-card-border bg-card px-3.5 text-sm text-foreground outline-none focus:border-primary"
+        />
+        <span className="text-xs text-muted">
+          Deixe em branco pra receber uma passagem escolhida na hora.
+        </span>
+      </label>
 
       <div className="flex flex-col items-center gap-2">
         <button

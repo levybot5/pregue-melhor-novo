@@ -18,9 +18,14 @@ export type DevotionalActionResult =
   | { status: "blocked"; reason: GenerationBlockReason; message: string }
   | { status: "generated"; devotional: DevotionalContent };
 
+const PASSAGE_MAX_LENGTH = 150;
+
 function validateInput(input: DevotionalInput): string | null {
   if (!(devotionalMoments as readonly string[]).includes(input.moment)) {
     return "Selecione um momento.";
+  }
+  if (input.passage && input.passage.length > PASSAGE_MAX_LENGTH) {
+    return "Passagem muito longa.";
   }
   return null;
 }

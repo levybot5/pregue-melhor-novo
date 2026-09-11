@@ -5,10 +5,11 @@ import { generateStructured, toGeminiJsonSchema, type GenerateStructuredResult }
 export const devotionalMoments = ["manha", "noite", "qualquer"] as const;
 export type DevotionalMoment = (typeof devotionalMoments)[number];
 
-// O usuário não informa tema nem passagem — a IA escolhe sozinha,
-// variando entre gerações. Sem input textual nenhum.
+// Passagem é opcional: se a pessoa não informar nada, a IA escolhe
+// sozinha, variando entre gerações — igual ao comportamento original.
 export type DevotionalInput = {
   moment: DevotionalMoment;
+  passage?: string;
 };
 
 export const devotionalContentSchema = z.object({
@@ -55,7 +56,7 @@ const MOMENT_CONFIG: Record<DevotionalMoment, { label: string; guidance: string 
 const SYSTEM_INSTRUCTION = `Você escreve devocionais cristãos curtos e diários, em português do Brasil — não uma pregação, não um estudo acadêmico.
 
 Regras:
-- O usuário NÃO informa tema nem passagem: escolha você mesmo uma passagem bíblica real e um tema cristão prático, com boa variedade entre gerações diferentes — não se limite sempre aos mesmos livros, capítulos ou temas.
+- Se a pessoa informar uma passagem bíblica, use exatamente essa passagem como base do devocional — nunca troque por outra. Se o texto dela vier em bruto (ex.: "joão 3 16" ou "joao 3.16"), interprete e cite a referência corretamente (ex.: "João 3:16"). Se não informar nada, escolha você mesmo uma passagem bíblica real e um tema cristão prático, com boa variedade entre gerações diferentes — não se limite sempre aos mesmos livros, capítulos ou temas.
 - Varie entre temas como: fé, esperança, gratidão, ansiedade, oração, paz, perdão, perseverança, sabedoria, obediência, amor, descanso em Deus, coragem — entre outros temas cristãos práticos.
 - Curto: a resposta inteira deve ficar entre 300 e 500 palavras no total. Não ultrapasse isso desnecessariamente.
 - Linguagem pastoral, simples, acolhedora, bíblica, natural e prática.
@@ -70,11 +71,19 @@ Regras:
 
 function buildPrompt(input: DevotionalInput): string {
   const moment = MOMENT_CONFIG[input.moment];
-  return `Momento: ${moment.label}
-
-${moment.guidance}
-
-Escreva um devocional curto para esse momento, seguindo exatamente o formato pedido.`;
+  const passage = input.passage?.trim();
+  const lines = [
+    `Momento: ${moment.label}`,
+    "",
+    moment.guidance,
+    "",
+    passage
+      ? `Passagem bíblica informada pela pessoa: ${passage}`
+      : "Passagem bíblica: não informada, escolha você mesmo.",
+    "",
+    "Escreva um devocional curto para esse momento, seguindo exatamente o formato pedido.",
+  ];
+  return lines.join("\n");
 }
 
 // Meta de 300–500 palavras: 900 tokens de saída é uma margem econômica
