@@ -25,6 +25,14 @@ export type AuthActionResult =
   | { status: "check_email" }
   | { status: "error"; message: string };
 
+// E-mail não deveria ser case-sensitive pra ninguém — sem isso, alguém
+// que cadastrou com "nome@..." e depois digita "Nome@..." pra entrar
+// (ex.: teclado com autocapitalização) levava "e-mail ou senha
+// incorretos" mesmo com a senha certa.
+function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
+}
+
 // "name" é opcional: o cadastro normal (/cadastrar) não pede mais nome
 // (só e-mail + senha) — o parâmetro só existe pra manter o fluxo
 // pós-pagamento (planos/retorno/AsaasSignupForm.tsx, que ainda pede
@@ -36,7 +44,7 @@ export async function signUp(
 ): Promise<AuthActionResult> {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase.auth.signUp({
-    email,
+    email: normalizeEmail(email),
     password,
     options: name ? { data: { name } } : undefined,
   });
@@ -59,7 +67,10 @@ export async function signIn(
   password: string,
 ): Promise<AuthActionResult> {
   const supabase = await getSupabaseServerClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { error } = await supabase.auth.signInWithPassword({
+    email: normalizeEmail(email),
+    password,
+  });
 
   if (error) {
     console.error("Falha no login:", error.status, error.message);
@@ -86,7 +97,7 @@ export async function requestPasswordReset(email: string): Promise<void> {
   // precisa ser alcançável de fora (ex.: túnel em desenvolvimento).
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
 
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+  const { error } = await supabase.auth.resetPasswordForEmail(normalizeEmail(email), {
     redirectTo: siteUrl ? `${siteUrl}/api/auth/callback?next=/redefinir-senha` : undefined,
   });
 
