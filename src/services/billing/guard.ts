@@ -17,9 +17,9 @@ export type GenerationBlockReason =
 
 // Resultado de reserveGenerationOrTrial(): "subscriber" é o fluxo
 // normal (autenticado + Pro ativo, limites diário/mensal); "trial" é
-// usuário autenticado sem Pro (cadastro é obrigatório antes de
-// qualquer acesso ao app — não existe mais visitante anônimo aqui),
-// controlado por user_id.
+// visitante anônimo OU autenticado sem Pro, controlado por device_id
+// (cookie HttpOnly, ver services/billing/trial.ts) — sem exigir
+// cadastro pra experimentar as ferramentas.
 export type GenerationReservation =
   | { allowed: true; mode: "subscriber"; userId: string; dailyRemainingAfter: number }
   | { allowed: true; mode: "trial" }

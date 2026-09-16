@@ -2,18 +2,31 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { DEVICE_ID_COOKIE } from "@/services/billing/device";
 
-// Cadastro é obrigatório antes de QUALQUER acesso ao app — inclusive
-// as 6 ferramentas de IA e a Home. O trial (3 gerações grátis) agora é
-// por conta (auth.uid(), ver services/billing/trial.ts), não mais por
-// device_id/cookie. Por isso o modelo de gate virou o oposto de antes:
-// em vez de listar rotas protegidas, listamos as poucas rotas
-// PÚBLICAS — tudo que não estiver aqui exige sessão.
+// Home + as 7 ferramentas de geração por IA ficam públicas — dá pra
+// testar (3 gerações grátis por device_id, ver services/billing/trial.ts)
+// sem criar conta. Cadastro só é exigido em dois momentos: pra acessar
+// recursos que são inerentemente pessoais/persistentes (Biblioteca,
+// Academia, Bíblia Guiada — progresso de leitura, Conta, Anotações) ou
+// depois de pagar um plano (o checkout em si já era público). Listamos
+// as rotas PÚBLICAS — tudo que não estiver aqui exige sessão.
 const PUBLIC_PATHS = [
+  "/",
   "/entrar",
   "/cadastrar",
   "/esqueci-senha",
   "/redefinir-senha",
   "/privacidade",
+  // As 7 ferramentas de geração por IA elegíveis ao trial sem login
+  // (ver USAGE_TOOLS em services/billing/limits.ts). Bíblia Guiada
+  // (/biblia-completa) fica de fora de propósito: progresso de
+  // leitura, grifos e anotações só fazem sentido com conta.
+  "/pregacao",
+  "/esboco-pregacao",
+  "/esboco-pulpito",
+  "/biblia",
+  "/dicionario",
+  "/aula-biblica",
+  "/devocional",
   // Página de oferta (landing de anúncio) — movida do Artifact avulso pra
   // dentro do app, precisa ficar acessível sem login.
   "/oferta",
