@@ -140,7 +140,7 @@ export default function CadastrarPage() {
               disabled={isPending}
               className="flex min-h-[52px] items-center justify-center rounded-2xl bg-primary px-5 font-semibold uppercase tracking-wide text-primary-foreground disabled:opacity-60"
             >
-              {isPending ? "Criando..." : "Criar meu acesso"}
+              {isPending ? "Cadastrando..." : "Cadastrar"}
             </button>
           </form>
 
@@ -148,7 +148,7 @@ export default function CadastrarPage() {
             href={entrarHref}
             className="flex min-h-[52px] items-center justify-center rounded-2xl border border-card-border bg-card px-5 font-semibold text-primary"
           >
-            Já possui uma conta? Entrar
+            Entrar
           </Link>
 
           <p className="text-center text-xs text-muted">
