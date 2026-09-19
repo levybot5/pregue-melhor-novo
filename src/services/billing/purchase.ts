@@ -12,6 +12,7 @@ import {
 import { recordSubscriptionEvent, type SubscriptionStatusValue } from "./subscription-events";
 import { grantKitAccess } from "./kit";
 import { grantEbookAccess } from "./ebook";
+import { grantReferralRewardIfEligible } from "./referral";
 import {
   PLANS,
   KIT_PRICE,
@@ -584,6 +585,11 @@ export async function activateSubscriptionFromPurchase(
   if (purchase.includes_kit) {
     await grantKitAccess(admin, userId);
   }
+
+  // Bônus de indicação: só dispara em pagamento real (este é o único
+  // caminho por onde toda ativação de compra passa) — nunca em grant
+  // manual, que nem passa por aqui.
+  await grantReferralRewardIfEligible(admin, userId);
 
   const previousStatus = (existing?.status as SubscriptionStatusValue | undefined) ?? null;
   await recordSubscriptionEvent(admin, {

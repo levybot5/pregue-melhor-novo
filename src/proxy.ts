@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { DEVICE_ID_COOKIE } from "@/services/billing/device";
+import { REFERRAL_COOKIE } from "@/services/billing/referral";
 
 // Home + as 7 ferramentas de geração por IA ficam públicas — dá pra
 // testar (3 gerações grátis por device_id, ver services/billing/trial.ts)
@@ -46,6 +47,15 @@ const AUTH_PATHS = ["/entrar", "/cadastrar"];
 
 const DEVICE_ID_MAX_AGE_SECONDS = 60 * 60 * 24 * 400; // ~400 dias (máximo aceito por navegadores)
 
+// Programa de indicação: ?ref=<user_id> de um link compartilhado vira
+// o cookie REFERRAL_COOKIE (primeiro toque, nunca sobrescrito) — lido
+// só depois, no momento do cadastro real (signUp() em
+// services/auth/index.ts). Não precisa ficar visível no request desta
+// mesma navegação (ao contrário do device_id, que o trial lê na
+// hora), só precisa sobreviver até o cadastro acontecer.
+const REFERRAL_MAX_AGE_SECONDS = 60 * 60 * 24 * 30; // 30 dias de janela de atribuição
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 // Renomeado de middleware.ts para proxy.ts no Next.js 16 (mesma função).
 // Responsabilidades: renovar a sessão a cada navegação, garantir o
 // device_id (cookie HttpOnly, nunca localStorage — ainda usado pelo
@@ -69,6 +79,13 @@ export async function proxy(request: NextRequest) {
     response = NextResponse.next({ request });
   }
 
+  // Primeiro toque: só grava se ainda não existir cookie nenhum e o
+  // valor parecer um id de usuário de verdade (formato uuid) — um "ref"
+  // malformado ou ausente simplesmente não vira cookie, sem erro.
+  const refParam = request.nextUrl.searchParams.get("ref");
+  const shouldSetReferralCookie =
+    !request.cookies.get(REFERRAL_COOKIE)?.value && refParam !== null && UUID_RE.test(refParam);
+
   function finishWithDeviceCookie(res: NextResponse): NextResponse {
     if (!existingDeviceId) {
       res.cookies.set(DEVICE_ID_COOKIE, deviceId, {
@@ -77,6 +94,15 @@ export async function proxy(request: NextRequest) {
         sameSite: "lax",
         path: "/",
         maxAge: DEVICE_ID_MAX_AGE_SECONDS,
+      });
+    }
+    if (shouldSetReferralCookie) {
+      res.cookies.set(REFERRAL_COOKIE, refParam!, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: REFERRAL_MAX_AGE_SECONDS,
       });
     }
     return res;

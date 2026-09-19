@@ -1,7 +1,9 @@
 import "server-only";
 import { cache } from "react";
+import { cookies } from "next/headers";
 import { getSupabaseServerClient } from "@/services/database/server-client";
 import { getSupabaseAdminClient } from "@/services/database/admin-client";
+import { REFERRAL_COOKIE } from "@/services/billing/referral";
 
 export type CurrentUser = {
   id: string;
@@ -43,10 +45,22 @@ export async function signUp(
   name?: string,
 ): Promise<AuthActionResult> {
   const supabase = await getSupabaseServerClient();
+
+  // Programa de indicação: o cookie só existe se alguém chegou por um
+  // link com ?ref=<user_id> válido (ver proxy.ts) — vira metadado do
+  // cadastro, lido pelo trigger handle_new_user() no banco (migration
+  // 20260919190000) pra preencher profiles.referred_by. Não valida o
+  // uuid aqui de novo: um valor malformado ou de usuário inexistente é
+  // simplesmente ignorado lá, nunca trava o cadastro.
+  const referredBy = (await cookies()).get(REFERRAL_COOKIE)?.value;
+  const metadata: Record<string, string> = {};
+  if (name) metadata.name = name;
+  if (referredBy) metadata.referred_by = referredBy;
+
   const { data, error } = await supabase.auth.signUp({
     email: normalizeEmail(email),
     password,
-    options: name ? { data: { name } } : undefined,
+    options: Object.keys(metadata).length > 0 ? { data: metadata } : undefined,
   });
 
   if (error) {

@@ -5,6 +5,8 @@ import { getProfile } from "@/services/database";
 import {
   getCurrentSubscription,
   getDaysUntilExpiry,
+  getReferralCount,
+  REFERRAL_BONUS_DAYS,
   PLANS,
   isPlanId,
   type SubscriptionStatus,
@@ -13,6 +15,7 @@ import { DeleteAccountButton } from "./DeleteAccountButton";
 import { EditNameForm } from "./EditNameForm";
 import { AppHeader } from "@/components/AppHeader";
 import { BottomNav } from "@/components/home/BottomNav";
+import { WhatsappIcon } from "@/components/icons";
 
 const SUPPORT_WHATSAPP_URL = "https://wa.me/5591982486230?text=Quero%20suporte%20no%20Pregue%20Melhor";
 
@@ -38,9 +41,10 @@ export default async function ContaPage() {
     redirect("/entrar?redirectTo=/conta");
   }
 
-  const [profile, subscription] = await Promise.all([
+  const [profile, subscription, referralCount] = await Promise.all([
     getProfile(user.id),
     getCurrentSubscription(user.id),
+    getReferralCount(user.id),
   ]);
   const isActive = subscription?.status === "active";
   const isPastDue = subscription?.status === "past_due";
@@ -49,6 +53,13 @@ export default async function ContaPage() {
   const planValueLabel = planId
     ? `R$${PLANS[planId].price.toFixed(2).replace(".", ",")} / ${PLANS[planId].days} dias`
     : "R$10/mês";
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://pregue-melhor-novo-gules.vercel.app";
+  const referralLink = `${siteUrl}/cadastrar?ref=${user.id}`;
+  const referralWhatsappText =
+    `Ei! Eu uso o Pregue Melhor pra preparar minhas pregações e tá me ajudando muito. ` +
+    `Se cadastra por esse link que a gente ganha ${REFERRAL_BONUS_DAYS} dias grátis de Pro cada um: ${referralLink}`;
+  const referralWhatsappUrl = `https://wa.me/?text=${encodeURIComponent(referralWhatsappText)}`;
 
   return (
     <>
@@ -125,6 +136,31 @@ export default async function ContaPage() {
             </Link>
           </>
         )}
+      </section>
+
+      <section className="flex flex-col gap-3 rounded-2xl border border-card-border bg-card p-6 shadow-sm">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-primary">
+          Indique um amigo
+        </h2>
+        <p className="text-foreground">
+          Chame outro pregador pelo WhatsApp. Quando ele assinar, vocês dois ganham{" "}
+          <strong>{REFERRAL_BONUS_DAYS} dias grátis</strong> de Pro.
+        </p>
+        {referralCount > 0 && (
+          <p className="text-sm text-muted">
+            Você já indicou {referralCount}{" "}
+            {referralCount === 1 ? "pessoa que assinou" : "pessoas que assinaram"}.
+          </p>
+        )}
+        <a
+          href={referralWhatsappUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="flex min-h-[48px] items-center justify-center gap-1.5 rounded-2xl bg-primary px-5 font-semibold text-primary-foreground"
+        >
+          <WhatsappIcon className="h-4 w-4" />
+          Indicar pelo WhatsApp
+        </a>
       </section>
 
       <a

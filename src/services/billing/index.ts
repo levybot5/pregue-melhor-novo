@@ -55,3 +55,4 @@ export {
 export type { PlanId, Plan } from "./pricing";
 export { hasKitAccess } from "./kit";
 export { hasEbookAccess } from "./ebook";
+export { REFERRAL_BONUS_DAYS, getReferralCount } from "./referral";
