@@ -16,23 +16,17 @@ export function TrialPaywallNotice() {
         Continue usando todas as ferramentas do Pregue Melhor.
       </p>
 
-      <div className="flex flex-col items-center gap-1 rounded-2xl bg-card-active px-4 py-3">
-        <span className="text-xs font-semibold uppercase tracking-wide text-accent">
-          Valor de lançamento
-        </span>
-        <p className="text-3xl font-bold text-foreground">
-          R$10<span className="text-base font-medium text-muted">/mês</span>
-        </p>
-      </div>
-
+      {/* Sem preço fixo aqui de propósito — já tivemos essa tela mostrando
+          só "R$10/mês" sem citar o Trimestral (destacado como "mais
+          vantajoso" em /planos), deixando quem esgota o teste sem saber
+          que tinha opção melhor. Manda pra /planos, que sempre mostra os
+          planos reais e atualizados, em vez de duplicar preço aqui. */}
       <Link
-        href="/planos/pagar"
+        href="/planos"
         className="mx-auto flex min-h-[48px] w-full items-center justify-center rounded-2xl bg-primary px-6 font-semibold uppercase tracking-wide text-primary-foreground"
       >
-        Assinar Pregue Melhor
+        Ver planos
       </Link>
-
-      <p className="text-xs text-muted">Cancele quando quiser.</p>
     </div>
   );
 }
