@@ -151,6 +151,17 @@ export function PdfIcon({ className }: IconProps) {
   );
 }
 
+// Marca oficial do WhatsApp (verde de marca) — igual ao GoogleIcon,
+// texto sozinho não passa confiança nesse tipo de botão, e monocromático
+// (igual aos outros ícones deste arquivo) ficaria irreconhecível aqui.
+export function WhatsappIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="#25D366" className={className} aria-hidden="true">
+      <path d="M12.04 2c-5.5 0-9.96 4.46-9.96 9.96 0 1.76.46 3.45 1.32 4.95L2 22l5.2-1.36a9.9 9.9 0 0 0 4.84 1.23h.01c5.5 0 9.96-4.46 9.96-9.96S17.54 2 12.04 2Zm5.83 14.24c-.25.7-1.24 1.28-2.03 1.45-.54.12-1.24.21-3.6-.77-2.9-1.2-4.76-4.15-4.9-4.34-.14-.19-1.17-1.56-1.17-2.97 0-1.41.74-2.1 1-2.39.25-.28.55-.35.74-.35.19 0 .37 0 .53.01.17.01.4-.06.62.48.25.6.83 2.06.9 2.21.07.15.12.32.02.51-.1.19-.15.31-.3.47-.15.17-.31.37-.44.5-.15.15-.3.31-.13.6.17.3.76 1.26 1.63 2.04 1.12 1 2.06 1.31 2.36 1.46.3.15.48.13.65-.08.17-.2.74-.87.94-1.16.19-.3.39-.24.65-.15.27.1 1.7.8 1.99.95.3.15.49.22.56.35.07.13.07.75-.18 1.44Z" />
+    </svg>
+  );
+}
+
 export function CopyIcon({ className }: IconProps) {
   return (
     <svg {...base} className={className}>

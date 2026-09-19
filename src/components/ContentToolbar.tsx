@@ -15,7 +15,7 @@ import type { ReadySermon, ReadyOutline, FavoriteContentType } from "@/services/
 import type { PulpitModeContent } from "@/lib/pulpit-mode";
 import { PulpitMode } from "./PulpitMode";
 import { FavoriteButton } from "./FavoriteButton";
-import { PodiumIcon, PdfIcon, CopyIcon, TrashIcon } from "./icons";
+import { PodiumIcon, PdfIcon, CopyIcon, WhatsappIcon, TrashIcon } from "./icons";
 import { deleteContentAction } from "@/app/biblioteca/actions";
 
 // Aula Bíblica: ensino/classe, não ministração de púlpito — mesmo
@@ -232,6 +232,19 @@ export function ContentToolbar(props: ContentToolbarProps) {
     }
   }
 
+  // Mesmo texto formatado do "Copiar" — wa.me abre o WhatsApp (app no
+  // celular, Web no desktop) já com a mensagem pronta, sem precisar
+  // colar. Aberto numa aba/janela nova a partir do próprio clique
+  // (nunca depois do await) pra não cair no bloqueio de pop-up do
+  // navegador.
+  async function handleShareWhatsapp() {
+    const win = window.open("", "_blank");
+    const text = await buildCopyText(props);
+    if (win) {
+      win.location.href = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    }
+  }
+
   function handleDelete() {
     if (!props.deletable) return;
     setDeleteError(null);
@@ -283,6 +296,10 @@ export function ContentToolbar(props: ContentToolbarProps) {
         <button type="button" onClick={handleCopy} className={TOOLBAR_BUTTON_CLASS}>
           <CopyIcon className="h-4 w-4" />
           {copyLabel}
+        </button>
+        <button type="button" onClick={handleShareWhatsapp} className={TOOLBAR_BUTTON_CLASS}>
+          <WhatsappIcon className="h-4 w-4" />
+          WhatsApp
         </button>
         {props.favorite && (
           <FavoriteButton

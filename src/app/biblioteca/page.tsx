@@ -4,7 +4,7 @@ import { listContents } from "@/services/database";
 import { getCurrentUser } from "@/services/auth";
 import { AppHeader } from "@/components/AppHeader";
 import { BottomNav } from "@/components/home/BottomNav";
-import { BibliotecaListItem } from "./BibliotecaListItem";
+import { BibliotecaSearch } from "./BibliotecaSearch";
 
 // Sempre busca no request: a biblioteca não pode ficar "congelada"
 // com os dados que existiam no momento do build.
@@ -49,11 +49,7 @@ export default async function BibliotecaPage() {
         <p className="text-muted">Nenhum conteúdo salvo ainda.</p>
       )}
 
-      <div className="flex flex-col gap-3">
-        {contents.map((item) => (
-          <BibliotecaListItem key={item.id} item={item} />
-        ))}
-      </div>
+      {!loadError && <BibliotecaSearch contents={contents} />}
 
       <Link
         href="/"
