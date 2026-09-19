@@ -63,7 +63,7 @@ export default async function Home() {
     // outra rota é afetada. min-h-dvh evita qualquer flash do fundo
     // claro do <body> (ver src/app/globals.css, não editado).
     <div className="min-h-dvh bg-[#07101F]">
-      <UpdateAnnouncementModal />
+      {generationStatus?.subscriptionActive && <UpdateAnnouncementModal />}
       <header className="bg-[#07101F]">
         <div className="mx-auto flex w-full max-w-xl items-center justify-between px-4 py-2 pt-[calc(env(safe-area-inset-top)+0.5rem)] lg:max-w-[1100px] lg:px-8 lg:py-3 lg:pt-[calc(env(safe-area-inset-top)+0.75rem)]">
           <span className="flex items-center gap-2">
