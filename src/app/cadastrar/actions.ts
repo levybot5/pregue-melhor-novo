@@ -1,7 +1,8 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { signUp } from "@/services/auth";
+import { signUp, getCurrentUser } from "@/services/auth";
+import { claimAnyPendingPurchaseForDevice } from "@/services/billing";
 
 export type CadastrarState = { error: string | null; checkEmail: boolean };
 
@@ -32,6 +33,16 @@ export async function signUpAction(
 
   if (result.status === "check_email") {
     return { error: null, checkEmail: true };
+  }
+
+  // Rede de segurança: se este mesmo aparelho tiver um Pix pago e sem
+  // dono (ex.: pagou, a aba de espera morreu — comum no Android — e a
+  // pessoa cadastrou pelo caminho comum em vez de voltar pro link do
+  // pós-pagamento), vincula sozinho. Nunca lança, nunca atrasa o
+  // redirect normal do cadastro.
+  const user = await getCurrentUser();
+  if (user) {
+    await claimAnyPendingPurchaseForDevice(user.id);
   }
 
   redirect(redirectTo.startsWith("/") ? redirectTo : "/");

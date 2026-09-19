@@ -491,6 +491,51 @@ export async function claimPendingPurchase(purchaseId: string): Promise<ClaimPur
   return { success: true };
 }
 
+// Rede de segurança pro caso real (visto em produção): a pessoa paga o
+// Pix, mas a aba onde ficava esperando a confirmação morre antes de
+// redirecionar pra /planos/retorno — comum no Android, que mata abas
+// em segundo plano pra liberar memória enquanto a pessoa está no app
+// do banco. Se ela então simplesmente abre o site de novo e cadastra
+// pelo caminho comum (/cadastrar), sem isso o pagamento ficava órfão
+// pra sempre (pago, mas nunca vinculado a nenhuma conta). Chamada logo
+// após QUALQUER cadastro bem-sucedido (ver signUpAction) — encontra a
+// compra paga e ainda sem dono do MESMO device_id (o cookie sobrevive
+// à aba morrer, só não sobrevive a limpar dados do navegador ou trocar
+// de aparelho/app) e vincula sozinha, sem exigir purchaseId nenhum.
+// Nunca lança: cadastro tem que ter sucesso mesmo que isto falhe.
+export async function claimAnyPendingPurchaseForDevice(userId: string): Promise<void> {
+  try {
+    const deviceId = await getOrCreateDeviceId();
+    const admin = getSupabaseAdminClient();
+
+    const { data: purchase, error } = await admin
+      .from("pending_purchases")
+      .select()
+      .eq("device_id", deviceId)
+      .eq("status", "paid")
+      .is("claimed_by_user_id", null)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw error;
+    if (!purchase) return;
+
+    const { error: claimError } = await admin
+      .from("pending_purchases")
+      .update({ claimed_by_user_id: userId, claimed_at: new Date().toISOString() })
+      .eq("id", purchase.id)
+      .is("claimed_by_user_id", null); // mesma guarda contra corrida do claimPendingPurchase
+    if (claimError) throw claimError;
+
+    await activateSubscriptionFromPurchase({
+      ...(purchase as PendingPurchaseRow),
+      claimed_by_user_id: userId,
+    });
+  } catch (error) {
+    console.error("[PURCHASE] falha ao vincular compra orfa por device_id (não bloqueia o cadastro):", error);
+  }
+}
+
 // Ativa/renova a assinatura em `subscriptions` (fonte única de verdade
 // de "é Pro" — item 15) a partir de uma pending_purchase já paga E já
 // vinculada a um usuário. Chamada em dois pontos: aqui em

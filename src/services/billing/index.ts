@@ -28,6 +28,7 @@ export {
   createEbookOnlyPurchase,
   getPurchaseStatus,
   claimPendingPurchase,
+  claimAnyPendingPurchaseForDevice,
   InvalidPixPurchaseInputError,
 } from "./purchase";
 export type {
