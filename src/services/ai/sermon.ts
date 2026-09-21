@@ -115,6 +115,14 @@ const pontoSchema = z.object({
     .describe(
       "Palavra-chave no idioma original bíblico (hebraico para Antigo Testamento, grego para Novo Testamento) para este ponto, apenas quando genuinamente relevante para a compreensão. Curta e objetiva. Use null quando não houver uma palavra que agregue — não force em todo ponto e nunca invente etimologias, transliterações ou significados.",
     ),
+  versiculos_apoio: z
+    .array(z.string().min(1))
+    .min(1)
+    .max(3)
+    .nullable()
+    .describe(
+      "De 1 a 3 referências bíblicas REAIS (referências cruzadas) que reforçam este ponto específico, além do texto base principal — formato 'Referência — breve ideia ou trecho do versículo' (ex.: 'Tiago 1:17 — todo dom perfeito vem do Pai'). Nunca invente uma referência que não existe; use null só quando genuinamente não houver versículo de apoio relevante para este ponto.",
+    ),
 });
 
 const esbocoPontoSchema = z.object({
@@ -218,6 +226,7 @@ const DURATION_CONFIG: Record<
 - cada ponto (explicacao): 3 a 5 parágrafos curtos.
 - cada ponto (exemplo_aplicacao): curta e objetiva, 1 parágrafo.
 - palavra_original (quando houver): curta e objetiva.
+- versiculos_apoio (em cada ponto): 1 a 3 referências reais.
 - aplicacao_final: 2 a 3 parágrafos curtos, complementando (não repetindo) as aplicações de cada ponto.
 - conclusao: aproximadamente 2 parágrafos curtos.
 - apelo: curto, 1 parágrafo.
@@ -287,6 +296,7 @@ Regras de estilo:
 - "Profundidade" controla o NÍVEL DE ANÁLISE (contexto, precisão conceitual, relações do texto) — nunca o tamanho do texto, que é controlado pela Duração. Uma mensagem de 15 minutos com profundidade "profunda" deve ser curta E analiticamente cuidadosa, não uma mensagem longa.
 - Toda pregação precisa de aplicação prática real em cada ponto — nunca entregue só explicação bíblica.
 - "palavra_original": inclua uma palavra em hebraico (Antigo Testamento) ou grego (Novo Testamento) apenas quando ela realmente ajudar a entender o ponto; use null quando não houver uma palavra relevante. Nunca invente etimologias, transliterações ou significados — se não tiver certeza, use null.
+- "versiculos_apoio": em CADA ponto, traga de 1 a 3 referências cruzadas reais que sustentam o argumento daquele ponto (além do texto base principal da mensagem) — isso é o que diferencia uma pregação bem fundamentada de uma que só parafraseia um texto único. Só use null se genuinamente não houver referência de apoio relevante, o que deve ser raro. Nunca invente uma referência, capítulo ou versículo que não existe — se não tiver certeza absoluta de que a referência é real e diz o que você está afirmando, prefira null a arriscar.
 - Se uma versão da Bíblia for indicada como preferência, use-a como referência de registro/linguagem ao citar ou parafrasear o texto (mais formal ou mais contemporânea, conforme a tradução) — nunca copie um trecho extenso e literal de uma tradução específica; texto_base e qualquer citação devem ser uma citação/paráfrase fiel e concisa, no seu próprio texto, nunca uma reprodução extensa de uma obra com direitos autorais.
 - Se houver observações adicionais do usuário, respeite essas instruções específicas dentro do que for bíblica e pastoralmente responsável.
 - Em todo campo de texto mais longo (introducao, contexto_biblico, explicacao de cada ponto, aplicacao_final, conclusao): escreva em parágrafos curtos (poucas frases cada), separados por uma linha em branco entre eles — nunca um bloco único de texto extenso. Isso é para leitura confortável em celular.

@@ -62,6 +62,20 @@ export function SermonView({ sermon }: SermonViewProps) {
             last={index === sermon.pontos.length - 1}
           >
             <Paragraphs text={ponto.explicacao} />
+            {ponto.versiculos_apoio && ponto.versiculos_apoio.length > 0 && (
+              <div className="mt-3 flex flex-col gap-1 rounded-xl bg-card-active px-3.5 py-3 text-sm">
+                <span className="text-xs font-semibold uppercase tracking-wide text-muted">
+                  Versículos de apoio
+                </span>
+                <ul className="flex flex-col gap-1">
+                  {ponto.versiculos_apoio.map((versiculo, i) => (
+                    <li key={i} className="text-foreground">
+                      {versiculo}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             <div className="mt-3 flex flex-col gap-2">
               {ponto.palavra_original && (
                 <ExpandableSection title="Palavra no Original">

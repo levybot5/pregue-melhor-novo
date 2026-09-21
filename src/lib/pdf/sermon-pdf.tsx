@@ -11,6 +11,7 @@ type SermonPdfPoint = {
   titulo: string;
   explicacao: string;
   exemploAplicacao: string;
+  versiculosApoio?: string[] | null;
   palavraOriginal?: {
     palavra: string;
     idioma: string;
@@ -53,6 +54,7 @@ export function sermonToPdfData(sermon: SermonContent): SermonPdfData {
       titulo: normalizeOutlinePointTitle(ponto.titulo),
       explicacao: ponto.explicacao,
       exemploAplicacao: ponto.exemplo_aplicacao,
+      versiculosApoio: ponto.versiculos_apoio,
       palavraOriginal: ponto.palavra_original,
     })),
     aplicacaoFinal: sermon.aplicacao_final,
@@ -112,6 +114,14 @@ export function SermonPdfDocument({ data }: { data: SermonPdfData }) {
               {index + 1}. {ponto.titulo}
             </Text>
             <Text style={pdfStyles.paragraph}>{ponto.explicacao}</Text>
+            {ponto.versiculosApoio && ponto.versiculosApoio.length > 0 && (
+              <View style={pdfStyles.highlightBox}>
+                <Text style={{ ...pdfStyles.paragraph, fontFamily: "Helvetica-Bold" }}>
+                  Versículos de apoio
+                </Text>
+                <PdfBulletList items={ponto.versiculosApoio} compact />
+              </View>
+            )}
             {ponto.palavraOriginal && (
               <View style={pdfStyles.highlightBox}>
                 <Text style={{ ...pdfStyles.paragraph, fontFamily: "Helvetica-Bold" }}>

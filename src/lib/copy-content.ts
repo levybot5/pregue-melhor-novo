@@ -28,7 +28,11 @@ export function formatSermonForCopy(sermon: SermonContent): string {
       const palavraOriginal = ponto.palavra_original
         ? `\nPalavra no Original (${ponto.palavra_original.idioma}): ${ponto.palavra_original.palavra} (${ponto.palavra_original.transliteracao})\n${ponto.palavra_original.significado}\n${ponto.palavra_original.aplicacao}`
         : "";
-      return `${index + 1}. ${normalizeOutlinePointTitle(ponto.titulo)}\n${ponto.explicacao}${palavraOriginal}\n${ponto.exemplo_aplicacao}`;
+      const versiculosApoio =
+        ponto.versiculos_apoio && ponto.versiculos_apoio.length > 0
+          ? `\nVersículos de apoio:\n${ponto.versiculos_apoio.map((v) => `- ${v}`).join("\n")}`
+          : "";
+      return `${index + 1}. ${normalizeOutlinePointTitle(ponto.titulo)}\n${ponto.explicacao}${versiculosApoio}${palavraOriginal}\n${ponto.exemplo_aplicacao}`;
     })
     .join("\n\n");
 
