@@ -65,7 +65,16 @@ export const sermonDepths = ["basica", "intermediaria", "profunda", "teologica"]
 // texto_base sempre foi gerado pela própria IA a partir do que ela sabe,
 // nunca copiado de uma base de dados de traduções bíblicas — não existe
 // esse acervo no projeto). "padrao" = sem preferência, a IA decide.
-export const bibleVersions = ["padrao", "ara", "arc", "naa", "nvi", "ntlh", "acf"] as const;
+export const bibleVersions = [
+  "padrao",
+  "ara",
+  "arc",
+  "naa",
+  "nvi",
+  "ntlh",
+  "acf",
+  "biblia_viva",
+] as const;
 
 export type SermonInput = {
   passage: string;
@@ -278,6 +287,7 @@ const BIBLE_VERSION_LABELS: Record<Exclude<SermonInput["bibleVersion"], "padrao"
   nvi: "Nova Versão Internacional (NVI)",
   ntlh: "Nova Tradução na Linguagem de Hoje (NTLH)",
   acf: "Almeida Corrigida Fiel (ACF)",
+  biblia_viva: "Bíblia Viva (paráfrase, linguagem bem coloquial e direta)",
 };
 
 const SYSTEM_INSTRUCTION = `Você ajuda pregadores cristãos a preparar mensagens para o púlpito, em português do Brasil.

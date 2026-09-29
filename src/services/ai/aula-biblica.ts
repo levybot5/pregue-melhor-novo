@@ -15,7 +15,16 @@ export const aulaBiblicaDuracoes = ["30", "45", "60", "90"] as const;
 export const aulaBiblicaProfundidades = ["basica", "intermediaria", "aprofundada"] as const;
 // Cópia própria da mesma lista de sermon.ts — zero import/edição em
 // sermon.ts, pra não tocar em nenhum jeito numa ferramenta existente.
-export const aulaBiblicaBibleVersions = ["padrao", "ara", "arc", "naa", "nvi", "ntlh", "acf"] as const;
+export const aulaBiblicaBibleVersions = [
+  "padrao",
+  "ara",
+  "arc",
+  "naa",
+  "nvi",
+  "ntlh",
+  "acf",
+  "biblia_viva",
+] as const;
 
 export type AulaBiblicaInput = {
   tema: string;
@@ -198,6 +207,7 @@ const BIBLE_VERSION_LABELS: Record<Exclude<AulaBiblicaInput["bibleVersion"], "pa
   nvi: "Nova Versão Internacional (NVI)",
   ntlh: "Nova Tradução na Linguagem de Hoje (NTLH)",
   acf: "Almeida Corrigida Fiel (ACF)",
+  biblia_viva: "Bíblia Viva (paráfrase, linguagem bem coloquial e direta)",
 };
 
 const SYSTEM_INSTRUCTION = `Você é um assistente especializado na preparação de aulas bíblicas. Sua função é ajudar professores, líderes e discipuladores a transformar um tema ou passagem bíblica em uma aula clara, fiel ao texto, didática e fácil de conduzir.

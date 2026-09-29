@@ -32,6 +32,7 @@ const BIBLE_VERSION_OPTIONS: { value: BibleStudyInput["bibleVersion"]; label: st
   { value: "nvi", label: "Nova Versão Internacional (NVI)" },
   { value: "ntlh", label: "Nova Tradução na Linguagem de Hoje (NTLH)" },
   { value: "acf", label: "Almeida Corrigida Fiel (ACF)" },
+  { value: "biblia_viva", label: "Bíblia Viva (paráfrase, linguagem coloquial)" },
 ];
 
 type BibliaFormProps = {

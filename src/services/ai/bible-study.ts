@@ -15,6 +15,7 @@ const BIBLE_VERSION_LABELS: Record<Exclude<SermonInput["bibleVersion"], "padrao"
   nvi: "Nova Versão Internacional (NVI)",
   ntlh: "Nova Tradução na Linguagem de Hoje (NTLH)",
   acf: "Almeida Corrigida Fiel (ACF)",
+  biblia_viva: "Bíblia Viva (paráfrase, linguagem bem coloquial e direta)",
 };
 
 const originalWordSchema = z.object({
