@@ -1,7 +1,7 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseAdminClient } from "@/services/database/admin-client";
-import { getResendClient, RESEND_FROM } from "./resend-client";
+import { getResendClient, RESEND_FROM, RESEND_REPLY_TO } from "./resend-client";
 import { PLANS, isPlanId } from "@/services/billing/pricing";
 
 // Só alcança quem estava LOGADO no momento de gerar o Pix
@@ -39,9 +39,16 @@ function renderReminderHtml(planLabel: string, amount: number, payUrl: string): 
           Finalizar assinatura
         </a>
       </p>
-      <p style="font-size: 12px; color: #6b7280;">Pregue Melhor</p>
+      <p style="font-size: 12px; color: #6b7280;">
+        Equipe Pregue Melhor<br />
+        Dúvidas? É só responder este e-mail.
+      </p>
     </div>
   `;
+}
+
+function renderReminderText(planLabel: string, amount: number, payUrl: string): string {
+  return `Seu Pix ainda não foi pago\n\nVocê começou a assinar o Pregue Melhor Pro (${planLabel} — R$${formatPrice(amount)}), mas o pagamento não foi confirmado.\n\nSe ainda tiver interesse, é só gerar um novo Pix — leva menos de um minuto.\n\nFinalizar assinatura: ${payUrl}\n\nEquipe Pregue Melhor\nDúvidas? É só responder este e-mail.`;
 }
 
 async function sendOneReminder(
@@ -64,9 +71,11 @@ async function sendOneReminder(
     const resend = getResendClient();
     const { error: sendError } = await resend.emails.send({
       from: RESEND_FROM,
+      replyTo: RESEND_REPLY_TO,
       to: userData.user.email,
       subject: "Seu Pix do Pregue Melhor ainda não foi pago",
       html: renderReminderHtml(planLabel, purchase.amount, `${siteUrl}/planos/pagar`),
+      text: renderReminderText(planLabel, purchase.amount, `${siteUrl}/planos/pagar`),
     });
     if (sendError) throw sendError;
 

@@ -1,7 +1,7 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseAdminClient } from "@/services/database/admin-client";
-import { getResendClient, RESEND_FROM } from "./resend-client";
+import { getResendClient, RESEND_FROM, RESEND_REPLY_TO } from "./resend-client";
 
 // Só PIX precisa de lembrete — cartão renova sozinho (mesma regra de
 // getDaysUntilExpiry em services/billing/subscription.ts). Dois avisos
@@ -29,14 +29,24 @@ type ReminderCandidate = {
   renewal_reminder_1d_sent_at: string | null;
 };
 
-function renderReminderHtml(daysLeft: number, renewUrl: string, urgency: ReminderUrgency): string {
+function reminderCopy(daysLeft: number, urgency: ReminderUrgency): { heading: string; body: string } {
   const dayWord = daysLeft === 1 ? "dia" : "dias";
-  const heading =
-    urgency === "1d" ? "Seu acesso vence amanhã" : `Seu acesso vence em ${daysLeft} ${dayWord}`;
-  const body =
-    urgency === "1d"
-      ? "Últimas horas: quando o prazo acabar você perde acesso às ferramentas e à geração de novo conteúdo (sua Biblioteca continua salva)."
-      : "O Pregue Melhor Pro não renova sozinho — quando o prazo acabar, você perde acesso às ferramentas e à geração de novo conteúdo (sua Biblioteca continua salva).";
+  return {
+    heading: urgency === "1d" ? "Seu acesso vence amanhã" : `Seu acesso vence em ${daysLeft} ${dayWord}`,
+    body:
+      urgency === "1d"
+        ? "Últimas horas: quando o prazo acabar você perde acesso às ferramentas e à geração de novo conteúdo (sua Biblioteca continua salva)."
+        : "O Pregue Melhor Pro não renova sozinho — quando o prazo acabar, você perde acesso às ferramentas e à geração de novo conteúdo (sua Biblioteca continua salva).",
+  };
+}
+
+// E-mail-only HTML (sem <html>/<head>) de propósito — Resend envolve
+// isso no envelope da mensagem. Rodapé com assinatura de verdade
+// (não só "Pregue Melhor" solto) e a versão em texto puro logo abaixo
+// (renderReminderText) ajudam a pontuação de spam — filtro desconfia
+// de e-mail só-HTML, sem alternativa em texto.
+function renderReminderHtml(daysLeft: number, renewUrl: string, urgency: ReminderUrgency): string {
+  const { heading, body } = reminderCopy(daysLeft, urgency);
   return `
     <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; color: #1f2933;">
       <h1 style="font-size: 20px;">${heading}</h1>
@@ -48,9 +58,17 @@ function renderReminderHtml(daysLeft: number, renewUrl: string, urgency: Reminde
           Escolher plano e renovar
         </a>
       </p>
-      <p style="font-size: 12px; color: #6b7280;">Pregue Melhor</p>
+      <p style="font-size: 12px; color: #6b7280;">
+        Equipe Pregue Melhor<br />
+        Dúvidas? É só responder este e-mail.
+      </p>
     </div>
   `;
+}
+
+function renderReminderText(daysLeft: number, renewUrl: string, urgency: ReminderUrgency): string {
+  const { heading, body } = reminderCopy(daysLeft, urgency);
+  return `${heading}\n\n${body}\n\nEscolher plano e renovar: ${renewUrl}\n\nEquipe Pregue Melhor\nDúvidas? É só responder este e-mail.`;
 }
 
 async function runReminderPass(
@@ -98,12 +116,14 @@ async function runReminderPass(
       const resend = getResendClient();
       const { error: sendError } = await resend.emails.send({
         from: RESEND_FROM,
+        replyTo: RESEND_REPLY_TO,
         to: userData.user.email,
         subject:
           pass.urgency === "1d"
             ? "Seu acesso ao Pregue Melhor vence amanhã!"
             : `Seu acesso ao Pregue Melhor vence em ${daysLeft} ${daysLeft === 1 ? "dia" : "dias"}`,
         html: renderReminderHtml(daysLeft, `${siteUrl}/planos`, pass.urgency),
+        text: renderReminderText(daysLeft, `${siteUrl}/planos`, pass.urgency),
       });
       if (sendError) throw sendError;
 
