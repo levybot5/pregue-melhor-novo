@@ -36,8 +36,12 @@ export {
   getReadingStreak,
   getCachedVerseExplanation,
   cacheVerseExplanation,
+  bibleReaderVersions,
+  DEFAULT_BIBLE_VERSION,
+  BIBLE_READER_VERSION_LABELS,
+  isBibleReaderVersion,
 } from "./bible";
-export type { BibleVerse, BibleContinueReading } from "./bible";
+export type { BibleVerse, BibleContinueReading, BibleReaderVersion } from "./bible";
 
 export { listNotes, listAllNotes, getNote, upsertNote, deleteNote } from "./bible-notes";
 export type { BibleNote } from "./bible-notes";

@@ -15,21 +15,40 @@ export type BibleContinueReading = {
   lastReadAt: string;
 };
 
-// ACF (Almeida Corrigida Fiel) — mesma tradução carregada por
-// scripts/import-bible.mjs. Trocar aqui exige rodar o script de novo
-// com a nova versão (a coluna `version` permite mais de uma no futuro).
-const BIBLE_VERSION = "acf";
+// ACF (Almeida Corrigida Fiel) continua o padrão — Bíblia Livre
+// (BLIVRE, licença CC-BY 3.0 Brasil, importada por
+// scripts/import-bible-livre.mjs) é a segunda opção, selecionável na
+// Bíblia Guiada. As duas convivem na mesma tabela, diferenciadas pela
+// coluna `version` (pensada assim desde a Etapa 1, ver comentário na
+// migration 20260829120000_bible_reader.sql).
+export const bibleReaderVersions = ["acf", "blivre"] as const;
+export type BibleReaderVersion = (typeof bibleReaderVersions)[number];
+export const DEFAULT_BIBLE_VERSION: BibleReaderVersion = "acf";
 
-// Texto já importado pra bible_verses (script scripts/import-bible.mjs)
-// — nenhuma chamada externa acontece aqui, só leitura do banco.
-export async function getChapterVerses(book: string, chapter: number): Promise<BibleVerse[]> {
+export const BIBLE_READER_VERSION_LABELS: Record<BibleReaderVersion, string> = {
+  acf: "Almeida Corrigida Fiel",
+  blivre: "Bíblia Livre",
+};
+
+export function isBibleReaderVersion(value: string): value is BibleReaderVersion {
+  return (bibleReaderVersions as readonly string[]).includes(value);
+}
+
+// Texto já importado pra bible_verses (scripts/import-bible.mjs e
+// import-bible-livre.mjs) — nenhuma chamada externa acontece aqui, só
+// leitura do banco.
+export async function getChapterVerses(
+  book: string,
+  chapter: number,
+  version: BibleReaderVersion = DEFAULT_BIBLE_VERSION,
+): Promise<BibleVerse[]> {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("bible_verses")
     .select("book, chapter, verse, text")
     .eq("book", book)
     .eq("chapter", chapter)
-    .eq("version", BIBLE_VERSION)
+    .eq("version", version)
     .order("verse", { ascending: true });
 
   if (error) throw error;
