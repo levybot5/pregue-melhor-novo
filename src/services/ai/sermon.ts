@@ -1,6 +1,6 @@
 import "server-only";
 import { z } from "zod";
-import { getGeminiClient } from "./gemini-client";
+import { generateStructured, toGeminiJsonSchema } from "./generate";
 
 // Modelo escolhido: gemini-3.1-flash-lite. É o Flash "current" da família
 // Lite (não a 2.0/2.5, já superadas), otimizado pelo próprio Google para
@@ -8,7 +8,7 @@ import { getGeminiClient } from "./gemini-client";
 // exatamente o perfil de custo/velocidade que queremos para gerar uma
 // pregação estruturada. Ver relatório desta etapa para a comparação de
 // custo com os demais modelos Flash disponíveis em ai.google.dev/gemini-api/docs/pricing.
-const MODEL = "gemini-3.1-flash-lite";
+// (MODEL em si vive em generate.ts, único lugar — ver comentário lá.)
 
 // "Formato da Mensagem" — só a abordagem estrutural/exegética
 // (COMO a mensagem é construída). Antes se chamava "Tipo de Mensagem"
@@ -345,75 +345,29 @@ ${DEPTH_GUIDANCE[input.depth]}
 Gere uma pregação completa e um esboço resumido para o púlpito, seguindo o formato pedido.`;
 }
 
-const rawSermonJsonSchema = z.toJSONSchema(sermonContentSchema, {
-  target: "draft-7",
-}) as Record<string, unknown>;
-delete rawSermonJsonSchema.$schema;
-const sermonJsonSchema = rawSermonJsonSchema;
+const sermonJsonSchema = toGeminiJsonSchema(sermonContentSchema);
 
+// Reescrito pra usar o núcleo compartilhado (generateStructured, em
+// generate.ts) em vez da própria chamada direta à Gemini que existia
+// aqui antes — essa duplicação é exatamente por que o SHARED_STYLE_RULES
+// (maiúscula reverencial correta) e fixReverentialCapitalization nunca
+// pegavam nas pregações: achado ao vivo, "dEle" continuava aparecendo
+// mesmo depois da correção em generate.ts, porque esta função nunca
+// passava por lá. Mantém a mesma forma de retorno (`sermon`, não
+// `data`) pra não quebrar quem já chama generateSermon().
 export async function generateSermon(
   input: SermonInput,
 ): Promise<GenerateSermonResult> {
-  const start = Date.now();
-  let usage = { total_input_tokens: 0, total_output_tokens: 0, total_tokens: 0 };
-  let success = false;
-
-  try {
-    const client = getGeminiClient();
-    const durationSettings = DURATION_CONFIG[input.duration];
-
-    const interaction = await client.interactions.create({
-      model: MODEL,
-      store: false,
-      system_instruction: SYSTEM_INSTRUCTION,
-      input: buildPrompt(input),
-      generation_config: {
-        max_output_tokens: durationSettings.maxOutputTokens,
-      },
-      response_format: {
-        type: "text",
-        mime_type: "application/json",
-        schema: sermonJsonSchema,
-      },
-    });
-
-    usage = {
-      total_input_tokens: interaction.usage?.total_input_tokens ?? 0,
-      total_output_tokens: interaction.usage?.total_output_tokens ?? 0,
-      total_tokens: interaction.usage?.total_tokens ?? 0,
-    };
-
-    if (interaction.status !== "completed") {
-      throw new Error(
-        `Interação não concluída (status: ${interaction.status}) ${JSON.stringify(interaction.errors ?? [])}`,
-      );
-    }
-
-    const raw = JSON.parse(interaction.output_text ?? "");
-    const parsed = sermonContentSchema.safeParse(raw);
-
-    if (!parsed.success) {
-      console.error(
-        "[AI-LOG] tool=pregacao validation_error=" + parsed.error.message,
-      );
-      return {
-        success: false,
-        message: "A IA retornou uma resposta em formato inesperado. Tente novamente.",
-      };
-    }
-
-    success = true;
-    return { success: true, sermon: parsed.data };
-  } catch (error) {
-    console.error("Falha ao gerar pregação:", error);
-    return {
-      success: false,
-      message: "Não foi possível gerar a pregação agora. Tente novamente.",
-    };
-  } finally {
-    const latencyMs = Date.now() - start;
-    console.log(
-      `[AI-LOG] tool=pregacao model=${MODEL} duration=${input.duration}min input_tokens=${usage.total_input_tokens} output_tokens=${usage.total_output_tokens} total_tokens=${usage.total_tokens} latency_ms=${latencyMs} success=${success}`,
-    );
-  }
+  const duration = DURATION_CONFIG[input.duration];
+  const result = await generateStructured({
+    tool: "pregacao",
+    logDuration: `${input.duration}min`,
+    systemInstruction: SYSTEM_INSTRUCTION,
+    input: buildPrompt(input),
+    maxOutputTokens: duration.maxOutputTokens,
+    schema: sermonContentSchema,
+    jsonSchema: sermonJsonSchema,
+  });
+  if (!result.success) return result;
+  return { success: true, sermon: result.data };
 }
