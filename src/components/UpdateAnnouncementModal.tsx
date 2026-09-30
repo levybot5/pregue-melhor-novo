@@ -5,7 +5,7 @@ import { useState, useSyncExternalStore } from "react";
 // Bumpar essa string a cada atualização que mereça avisar de novo —
 // só isso já faz o popup voltar a aparecer pra quem já viu a anterior
 // (guardado por chave, não por "já viu algum popup alguma vez").
-const UPDATE_KEY = "update-seen-2026-09-19-indicacao-whatsapp-busca";
+const UPDATE_KEY = "update-seen-2026-09-30-biblia-livre-versiculos-apoio";
 
 // Mesmo padrão de InstallPwaBanner: leitura de localStorage via
 // useSyncExternalStore, não setState em efeito — servidor sempre
@@ -56,24 +56,24 @@ export function UpdateAnnouncementModal() {
 
         <ul className="flex flex-col gap-3 text-sm text-foreground">
           <li className="flex items-start gap-2.5">
-            <span className="mt-0.5">🎁</span>
+            <span className="mt-0.5">📖</span>
             <span>
-              <strong>Indique um amigo</strong> — chame outro pregador pelo WhatsApp e, quando
-              ele assinar, vocês dois ganham 15 dias grátis de Pro. Ache seu link em Conta.
+              <strong>Nova tradução na Bíblia Guiada</strong> — agora dá pra ler em Bíblia Livre,
+              uma linguagem mais simples, ao lado do Almeida Corrigida Fiel de sempre.
             </span>
           </li>
           <li className="flex items-start gap-2.5">
-            <span className="mt-0.5">💬</span>
+            <span className="mt-0.5">📚</span>
             <span>
-              <strong>Compartilhar no WhatsApp</strong> — qualquer pregação, esboço ou
-              devocional que você gerar já tem um botão pra mandar direto.
+              <strong>Versículos de apoio na Pregação Completa</strong> — cada ponto da mensagem
+              agora traz referências cruzadas reais, não só o texto base.
             </span>
           </li>
           <li className="flex items-start gap-2.5">
-            <span className="mt-0.5">🔍</span>
+            <span className="mt-0.5">🗣️</span>
             <span>
-              <strong>Busca na Biblioteca</strong> — encontre suas mensagens salvas por título,
-              tema ou passagem.
+              <strong>Bíblia Viva como opção de linguagem</strong> — escolha esse estilo mais
+              coloquial ao gerar pregação, aula bíblica ou comentário.
             </span>
           </li>
         </ul>
