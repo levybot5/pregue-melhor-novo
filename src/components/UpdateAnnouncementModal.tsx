@@ -5,7 +5,7 @@ import { useState, useSyncExternalStore } from "react";
 // Bumpar essa string a cada atualização que mereça avisar de novo —
 // só isso já faz o popup voltar a aparecer pra quem já viu a anterior
 // (guardado por chave, não por "já viu algum popup alguma vez").
-const UPDATE_KEY = "update-seen-2026-09-30-biblia-livre-versiculos-apoio";
+const UPDATE_KEY = "update-seen-2026-09-30-esbocos-prontos";
 
 // Mesmo padrão de InstallPwaBanner: leitura de localStorage via
 // useSyncExternalStore, não setState em efeito — servidor sempre
@@ -74,6 +74,13 @@ export function UpdateAnnouncementModal() {
             <span>
               <strong>Bíblia Viva como opção de linguagem</strong> — escolha esse estilo mais
               coloquial ao gerar pregação, aula bíblica ou comentário.
+            </span>
+          </li>
+          <li className="flex items-start gap-2.5">
+            <span className="mt-0.5">📂</span>
+            <span>
+              <strong>+50 esboços prontos na Biblioteca</strong> — mais opções de fé, família,
+              oração, jovens, datas especiais e muito mais.
             </span>
           </li>
         </ul>
