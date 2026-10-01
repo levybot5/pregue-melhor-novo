@@ -142,9 +142,11 @@ export function formatBibleStudyForCopy(study: BibleStudyContent): string {
     study.passagem,
     study.contexto ? `CONTEXTO\n${study.contexto}` : null,
     `EXPLICAÇÃO DO TEXTO\n${study.explicacao}`,
+    study.geografia ? `GEOGRAFIA\n${study.geografia}` : null,
     study.palavra_original
       ? `PALAVRA NO ORIGINAL\n${study.palavra_original.termo} (${study.palavra_original.idioma}${study.palavra_original.transliteracao ? `, ${study.palavra_original.transliteracao}` : ""})\n${study.palavra_original.significado}\n${study.palavra_original.explicacao}`
       : null,
+    study.curiosidade_historica ? `CURIOSIDADE HISTÓRICA\n${study.curiosidade_historica}` : null,
     `CONEXÕES BÍBLICAS\n\n${conexoes}`,
     `APLICAÇÃO PRÁTICA\n${study.aplicacao}`,
     `RESUMO\n${study.resumo}`,

@@ -55,16 +55,30 @@ export const bibleStudyContentSchema = z.object({
     .describe(
       "A seção central: explica o sentido da passagem, mostra o raciocínio do texto, destaca detalhes importantes, relaciona ao contexto e explica palavras/expressões importantes quando necessário — tudo dentro desta única seção, fazendo o papel de um comentário bíblico acessível. Nunca crie uma segunda seção de comentário separada.",
     ),
+  geografia: z
+    .string()
+    .nullable()
+    .describe(
+      "Nota curta sobre um lugar citado na passagem (onde fica, distância, relevância da época) — só quando a geografia realmente ajuda a entender o texto. Use null quando não houver lugar relevante ou quando isso não agregar nada.",
+    ),
   palavra_original: originalWordSchema
     .nullable()
     .describe(
       "No máximo uma palavra no idioma original, e somente se realmente agregar. Não force em toda passagem — use null quando não houver valor real.",
     ),
+  curiosidade_historica: z
+    .string()
+    .nullable()
+    .describe(
+      "Um dado histórico, cultural ou arqueológico concreto e verificável que ilumina a passagem (um costume da época, um achado arqueológico, um detalhe do período histórico) — só quando for genuinamente interessante e você tiver certeza da informação. Nunca invente. Use null na maioria das vezes.",
+    ),
   conexoes_biblicas: z
     .array(connectionSchema)
     .min(1)
     .max(3)
-    .describe("De 1 a 3 conexões genuinamente relevantes — nunca versículos aleatórios só para preencher."),
+    .describe(
+      "De 1 a 3 conexões genuinamente relevantes — nunca versículos aleatórios só para preencher. Quando fizer sentido, varie entre diferentes partes da Bíblia (Lei, Profetas, Evangelhos, Epístolas) em vez de ficar sempre na mesma região do texto.",
+    ),
   aplicacao: z
     .string()
     .min(1)
@@ -89,8 +103,10 @@ Regras:
 - Nunca use termos técnicos de teologia acadêmica (ex.: aoristo, homoousios, soteriologia) nem análise gramatical complexa.
 - Evite superficialidade (não fique só na superfície do texto) e evite academicismo excessivo (não vire um artigo técnico) — o equilíbrio é uma explicação boa, clara e substancial.
 - "contexto": curto e realmente útil (autor, destinatários, situação, contexto histórico/literário). Opcional de verdade — use null quando não ajudar a entender o texto, nunca preencha só para ocupar espaço. Nunca invente detalhes históricos.
+- "geografia": só quando a passagem cita um lugar cuja localização, distância ou relevância da época realmente ajuda a entender a cena (ex.: "Jericó fica cerca de 850m abaixo do nível do mar, o que explica..."). Use null na maioria das vezes — não force.
 - "palavra_original": no máximo uma palavra, só quando genuinamente relevante. Use null quando não houver valor real — não force em toda passagem.
-- "conexoes_biblicas": de 1 a 3, todas genuinamente relacionadas ao texto — nunca jogue referências aleatórias só para preencher a lista. Cada uma precisa de uma explicação real da relação com a passagem estudada.
+- "curiosidade_historica": um dado histórico, cultural ou arqueológico concreto (não especulativo) que ilumina a passagem. Só inclua quando tiver certeza da informação — nunca invente um "achado arqueológico" ou dado histórico para parecer interessante. Use null na maioria das vezes.
+- "conexoes_biblicas": de 1 a 3, todas genuinamente relacionadas ao texto — nunca jogue referências aleatórias só para preencher a lista. Cada uma precisa de uma explicação real da relação com a passagem estudada. Quando fizer sentido, varie a origem das conexões (Lei, Profetas, Evangelhos, Epístolas) em vez de só repetir a mesma região da Bíblia.
 - "aplicacao": precisa nascer da interpretação do texto — prefira atitudes concretas, perguntas de reflexão, decisões práticas ou conexão com situações reais da vida cristã. Evite frases genéricas soltas como "confie mais em Deus" ou "tenha fé" sem ligação direta com o que o texto mostrou.
 - "resumo": curto, permite responder "qual é a principal verdade desta passagem?" sem repetir literalmente o que já foi dito em "contexto" e "explicacao".
 - Evite repetição entre contexto, explicação e resumo — cada seção traz algo que as outras não trazem.
@@ -116,7 +132,9 @@ Explique essa passagem de forma clara, pastoral e prática, seguindo o formato p
 // campos removidos nesta revisão), então a seção pode ser mais longa —
 // 1500 não sobrava muita margem para isso. 1900 dá espaço confortável
 // sem abrir demais (ver relatório desta etapa para os números reais).
-const MAX_OUTPUT_TOKENS = 1900;
+// 2200 depois da adição de "geografia" e "curiosidade_historica" (ambos
+// nullable, mas o teto precisa cobrir quando os dois vêm preenchidos).
+const MAX_OUTPUT_TOKENS = 2200;
 const bibleStudyJsonSchema = toGeminiJsonSchema(bibleStudyContentSchema);
 
 export async function generateBibleStudy(

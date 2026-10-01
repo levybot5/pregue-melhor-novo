@@ -388,6 +388,14 @@ export function VerseReader({
                           </p>
                         </>
                       )}
+                      {explanation.curiosidade && (
+                        <>
+                          <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+                            Curiosidade
+                          </p>
+                          <p>{explanation.curiosidade}</p>
+                        </>
+                      )}
                       <p className="text-xs font-semibold uppercase tracking-wide text-primary">
                         Aplicação
                       </p>

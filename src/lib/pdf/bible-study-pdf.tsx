@@ -14,6 +14,8 @@ export function BibleStudyPdfDocument({ study }: { study: BibleStudyContent }) {
         {study.contexto && <PdfSection title="Contexto" text={study.contexto} />}
         <PdfSection title="Explicação do Texto" text={study.explicacao} />
 
+        {study.geografia && <PdfSection title="Geografia" text={study.geografia} />}
+
         {study.palavra_original && (
           <View style={pdfStyles.section} wrap={false}>
             <Text style={pdfStyles.sectionTitle}>Palavra no Original</Text>
@@ -27,6 +29,10 @@ export function BibleStudyPdfDocument({ study }: { study: BibleStudyContent }) {
             </Text>
             <Text style={pdfStyles.paragraph}>{study.palavra_original.explicacao}</Text>
           </View>
+        )}
+
+        {study.curiosidade_historica && (
+          <PdfSection title="Curiosidade Histórica" text={study.curiosidade_historica} />
         )}
 
         <View style={pdfStyles.section} wrap={false}>

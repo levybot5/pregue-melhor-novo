@@ -19,6 +19,8 @@ export function BibleStudyView({ study }: BibleStudyViewProps) {
 
       <ReadingSection title="Explicação do Texto">{study.explicacao}</ReadingSection>
 
+      {study.geografia && <ReadingSection title="Geografia">{study.geografia}</ReadingSection>}
+
       {study.palavra_original && (
         <section className="flex flex-col gap-1 rounded-2xl border-l-[3px] border-accent bg-accent-soft/40 px-4 py-3">
           <h2 className="text-xs font-semibold tracking-wide text-primary uppercase">
@@ -41,6 +43,10 @@ export function BibleStudyView({ study }: BibleStudyViewProps) {
             {study.palavra_original.explicacao}
           </p>
         </section>
+      )}
+
+      {study.curiosidade_historica && (
+        <ReadingSection title="Curiosidade Histórica">{study.curiosidade_historica}</ReadingSection>
       )}
 
       <section className="flex flex-col gap-3">

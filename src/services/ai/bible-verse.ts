@@ -28,6 +28,12 @@ export const bibleVerseExplanationSchema = z.object({
   palavra_original: originalWordSchema
     .nullable()
     .describe("No máximo uma palavra no original, só se genuinamente agregar. Use null quando não houver valor real."),
+  curiosidade: z
+    .string()
+    .nullable()
+    .describe(
+      "Uma curiosidade histórica, geográfica ou cultural bem curta (1 frase) sobre este versículo específico — só quando for genuinamente interessante e você tiver certeza da informação. Use null na maioria das vezes; nunca invente.",
+    ),
   aplicacao: z
     .string()
     .min(1)
@@ -43,6 +49,7 @@ Regras:
 - Nunca repita o texto do versículo de volta — a pessoa já está vendo ele na tela.
 - Nunca use termos técnicos de teologia acadêmica.
 - "palavra_original": só quando genuinamente relevante pra este versículo específico; use null na maioria das vezes.
+- "curiosidade": só um dado histórico, geográfico ou cultural concreto e verificável, em 1 frase curta; nunca invente um dado pra parecer interessante. Use null na maioria das vezes.
 - "aplicacao": concreta e ligada exatamente a este versículo, nunca genérica.
 - Responda sempre em português do Brasil.
 - Responda SOMENTE com JSON seguindo exatamente o schema fornecido, sem texto fora do JSON.`;
@@ -55,8 +62,9 @@ Explique este versículo especificamente, seguindo o formato pedido.`;
 }
 
 // Explicação curta — bem mais barata que Bíblia Explicada (que cobre
-// uma passagem inteira), por isso o teto de tokens é bem menor.
-const MAX_OUTPUT_TOKENS = 500;
+// uma passagem inteira), por isso o teto de tokens é bem menor. 650
+// depois da adição do campo opcional "curiosidade".
+const MAX_OUTPUT_TOKENS = 650;
 const bibleVerseExplanationJsonSchema = toGeminiJsonSchema(bibleVerseExplanationSchema);
 
 export async function generateVerseExplanation(
