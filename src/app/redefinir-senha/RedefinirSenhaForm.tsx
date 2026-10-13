@@ -6,7 +6,7 @@ import { updatePasswordAction, type RedefinirSenhaState } from "./actions";
 
 const initialState: RedefinirSenhaState = { error: null };
 
-export function RedefinirSenhaForm() {
+export function RedefinirSenhaForm({ tokenHash }: { tokenHash?: string }) {
   const [state, formAction, isPending] = useActionState(updatePasswordAction, initialState);
 
   const [password, setPassword] = useState("");
@@ -19,6 +19,8 @@ export function RedefinirSenhaForm() {
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
+      {tokenHash && <input type="hidden" name="tokenHash" value={tokenHash} />}
+
       <PasswordInput
         name="password"
         label="Nova senha"

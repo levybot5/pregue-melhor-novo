@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { getSupabaseServerClient } from "@/services/database/server-client";
 import { getSupabaseAdminClient } from "@/services/database/admin-client";
 import { REFERRAL_COOKIE } from "@/services/billing/referral";
+import { sendPasswordResetEmail } from "@/services/email/password-reset";
 
 export type CurrentUser = {
   id: string;
@@ -110,8 +111,23 @@ export async function requestPasswordReset(email: string): Promise<void> {
   // externo — APP_URL é só pra callback de webhook/checkout que
   // precisa ser alcançável de fora (ex.: túnel em desenvolvimento).
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  const normalizedEmail = normalizeEmail(email);
 
-  const { error } = await supabase.auth.resetPasswordForEmail(normalizeEmail(email), {
+  // Caminho principal: e-mail próprio via Resend, com link que abre o
+  // formulário direto (ver services/email/password-reset.ts). Se o
+  // envio falhar (Resend fora do ar/sem chave), cai no e-mail padrão
+  // do Supabase em vez de deixar a pessoa sem nenhuma saída.
+  try {
+    await sendPasswordResetEmail(
+      normalizedEmail,
+      siteUrl ?? "https://pregue-melhor-novo-gules.vercel.app",
+    );
+    return;
+  } catch (error) {
+    console.error("Falha ao enviar e-mail de redefinição pelo Resend:", error);
+  }
+
+  const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
     redirectTo: siteUrl ? `${siteUrl}/api/auth/callback?next=/redefinir-senha` : undefined,
   });
 
@@ -133,6 +149,27 @@ export async function updatePassword(password: string): Promise<AuthActionResult
   }
 
   return { status: "ok" };
+}
+
+// Link do e-mail próprio (ver services/email/password-reset.ts): o
+// token só é consumido aqui, junto com a senha nova — abrir a página
+// não gasta o link nem exige cookie de um pedido anterior.
+export async function updatePasswordWithToken(
+  tokenHash: string,
+  password: string,
+): Promise<AuthActionResult> {
+  const supabase = await getSupabaseServerClient();
+  const { error: verifyError } = await supabase.auth.verifyOtp({
+    token_hash: tokenHash,
+    type: "recovery",
+  });
+
+  if (verifyError) {
+    console.error("Token de redefinição inválido:", verifyError.status, verifyError.message);
+    return { status: "error", message: "Este link expirou ou já foi usado. Peça um novo link." };
+  }
+
+  return updatePassword(password);
 }
 
 // LGPD: a pessoa tem que poder excluir a própria conta sem depender de

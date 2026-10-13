@@ -7,8 +7,13 @@ import { RedefinirSenhaForm } from "./RedefinirSenhaForm";
 // e-mail (ver src/app/api/auth/callback/route.ts). Sem sessão válida,
 // mostra aviso em vez do formulário — não redireciona para /entrar
 // para não confundir quem acabou de clicar no link do e-mail.
-export default async function RedefinirSenhaPage() {
-  const user = await getCurrentUser();
+export default async function RedefinirSenhaPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ token_hash?: string }>;
+}) {
+  const { token_hash: tokenHash } = await searchParams;
+  const user = tokenHash ? null : await getCurrentUser();
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pb-10 pt-[calc(env(safe-area-inset-top)+2rem)] lg:max-w-md lg:justify-center lg:rounded-3xl lg:border lg:border-card-border lg:bg-card lg:p-10 lg:pt-10 lg:shadow-xl">
@@ -18,7 +23,9 @@ export default async function RedefinirSenhaPage() {
         <h1 className="text-2xl font-bold tracking-tight text-foreground">Nova senha</h1>
       </header>
 
-      {user ? (
+      {tokenHash ? (
+        <RedefinirSenhaForm tokenHash={tokenHash} />
+      ) : user ? (
         <RedefinirSenhaForm />
       ) : (
         <div className="flex flex-col items-center gap-3 rounded-2xl border border-card-border bg-card p-4 text-center text-foreground">
