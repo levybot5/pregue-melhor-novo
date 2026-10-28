@@ -23,7 +23,7 @@ export default function PrivacidadePage() {
         <h1 className="text-2xl font-bold tracking-tight text-foreground">
           Política de Privacidade
         </h1>
-        <p className="text-sm text-muted">Última atualização: 19 de agosto de 2026.</p>
+        <p className="text-sm text-muted">Última atualização: 28 de outubro de 2026.</p>
       </header>
 
       <Section title="Quais dados coletamos">
@@ -45,6 +45,30 @@ export default function PrivacidadePage() {
           <strong className="text-foreground">Uso do app:</strong> quais ferramentas você usa e
           quando, e um identificador anônimo de dispositivo (cookie) para controlar o teste
           gratuito antes do cadastro.
+        </p>
+      </Section>
+
+      <Section title="Login com Google">
+        <p>
+          Se você escolher entrar ou criar a conta com a sua Conta do Google, recebemos do
+          Google apenas o seu <strong className="text-foreground">nome</strong> e o seu{" "}
+          <strong className="text-foreground">endereço de e-mail</strong>. Usamos esses dados
+          somente para criar e identificar a sua conta no Pregue Melhor.
+        </p>
+        <p>
+          Não acessamos seus e-mails, contatos, arquivos nem qualquer outro dado da sua Conta do
+          Google, não vendemos nem compartilhamos essas informações com terceiros e não as usamos
+          para publicidade. O uso das informações recebidas do Google segue a{" "}
+          <a
+            href="https://developers.google.com/terms/api-services-user-data-policy"
+            target="_blank"
+            rel="noreferrer"
+            className="text-foreground underline underline-offset-4"
+          >
+            Política de Dados do Usuário dos Serviços de API do Google
+          </a>
+          , incluindo os requisitos de uso limitado. Você pode excluir sua conta a qualquer
+          momento, como descrito abaixo.
         </p>
       </Section>
 

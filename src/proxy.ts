@@ -15,6 +15,9 @@ const PUBLIC_PATHS = [
   "/esqueci-senha",
   "/redefinir-senha",
   "/privacidade",
+  // Página institucional simples (o que é o app + como usamos o login com
+  // Google), usada como "página inicial" na verificação de marca do Google.
+  "/sobre",
   // Página de oferta (landing de anúncio) — movida do Artifact avulso pra
   // dentro do app, precisa ficar acessível sem login.
   "/oferta",
