@@ -163,6 +163,9 @@ export const config = {
     // e por isso nunca tocava — nem manualmente, nem em autoplay).
     // "images/" pelo mesmo motivo: imagens promocionais da página de
     // oferta (public/images/).
-    "/((?!_next/static|_next/image|favicon.ico|icon$|icon-192|icon-512|apple-icon|manifest.webmanifest|sw.js|brand/|home/|videos/|images/).*)",
+    // "google<hash>.html" pelo mesmo motivo: arquivo de verificação de
+    // domínio do Google Search Console (exigido pela verificação de marca
+    // do login com Google), buscado sem sessão.
+    "/((?!_next/static|_next/image|favicon.ico|icon$|icon-192|icon-512|apple-icon|manifest.webmanifest|sw.js|brand/|home/|videos/|images/|google[a-z0-9]+\\.html$).*)",
   ],
 };
