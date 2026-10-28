@@ -34,6 +34,7 @@ export async function GET(request: NextRequest) {
     if (!error) {
       return NextResponse.redirect(`${origin}${next}`);
     }
+    console.error("[auth/callback] exchangeCodeForSession falhou:", error.status, error.message);
   }
 
   return NextResponse.redirect(`${origin}/entrar`);
