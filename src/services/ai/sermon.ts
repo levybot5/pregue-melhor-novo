@@ -343,6 +343,16 @@ Regras de estilo:
   Exemplo: Formato "expositiva" + Público "jovens" + Estilo "impactante" = uma pregação expositiva, voltada para jovens, com linguagem mais forte e marcante — os três se combinam, nenhum substitui o outro.
 - Se o usuário informar uma situação específica em observações adicionais (ex.: "será para um culto de missões", "é uma reunião de líderes"), use isso para ambientar o tom de abertura/fechamento da mensagem a esse contexto.
 - "Profundidade" controla o NÍVEL DE ANÁLISE (contexto, precisão conceitual, relações do texto) — nunca o tamanho do texto, que é controlado pela Duração. Uma mensagem de 15 minutos com profundidade "profunda" deve ser curta E analiticamente cuidadosa, não uma mensagem longa.
+- Humanidade e especificidade (é isto que separa uma pregação viva de uma genérica):
+  - Prefira o concreto ao abstrato. Em vez de "falhas", "lutas", "fardos" ou "desafios", diga a situação: a conta que não fecha, a mensagem que você deixou sem resposta, o pai que nunca pediu desculpa, o culto em que você estava de corpo presente e com a cabeça longe.
+  - Cada ponto precisa de pelo menos uma cena reconhecível da vida real, contada em poucas frases, com gente de verdade dentro (quem, onde, o que foi dito). Quando a ilustração for criada por você, apresente-a como tal ("imagine...", "pense em alguém que...") — nunca invente testemunho, estatística, citação de autor nem história apresentada como fato.
+  - Extraia detalhes específicos do próprio texto bíblico (o que foi dito, o que se repetiu, o que NÃO foi dito, o número, o lugar, a ordem das cenas) em vez de resumir o texto em ideias gerais.
+  - Evite frases de efeito que servem para qualquer texto: "Deus tem um propósito", "o amor de Deus é maior que tudo", "confie no Senhor", "nada é impossível para Deus", "o tempo de Deus é perfeito", "em um mundo cada vez mais...", "é importante lembrar que", "vivemos em dias...". Se a frase caberia em qualquer pregação, reescreva com algo que só funcione para ESTE texto.
+  - Varie as aberturas. Não comece sempre com a pergunta "Você já sentiu...?". Pode abrir com uma cena, uma fala do personagem, uma imagem concreta ou uma afirmação que surpreenda.
+  - Soe como uma pessoa falando a outra, não como um artigo: alterne frases curtas e médias, use o "nós" e admita, sem exagero, que o pregador também se reconhece ali. Evite sequências de três substantivos abstratos e o padrão repetido "não é X, nem Y, mas Z".
+  - Aplicações: sempre uma ação específica e pequena ligada ao que o texto disse (a quem ligar, o que deixar de fazer esta semana, que pergunta fazer a si mesmo) — nunca "ore mais", "leia a Bíblia" ou "confie em Deus" soltos.
+  - Títulos humanos e específicos do texto; evite fórmulas como "O Poder de...", "O Caminho para...", "A Chave para...".
+  - Ser humano e concreto não é ser informal demais nem inventar o que o texto não diz: mantenha reverência e fidelidade bíblica.
 - Toda pregação precisa de aplicação prática real em cada ponto — nunca entregue só explicação bíblica.
 - "palavra_original": inclua uma palavra em hebraico (Antigo Testamento) ou grego (Novo Testamento) apenas quando ela realmente ajudar a entender o ponto; use null quando não houver uma palavra relevante. Nunca invente etimologias, transliterações ou significados — se não tiver certeza, use null.
 - "versiculos_apoio": em CADA ponto, traga de 1 a 3 referências cruzadas reais que sustentam o argumento daquele ponto (além do texto base principal da mensagem) — isso é o que diferencia uma pregação bem fundamentada de uma que só parafraseia um texto único. Só use null se genuinamente não houver referência de apoio relevante, o que deve ser raro. Nunca invente uma referência, capítulo ou versículo que não existe — se não tiver certeza absoluta de que a referência é real e diz o que você está afirmando, prefira null a arriscar.
@@ -396,9 +406,11 @@ const sermonJsonSchema = toGeminiJsonSchema(sermonContentSchema);
 // `data`) pra não quebrar quem já chama generateSermon().
 export async function generateSermon(
   input: SermonInput,
+  options: { model?: string } = {},
 ): Promise<GenerateSermonResult> {
   const duration = DURATION_CONFIG[input.duration];
   const result = await generateStructured({
+    model: options.model,
     tool: "pregacao",
     logDuration: `${input.duration}min`,
     systemInstruction: SYSTEM_INSTRUCTION,

@@ -28,10 +28,15 @@ const BROKEN_REVERENTIAL_CAPITALIZATION = /\b[a-zà-ÿ]+(?:Ele|Eu)\b/g;
 
 function fixReverentialCapitalization<T>(value: T): T {
   if (typeof value === "string") {
-    return value.replace(
-      BROKEN_REVERENTIAL_CAPITALIZATION,
-      (match) => match.charAt(0).toUpperCase() + match.slice(1).toLowerCase(),
-    ) as T;
+    // Alguns modelos devolvem a quebra de parágrafo como o texto "\n"
+    // (barra + n) em vez de uma quebra de linha real; sem isso o "\n\n"
+    // aparecia escrito na tela no meio da pregação.
+    return value
+      .replace(/\\n/g, "\n")
+      .replace(
+        BROKEN_REVERENTIAL_CAPITALIZATION,
+        (match) => match.charAt(0).toUpperCase() + match.slice(1).toLowerCase(),
+      ) as T;
   }
   if (Array.isArray(value)) {
     return value.map(fixReverentialCapitalization) as T;
@@ -58,6 +63,9 @@ type GenerateStructuredParams<T> = {
   maxOutputTokens: number;
   schema: z.ZodType<T>;
   jsonSchema: Record<string, unknown>;
+  // Só para ferramentas que justifiquem um modelo diferente do padrão
+  // (ex.: a pregação, onde a qualidade do texto é o produto).
+  model?: string;
 };
 
 // Núcleo único de chamada ao provedor de IA, reutilizado por todas as
@@ -72,6 +80,7 @@ export async function generateStructured<T>({
   maxOutputTokens,
   schema,
   jsonSchema,
+  model = MODEL,
 }: GenerateStructuredParams<T>): Promise<GenerateStructuredResult<T>> {
   const start = Date.now();
   let usage = { total_input_tokens: 0, total_output_tokens: 0, total_tokens: 0 };
@@ -81,7 +90,7 @@ export async function generateStructured<T>({
     const client = getGeminiClient();
 
     const interaction = await client.interactions.create({
-      model: MODEL,
+      model,
       store: false,
       system_instruction: systemInstruction + SHARED_STYLE_RULES,
       input,
@@ -127,7 +136,7 @@ export async function generateStructured<T>({
   } finally {
     const latencyMs = Date.now() - start;
     console.log(
-      `[AI-LOG] tool=${tool} model=${MODEL} duration=${logDuration} input_tokens=${usage.total_input_tokens} output_tokens=${usage.total_output_tokens} total_tokens=${usage.total_tokens} latency_ms=${latencyMs} success=${success}`,
+      `[AI-LOG] tool=${tool} model=${model} duration=${logDuration} input_tokens=${usage.total_input_tokens} output_tokens=${usage.total_output_tokens} total_tokens=${usage.total_tokens} latency_ms=${latencyMs} success=${success}`,
     );
   }
 }
