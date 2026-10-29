@@ -52,6 +52,7 @@ export const sermonStyles = [
   "impactante",
   "pastoral",
   "devocional",
+  "contemplativo",
 ] as const;
 
 // "Profundidade" — nível de análise (contexto, precisão conceitual,
@@ -271,6 +272,44 @@ const STYLE_LABELS: Record<SermonInput["style"], string> = {
   impactante: "impactante, com força retórica",
   pastoral: "pastoral, acolhedor",
   devocional: "devocional, íntimo",
+  contemplativo: "contemplativo, profundo e transformador (ver diretrizes do estilo abaixo)",
+};
+
+// Diretrizes extras, só para estilos que mudam mais que o tom de voz.
+// "Contemplativo" é uma abordagem inteira (como a mensagem desperta a
+// consciência do ouvinte), então precisa de instruções próprias além do
+// rótulo curto — mapeadas aos campos reais do schema da pregação.
+const STYLE_GUIDANCE: Partial<Record<SermonInput["style"], string>> = {
+  contemplativo: `Diretrizes do estilo "Contemplativo": escreva como um pregador cristão com profunda compreensão das Escrituras, da natureza humana, da psicologia espiritual e dos ensinamentos de Jesus. Tom pastoral, contemplativo, profundo e transformador, com linguagem simples, humana e acolhedora.
+
+Como conduzir a mensagem:
+1. Desperte a consciência. Não se limite a narrar o acontecimento bíblico: explore as contradições humanas reveladas no texto (orgulho, medo, egoísmo, culpa, vaidade, apego, perdão, amor).
+2. Confronte sem condenar. Leve o ouvinte a reconhecer as próprias atitudes sem humilhá-lo; o objetivo é arrependimento sincero, despertar espiritual e transformação interior.
+3. Aproxime do cotidiano com situações reais: perder a paciência com a família, guardar ressentimento, buscar reconhecimento, sentir inveja, querer controlar tudo.
+4. Use parábolas e metáforas simples da vida (uma árvore, um rio, uma semente, um espelho, a luz e a escuridão) para explicar verdades espirituais.
+5. Alimente a sede de Deus. Mesmo ao tratar de temas difíceis, conduza à misericórdia, à presença divina, à esperança e à possibilidade de transformação.
+6. Mantenha fidelidade bíblica. Diferencie claramente o que o texto bíblico diz das reflexões psicológicas e espirituais que você acrescenta; nunca atribua à Bíblia ensinamentos que ela não apresenta.
+7. Evite linguagem religiosa artificial, frases motivacionais vazias, julgamentos agressivos, moralismo excessivo e jargões esotéricos.
+
+Princípio central: não pregue apenas sobre os erros de Pedro, Davi ou Paulo. Mostre como essas histórias revelam conflitos que também existem dentro de nós. Não ofereça só informação bíblica: conduza o ouvinte a examinar o próprio coração, iluminando a mente, tocando as feridas da alma e despertando o desejo sincero de viver mais perto de Deus.
+
+Marcas da voz (o jeito de falar, mais importante que qualquer regra acima):
+- Frases curtas e diretas, como alguém conversando de perto. Nada de tom de aula nem de palavras rebuscadas.
+- Conte o fato bíblico em poucas frases simples e então vire o espelho para o ouvinte, com uma observação como "e talvez a lição mais profunda seja...".
+- Mostre as contradições do dia a dia em frases paralelas e reconhecíveis, no estilo: "Oramos pedindo paz, mas tratamos a família com impaciência. Pedimos perdão a Deus, mas guardamos ressentimento. Falamos de amor, mas somos indiferentes à dor de quem está perto." Use situações concretas, não abstrações como "falhas" ou "lutas".
+- Tenha uma frase-chave curta, que resuma a virada da mensagem (por exemplo: "Nem sempre o que precisamos transformar está lá fora; muitas vezes está escondido dentro de nós.").
+- Acolha logo depois de confrontar: Deus mostra essas sombras não para condenar, mas para que o Seu amor as transforme.
+- Faça perguntas de autoexame na primeira pessoa ("Tenho coragem de reconhecer em mim o que tanto critico nos outros?"), não perguntas retóricas genéricas.
+- Termine com algo pequeno e prático que a pessoa possa fazer hoje (por exemplo, observar a própria reação quando alguém a contrariar e perceber se vem do orgulho ou do amor).
+- Quando couber, feche com uma frase de contraste simples, como: "Conhecer a Palavra ilumina a mente; viver seus ensinamentos transforma o coração."
+Isso é só para sentir o tom: nunca copie nem reaproveite o conteúdo desses exemplos, escreva sempre a partir do texto bíblico informado.
+
+Como isso se encaixa nos campos da resposta:
+- "introducao": abra com uma pergunta profunda que desperte identificação.
+- "contexto_biblico": contextualização bíblica clara do texto.
+- "pontos": cada ponto une a reflexão sobre a natureza humana, exemplos concretos do cotidiano e um confronto de consciência feito com amor e misericórdia; o "exemplo_aplicacao" de cada ponto deve ser uma situação real e reconhecível, terminando numa pequena prática para hoje.
+- "aplicacao_final": questionamentos que convidem ao autoexame, em vez de ordens ou lista de tarefas.
+- "conclusao", "apelo" e "oracao_final": conduzem à presença de Deus, à paz e à transformação interior.`,
 };
 
 const DEPTH_GUIDANCE: Record<SermonInput["depth"], string> = {
@@ -341,7 +380,7 @@ function buildPrompt(input: SermonInput): string {
 ${duration.guidance}
 
 ${DEPTH_GUIDANCE[input.depth]}
-
+${STYLE_GUIDANCE[input.style] ? `\n${STYLE_GUIDANCE[input.style]}\n` : ""}
 Gere uma pregação completa e um esboço resumido para o púlpito, seguindo o formato pedido.`;
 }
 

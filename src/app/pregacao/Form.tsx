@@ -45,6 +45,7 @@ const STYLE_OPTIONS: { value: SermonInput["style"]; label: string }[] = [
   { value: "impactante", label: "Impactante" },
   { value: "pastoral", label: "Pastoral" },
   { value: "devocional", label: "Devocional" },
+  { value: "contemplativo", label: "Contemplativo (confronta com amor)" },
 ];
 
 const DEPTH_OPTIONS: { value: SermonInput["depth"]; label: string }[] = [
