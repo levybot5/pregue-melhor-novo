@@ -296,13 +296,13 @@ Princípio central: não pregue apenas sobre os erros de Pedro, Davi ou Paulo. M
 Marcas da voz (o jeito de falar, mais importante que qualquer regra acima):
 - Frases curtas e diretas, como alguém conversando de perto. Nada de tom de aula nem de palavras rebuscadas.
 - Conte o fato bíblico em poucas frases simples e então vire o espelho para o ouvinte, com uma observação como "e talvez a lição mais profunda seja...".
-- Mostre as contradições do dia a dia em frases paralelas e reconhecíveis, no estilo: "Oramos pedindo paz, mas tratamos a família com impaciência. Pedimos perdão a Deus, mas guardamos ressentimento. Falamos de amor, mas somos indiferentes à dor de quem está perto." Use situações concretas, não abstrações como "falhas" ou "lutas".
-- Tenha uma frase-chave curta, que resuma a virada da mensagem (por exemplo: "Nem sempre o que precisamos transformar está lá fora; muitas vezes está escondido dentro de nós.").
-- Acolha logo depois de confrontar: Deus mostra essas sombras não para condenar, mas para que o Seu amor as transforme.
-- Faça perguntas de autoexame na primeira pessoa ("Tenho coragem de reconhecer em mim o que tanto critico nos outros?"), não perguntas retóricas genéricas.
-- Termine com algo pequeno e prático que a pessoa possa fazer hoje (por exemplo, observar a própria reação quando alguém a contrariar e perceber se vem do orgulho ou do amor).
-- Quando couber, feche com uma frase de contraste simples, como: "Conhecer a Palavra ilumina a mente; viver seus ensinamentos transforma o coração."
-Isso é só para sentir o tom: nunca copie nem reaproveite o conteúdo desses exemplos, escreva sempre a partir do texto bíblico informado.
+- Mostre as contradições do dia a dia em três frases curtas e paralelas, no formato "Dizemos X, mas fazemos Y", cada uma com uma situação concreta ligada ao tema DESTE texto. Só para ilustrar o formato, com outro assunto: "Dizemos que confiamos em Deus, mas acordamos de madrugada refazendo a conta de cabeça. Cantamos entrega, mas seguramos o volante com as duas mãos." Use situações concretas, não abstrações como "falhas" ou "lutas".
+- Tenha uma frase-chave curta e sua, que condense a virada deste texto específico (uma frase que não serviria para outra passagem).
+- Acolha logo depois de confrontar: Deus mostra as sombras não para condenar, mas para que o Seu amor as transforme.
+- Faça perguntas de autoexame na primeira pessoa e específicas do texto ("Em que momento eu...?", "O que eu faço quando...?"), não perguntas retóricas genéricas.
+- Termine com algo pequeno e prático que a pessoa possa fazer hoje, ligado ao que o texto mostrou.
+- Quando couber, feche com uma frase curta de contraste, sua, que arremate o pensamento deste texto.
+Nunca reutilize frases de exemplo: crie tudo do zero a partir do texto bíblico informado. Se o texto for um dos personagens ou cenas citados como exemplo (Pedro, Davi, Paulo/Saulo...), mais ainda: escreva com palavras novas, sem repetir fórmulas conhecidas.
 
 Como isso se encaixa nos campos da resposta:
 - "introducao": abra com uma pergunta profunda que desperte identificação.
@@ -361,6 +361,7 @@ Regras de estilo:
 - Em todo campo de texto mais longo (introducao, contexto_biblico, explicacao de cada ponto, aplicacao_final, conclusao): escreva em parágrafos curtos (poucas frases cada), separados por uma linha em branco entre eles — nunca um bloco único de texto extenso. Isso é para leitura confortável em celular.
 - Evite repetir a mesma ideia, explicação ou aplicação em seções diferentes (introdução, pontos, aplicação final, conclusão) — cada seção deve trazer conteúdo distinto.
 - O tempo de duração representa material de apoio suficiente para o pregador desenvolver ao vivo nesse tempo, não um texto para ser lido literalmente do início ao fim.
+- Antes de responder, releia o texto inteiro e corrija erros de português: concordância de gênero e número ("a poeira", "a rudeza", "o Senhor interrompa"), conjugação verbal e títulos bem formados. Um erro de gramática tira a credibilidade da pregação.
 - Responda sempre em português do Brasil.
 - Responda SOMENTE com JSON seguindo exatamente o schema fornecido, sem texto fora do JSON.`;
 
