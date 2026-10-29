@@ -2,10 +2,11 @@ import { getCurrentUser } from "@/services/auth";
 import { getCurrentSubscription, getGenerationStatus, getTrialRemaining } from "@/services/billing";
 import { PregacaoForm } from "./Form";
 
-// 60s (teto do plano Hobby da Vercel) — sem isso, a Server Action de
-// gerar a pregação usa o padrão de 10s e pode ser derrubada antes da
-// Gemini terminar, principalmente na versão "Completa".
-export const maxDuration = 60;
+// Sem isso, a Server Action de gerar a pregação usa o padrão de 10s e
+// pode ser derrubada antes da Gemini terminar. 120s (o plano Pro da Vercel
+// permite) porque o modelo mais forte da pregação leva uns 20s a 60s
+// dependendo da duração escolhida.
+export const maxDuration = 120;
 
 // Cadastro é obrigatório antes de chegar aqui (ver proxy.ts) — quem
 // nunca assinou cai no trial de 3 gerações grátis por CONTA (ver

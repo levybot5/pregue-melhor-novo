@@ -404,13 +404,21 @@ const sermonJsonSchema = toGeminiJsonSchema(sermonContentSchema);
 // mesmo depois da correção em generate.ts, porque esta função nunca
 // passava por lá. Mantém a mesma forma de retorno (`sermon`, não
 // `data`) pra não quebrar quem já chama generateSermon().
+// A pregação é o produto principal e é onde o texto "humano vs genérico"
+// aparece mais, então usa um modelo mais forte que as demais ferramentas
+// (comparado ao gemini-3.1-flash-lite em Lucas 15:25-32: cenas e detalhes
+// do texto em vez de generalidades). "minimal" porque escrita não precisa
+// de raciocínio longo — evita tokens de "pensamento" escondidos (custo e
+// geração incompleta) e deixa mais rápido. Se esse modelo falhar, cai no
+// modelo padrão em vez de devolver erro ao pastor.
+const SERMON_MODEL = "gemini-3.5-flash";
+
 export async function generateSermon(
   input: SermonInput,
-  options: { model?: string } = {},
+  options: { model?: string; thinkingLevel?: "minimal" | "low" | "medium" | "high" } = {},
 ): Promise<GenerateSermonResult> {
   const duration = DURATION_CONFIG[input.duration];
-  const result = await generateStructured({
-    model: options.model,
+  const params = {
     tool: "pregacao",
     logDuration: `${input.duration}min`,
     systemInstruction: SYSTEM_INSTRUCTION,
@@ -418,7 +426,16 @@ export async function generateSermon(
     maxOutputTokens: duration.maxOutputTokens,
     schema: sermonContentSchema,
     jsonSchema: sermonJsonSchema,
+  };
+
+  let result = await generateStructured({
+    ...params,
+    model: options.model ?? SERMON_MODEL,
+    thinkingLevel: options.thinkingLevel ?? "minimal",
   });
+  if (!result.success && !options.model) {
+    result = await generateStructured(params);
+  }
   if (!result.success) return result;
   return { success: true, sermon: result.data };
 }

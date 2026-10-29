@@ -66,6 +66,9 @@ type GenerateStructuredParams<T> = {
   // Só para ferramentas que justifiquem um modelo diferente do padrão
   // (ex.: a pregação, onde a qualidade do texto é o produto).
   model?: string;
+  // Limita o "raciocínio" interno do modelo (que conta como tokens de saída,
+  // custa e atrasa). Escrita criativa quase não precisa dele.
+  thinkingLevel?: "minimal" | "low" | "medium" | "high";
 };
 
 // Núcleo único de chamada ao provedor de IA, reutilizado por todas as
@@ -81,6 +84,7 @@ export async function generateStructured<T>({
   schema,
   jsonSchema,
   model = MODEL,
+  thinkingLevel,
 }: GenerateStructuredParams<T>): Promise<GenerateStructuredResult<T>> {
   const start = Date.now();
   let usage = { total_input_tokens: 0, total_output_tokens: 0, total_tokens: 0 };
@@ -94,7 +98,10 @@ export async function generateStructured<T>({
       store: false,
       system_instruction: systemInstruction + SHARED_STYLE_RULES,
       input,
-      generation_config: { max_output_tokens: maxOutputTokens },
+      generation_config: {
+        max_output_tokens: maxOutputTokens,
+        ...(thinkingLevel ? { thinking_level: thinkingLevel } : {}),
+      },
       response_format: {
         type: "text",
         mime_type: "application/json",
